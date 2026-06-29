@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leads — No Agents</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#faf9f6;color:#1a1a1a;font-size:14px;line-height:1.5}
+.login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-box{background:#fff;border-radius:12px;padding:40px;max-width:360px;width:100%;box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+.login-box h1{font-family:'Playfair Display',serif;font-size:24px;margin-bottom:24px}
+.login-box input{width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:16px}
+.login-box button{width:100%;padding:10px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer}
+.login-box .err{color:#e74c3c;font-size:13px;margin-bottom:12px;display:none}
+
+.app{display:none;max-width:960px;margin:0 auto;padding:24px 20px}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.header h1{font-family:'Playfair Display',serif;font-size:28px}
+.filters{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.filters button{padding:6px 14px;border:1px solid #ddd;border-radius:20px;background:#fff;cursor:pointer;font-size:13px;transition:all .15s}
+.filters button.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat{background:#fff;border-radius:10px;padding:16px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.stat .n{font-size:28px;font-weight:600}
+.stat .l{font-size:12px;color:#888;margin-top:2px}
+
+.lead-card{background:#fff;border-radius:10px;padding:20px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);cursor:pointer;transition:box-shadow .15s}
+.lead-card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.1)}
+.lead-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.lead-name{font-weight:600;font-size:16px}
+.lead-prop{color:#666;font-size:13px;margin-top:2px}
+.lead-meta{display:flex;gap:12px;margin-top:8px;font-size:13px;color:#888}
+.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600;text-transform:uppercase}
+.badge-new{background:#e8f5e9;color:#2e7d32}
+.badge-contacted{background:#e3f2fd;color:#1565c0}
+.badge-qualified{background:#fff3e0;color:#e65100}
+.badge-converted{background:#f3e5f5;color:#7b1fa2}
+.badge-lost{background:#fafafa;color:#999}
+.urgency-High{border-left:4px solid #e74c3c}
+.urgency-Medium{border-left:4px solid #f39c12}
+.urgency-Low{border-left:4px solid #27ae60}
+
+.detail{display:none;background:#fff;border-radius:10px;padding:24px;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,0.1)}
+.detail h2{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:16px}
+.detail-grid{display:grid;grid-template-columns:120px 1fr;gap:8px 16px;font-size:14px;margin-bottom:20px}
+.detail-grid .lbl{color:#888;font-weight:500}
+.convo{background:#f9f9f9;border-radius:8px;padding:16px;margin-top:12px}
+.convo-line{margin-bottom:8px}
+.convo-line .speaker{font-weight:600}
+.speaker-ari{color:#2ecc71}
+.speaker-caller{color:#3498db}
+.status-select{padding:6px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;cursor:pointer}
+.back-btn{background:none;border:none;cursor:pointer;font-size:14px;color:#888;margin-bottom:16px}
+.empty{text-align:center;padding:60px 20px;color:#999}
+
+@media(max-width:600px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .lead-top{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<div class="login" id="login">
+  <div class="login-box">
+    <h1>Leads</h1>
+    <p class="err" id="loginErr">Incorrect password</p>
+    <input type="password" id="pw" placeholder="Admin password" autofocus>
+    <button onclick="doLogin()">Sign in</button>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <div class="header">
+    <h1>Leads</h1>
+    <span id="count" style="color:#888"></span>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="filters" id="filters">
+    <button class="active" data-f="all">All</button>
+    <button data-f="new">New</button>
+    <button data-f="contacted">Contacted</button>
+    <button data-f="qualified">Qualified</button>
+    <button data-f="converted">Converted</button>
+    <button data-f="lost">Lost</button>
+  </div>
+
+  <div id="list"></div>
+  <div class="detail" id="detail"></div>
+</div>
+
+<script>
+const API = '/api/leads';
+let token = localStorage.getItem('na_token') || '';
+let leads = [];
+let filter = 'all';
+
+if (token) init();
+
+async function doLogin() {
+  const pw = document.getElementById('pw').value;
+  try {
+    const r = await fetch('/api/admin-auth', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password:pw})});
+    if (!r.ok) throw 0;
+    const d = await r.json();
+    token = d.token;
+    localStorage.setItem('na_token', token);
+    init();
+  } catch {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+document.getElementById('pw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+async function init() {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  await loadLeads();
+}
+
+async function loadLeads() {
+  try {
+    const r = await fetch(`${API}?token=${token}`);
+    if (r.status === 401) { localStorage.removeItem('na_token'); location.reload(); return; }
+    const d = await r.json();
+    leads = d.leads || [];
+    renderStats();
+    renderList();
+  } catch (e) {
+    document.getElementById('list').innerHTML = '<div class="empty">Failed to load leads.</div>';
+  }
+}
+
+function renderStats() {
+  const s = {new:0, contacted:0, qualified:0, converted:0, lost:0};
+  leads.forEach(l => { s[l.status] = (s[l.status]||0) + 1; });
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="n">${leads.length}</div><div class="l">Total</div></div>
+    <div class="stat"><div class="n">${s.new}</div><div class="l">New</div></div>
+    <div class="stat"><div class="n">${s.contacted + s.qualified}</div><div class="l">In Progress</div></div>
+    <div class="stat"><div class="n">${s.converted}</div><div class="l">Converted</div></div>
+  `;
+  document.getElementById('count').textContent = `${leads.length} lead${leads.length !== 1 ? 's' : ''}`;
+}
+
+function renderList() {
+  document.getElementById('detail').style.display = 'none';
+  const el = document.getElementById('list');
+  const filtered = filter === 'all' ? leads : leads.filter(l => l.status === filter);
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty">${leads.length ? 'No leads match this filter.' : 'No leads yet. Calls handled by Ari will appear here.'}</div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(l => `
+    <div class="lead-card urgency-${l.urgency || 'Low'}" onclick="showDetail('${l.id}')">
+      <div class="lead-top">
+        <div>
+          <div class="lead-name">${esc(l.callerName || 'Unknown')}</div>
+          <div class="lead-prop">${esc(l.property || 'No address provided')}</div>
+        </div>
+        <span class="badge badge-${l.status}">${l.status}</span>
+      </div>
+      <div class="lead-meta">
+        <span>${esc(l.callerNumber || '')}</span>
+        <span>${timeAgo(l.timestamp)}</span>
+        ${l.enquiry ? `<span>${esc(l.enquiry)}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function showDetail(id) {
+  const l = leads.find(x => x.id === id);
+  if (!l) return;
+  document.getElementById('list').style.display = 'none';
+  document.getElementById('filters').style.display = 'none';
+  const el = document.getElementById('detail');
+  el.style.display = 'block';
+  el.innerHTML = `
+    <button class="back-btn" onclick="closeDetail()">&larr; Back to leads</button>
+    <h2>${esc(l.callerName || 'Unknown')}</h2>
+    <div style="margin-bottom:16px">
+      <select class="status-select" onchange="updateStatus('${l.id}', this.value)">
+        ${['new','contacted','qualified','converted','lost'].map(s => `<option value="${s}" ${l.status===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="detail-grid">
+      <span class="lbl">Phone</span><span>${esc(l.callbackNumber || l.callerNumber || 'N/A')}</span>
+      <span class="lbl">Caller Number</span><span>${esc(l.callerNumber || 'N/A')}</span>
+      <span class="lbl">Type</span><span>${esc(l.callerType || 'N/A')}</span>
+      <span class="lbl">Property</span><span>${esc(l.property || 'Not provided')}</span>
+      <span class="lbl">Urgency</span><span>${l.urgency || 'Low'}</span>
+      <span class="lbl">Time</span><span>${esc(l.timestampLocal || l.timestamp || 'N/A')}</span>
+      <span class="lbl">Enquiry</span><span>${esc(l.enquiry || 'N/A')}</span>
+    </div>
+    ${l.actionItems && l.actionItems.length ? `<h3 style="margin-bottom:8px">Action Items</h3><ul style="margin-bottom:16px;padding-left:20px">${l.actionItems.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : ''}
+    <h3 style="margin-bottom:8px">Conversation</h3>
+    <div class="convo">
+      ${(l.conversation||[]).map(m => `<div class="convo-line"><span class="speaker ${m.role==='assistant'?'speaker-ari':'speaker-caller'}">${m.role==='assistant'?'Ari':'Caller'}:</span> ${esc(m.content)}</div>`).join('')}
+      ${!(l.conversation||[]).length ? '<span style="color:#999">No transcript available.</span>' : ''}
+    </div>
+  `;
+}
+
+function closeDetail() {
+  document.getElementById('detail').style.display = 'none';
+  document.getElementById('list').style.display = 'block';
+  document.getElementById('filters').style.display = 'flex';
+}
+
+async function updateStatus(id, status) {
+  try {
+    await fetch(API, {
+      method: 'PATCH',
+      headers: {'Content-Type':'application/json', 'x-admin-token': token},
+      body: JSON.stringify({id, status})
+    });
+    const lead = leads.find(l => l.id === id);
+    if (lead) lead.status = status;
+    renderStats();
+  } catch {}
+}
+
+document.getElementById('filters').addEventListener('click', e => {
+  if (e.target.dataset.f === undefined) return;
+  filter = e.target.dataset.f;
+  document.querySelectorAll('#filters button').forEach(b => b.classList.toggle('active', b.dataset.f === filter));
+  renderList();
+});
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function timeAgo(iso) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff/60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins/60);
+  if (hrs < 24) return hrs + 'h ago';
+  const days = Math.floor(hrs/24);
+  return days + 'd ago';
+}
+</script>
+</body>
+</html>

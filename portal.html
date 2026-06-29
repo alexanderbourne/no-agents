@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Portal — No Agents</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#faf9f6;color:#1a1a1a;font-size:14px;line-height:1.5}
+.sf{font-family:'Playfair Display',serif}
+
+.login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-box{background:#fff;border-radius:12px;padding:40px;max-width:380px;width:100%;box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+.login-box h1{font-family:'Playfair Display',serif;font-size:24px;margin-bottom:8px}
+.login-box p{color:#888;font-size:13px;margin-bottom:24px}
+.login-box input{width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:12px}
+.login-box button{width:100%;padding:10px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer}
+.err{color:#e74c3c;font-size:13px;margin-bottom:12px;display:none}
+
+.app{display:none;max-width:800px;margin:0 auto;padding:24px 20px 60px}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.header h1{font-family:'Playfair Display',serif;font-size:24px}
+.header .agent-name{color:#888;font-size:14px}
+.logout{background:none;border:1px solid #ddd;padding:6px 14px;border-radius:8px;font-size:13px;cursor:pointer}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+.stat{background:#fff;border-radius:10px;padding:16px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.stat .n{font-size:28px;font-weight:600}
+.stat .l{font-size:12px;color:#888;margin-top:2px}
+
+.section-title{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-title .count{background:#e5e0d6;color:#666;font-size:11px;padding:2px 8px;border-radius:10px}
+
+.card{background:#fff;border-radius:10px;padding:18px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.card-name{font-weight:600;font-size:15px}
+.card-sub{color:#666;font-size:13px;margin-top:2px}
+.card-meta{display:flex;gap:12px;margin-top:8px;font-size:13px;color:#888;flex-wrap:wrap}
+
+.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600;text-transform:uppercase}
+.badge-open{background:#e8f5e9;color:#2e7d32}
+.badge-confirmed{background:#e3f2fd;color:#1565c0}
+.badge-paid{background:#e8f5e9;color:#2e7d32}
+.badge-unpaid{background:#fff3e0;color:#e65100}
+
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s}
+.btn-claim{background:#1a1a1a;color:#fff}
+.btn-claim:hover{background:#333}
+.btn-claim:disabled{background:#ccc;cursor:not-allowed}
+
+.divider{height:1px;background:#e5e0d6;margin:28px 0}
+.empty{text-align:center;padding:40px 20px;color:#999;font-size:14px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:12px 24px;border-radius:10px;font-size:14px;display:none;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,0.2)}
+
+@media(max-width:600px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .card-top{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<div class="login" id="login">
+  <div class="login-box">
+    <h1>Agent Portal</h1>
+    <p>Sign in with the email and phone from your application.</p>
+    <p class="err" id="loginErr"></p>
+    <input type="email" id="email" placeholder="Email address">
+    <input type="tel" id="phone" placeholder="Phone number">
+    <button onclick="doLogin()">Sign in</button>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <div class="header">
+    <div>
+      <h1 class="sf">Agent Portal</h1>
+      <span class="agent-name" id="agentName"></span>
+    </div>
+    <button class="logout" onclick="doLogout()">Sign out</button>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div id="available-section"></div>
+
+  <div class="divider"></div>
+
+  <div id="history-section"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api/agent-portal';
+let agentToken = localStorage.getItem('na_agent_token') || '';
+let dashData = null;
+
+if (agentToken) init();
+
+async function doLogin() {
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const errEl = document.getElementById('loginErr');
+  if (!email || !phone) { errEl.textContent = 'Enter your email and phone.'; errEl.style.display = 'block'; return; }
+  try {
+    const r = await fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email, phone }) });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.error || 'Login failed.'; errEl.style.display = 'block'; return; }
+    agentToken = d.token;
+    localStorage.setItem('na_agent_token', agentToken);
+    init();
+  } catch { errEl.textContent = 'Connection error. Try again.'; errEl.style.display = 'block'; }
+}
+
+document.getElementById('phone').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+function doLogout() {
+  localStorage.removeItem('na_agent_token');
+  location.reload();
+}
+
+async function init() {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  await loadDashboard();
+}
+
+async function loadDashboard() {
+  try {
+    const r = await fetch(`${API}?token=${agentToken}`);
+    if (r.status === 401) { doLogout(); return; }
+    dashData = await r.json();
+    render();
+  } catch {
+    document.getElementById('available-section').innerHTML = '<div class="empty">Failed to load. Try refreshing.</div>';
+  }
+}
+
+function render() {
+  const { agent, myInspections, available, stats } = dashData;
+
+  document.getElementById('agentName').textContent = agent.name + (agent.suburb ? ' — ' + agent.suburb : '');
+
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="n">${stats.totalInspections}</div><div class="l">Inspections</div></div>
+    <div class="stat"><div class="n">$${stats.totalEarned}</div><div class="l">Total Earned</div></div>
+    <div class="stat"><div class="n" style="color:#2e7d32">$${stats.totalPaid}</div><div class="l">Paid</div></div>
+    <div class="stat"><div class="n" style="color:#e65100">$${stats.outstanding}</div><div class="l">Outstanding</div></div>
+  `;
+
+  // Available inspections
+  const avail = document.getElementById('available-section');
+  avail.innerHTML = `<div class="section-title">Available Inspections <span class="count">${available.length}</span></div>`;
+  if (!available.length) {
+    avail.innerHTML += '<div class="empty">No inspections available right now. Check back soon.</div>';
+  } else {
+    avail.innerHTML += available.map(r => `
+      <div class="card">
+        <div class="card-top">
+          <div>
+            <div class="card-name">${esc(r.address)}</div>
+            <div class="card-sub">${esc(r.date)}${r.time ? ' at ' + esc(r.time) : ''}${r.buyerName ? ' — Buyer: ' + esc(r.buyerName) : ''}</div>
+          </div>
+          <button class="btn btn-claim" onclick="claimInspection('${r.id}', this)">Claim — $70</button>
+        </div>
+        ${r.notes ? `<div class="card-meta"><span>${esc(r.notes)}</span></div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  // My inspections
+  const hist = document.getElementById('history-section');
+  hist.innerHTML = `<div class="section-title">My Inspections <span class="count">${myInspections.length}</span></div>`;
+  if (!myInspections.length) {
+    hist.innerHTML += '<div class="empty">No inspections yet. Claim one above to get started.</div>';
+  } else {
+    hist.innerHTML += myInspections.sort((a, b) => new Date(b.recordedAt) - new Date(a.recordedAt)).map(i => `
+      <div class="card">
+        <div class="card-top">
+          <div>
+            <div class="card-name">${esc(i.listingAddress)}</div>
+            <div class="card-sub">${esc(i.date)}${i.time ? ' at ' + esc(i.time) : ''}${i.buyerName ? ' — ' + esc(i.buyerName) : ''}</div>
+          </div>
+          <span class="badge badge-${i.commissionPaid ? 'paid' : 'unpaid'}">${i.commissionPaid ? 'Paid' : '$' + (i.commissionOwed || 70) + ' owed'}</span>
+        </div>
+        <div class="card-meta">
+          <span>${timeAgo(i.recordedAt)}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+async function claimInspection(requestId, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Claiming...';
+  try {
+    const r = await fetch(`${API}?action=claim`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-agent-token': agentToken },
+      body: JSON.stringify({ requestId }),
+    });
+    const d = await r.json();
+    if (!r.ok) { showToast(d.error || 'Failed to claim.'); btn.disabled = false; btn.textContent = 'Claim — $70'; return; }
+    showToast('Inspection claimed! $70 commission confirmed.');
+    await loadDashboard();
+  } catch {
+    showToast('Connection error. Try again.');
+    btn.disabled = false;
+    btn.textContent = 'Claim — $70';
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3500);
+}
+
+function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
+
+function timeAgo(iso) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  return Math.floor(hrs / 24) + 'd ago';
+}
+</script>
+</body>
+</html>

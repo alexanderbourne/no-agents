@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — No Agents</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#faf9f6;color:#1a1a1a;font-size:14px;line-height:1.5}
+.sf{font-family:'Playfair Display',serif}
+
+/* Login */
+.login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-box{background:#fff;border-radius:12px;padding:40px;max-width:360px;width:100%;box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+.login-box h1{font-family:'Playfair Display',serif;font-size:24px;margin-bottom:24px}
+.login-box input{width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:16px}
+.login-box button{width:100%;padding:10px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer}
+.login-box .err{color:#e74c3c;font-size:13px;margin-bottom:12px;display:none}
+
+/* Layout */
+.app{display:none;max-width:1100px;margin:0 auto;padding:24px 20px 60px}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px}
+.header h1{font-family:'Playfair Display',serif;font-size:28px}
+.header-links{display:flex;gap:8px}
+.header-links a{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:500;color:#1a1a1a;text-decoration:none;border:1px solid #ddd;transition:all .15s}
+.header-links a:hover{background:#1a1a1a;color:#fff}
+
+/* Tabs */
+.tabs{display:flex;gap:0;border-bottom:2px solid #e5e0d6;margin-bottom:24px}
+.tab{padding:10px 20px;cursor:pointer;font-size:14px;font-weight:500;color:#888;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.tab:hover{color:#1a1a1a}
+.tab.active{color:#1a1a1a;border-bottom-color:#1a1a1a}
+.tab .count{background:#e5e0d6;color:#666;font-size:11px;padding:1px 7px;border-radius:10px;margin-left:6px}
+.tab.active .count{background:#1a1a1a;color:#fff}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat{background:#fff;border-radius:10px;padding:16px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.stat .n{font-size:28px;font-weight:600}
+.stat .l{font-size:12px;color:#888;margin-top:2px}
+
+/* Cards */
+.card{background:#fff;border-radius:10px;padding:20px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:box-shadow .15s}
+.card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.1)}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.card-name{font-weight:600;font-size:16px}
+.card-sub{color:#666;font-size:13px;margin-top:2px}
+.card-meta{display:flex;gap:12px;margin-top:8px;font-size:13px;color:#888;flex-wrap:wrap}
+.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600;text-transform:uppercase}
+.badge-pending{background:#fff3e0;color:#e65100}
+.badge-approved{background:#e8f5e9;color:#2e7d32}
+.badge-suspended{background:#ffebee;color:#c62828}
+.badge-new{background:#e8f5e9;color:#2e7d32}
+.badge-contacted{background:#e3f2fd;color:#1565c0}
+.badge-qualified{background:#fff3e0;color:#e65100}
+.badge-converted{background:#f3e5f5;color:#7b1fa2}
+.badge-lost{background:#fafafa;color:#999}
+.badge-confirmed{background:#e3f2fd;color:#1565c0}
+.badge-paid{background:#e8f5e9;color:#2e7d32}
+.badge-unpaid{background:#fff3e0;color:#e65100}
+
+/* Detail panel */
+.detail{display:none;background:#fff;border-radius:10px;padding:24px;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,0.1)}
+.detail h2{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:16px}
+.detail-grid{display:grid;grid-template-columns:130px 1fr;gap:8px 16px;font-size:14px;margin-bottom:20px}
+.detail-grid .lbl{color:#888;font-weight:500}
+.back-btn{background:none;border:none;cursor:pointer;font-size:14px;color:#888;margin-bottom:16px;padding:0}
+.back-btn:hover{color:#1a1a1a}
+
+/* Actions */
+.actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid #ddd;background:#fff;transition:all .15s}
+.btn:hover{background:#f5f5f5}
+.btn-approve{background:#2e7d32;color:#fff;border-color:#2e7d32}
+.btn-approve:hover{background:#1b5e20}
+.btn-suspend{background:#c62828;color:#fff;border-color:#c62828}
+.btn-suspend:hover{background:#b71c1c}
+.btn-pay{background:#1565c0;color:#fff;border-color:#1565c0}
+.btn-pay:hover{background:#0d47a1}
+
+.convo{background:#f9f9f9;border-radius:8px;padding:16px;margin-top:12px}
+.convo-line{margin-bottom:8px}
+.speaker-ari{color:#2e7d32;font-weight:600}
+.speaker-caller{color:#1565c0;font-weight:600}
+.empty{text-align:center;padding:60px 20px;color:#999}
+select.status-sel{padding:6px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px}
+
+@media(max-width:640px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .card-top{flex-direction:column}
+  .tabs{overflow-x:auto}
+  .tab{white-space:nowrap;padding:10px 14px}
+}
+</style>
+</head>
+<body>
+
+<div class="login" id="login">
+  <div class="login-box">
+    <h1>Admin</h1>
+    <p class="err" id="loginErr">Incorrect password</p>
+    <input type="password" id="pw" placeholder="Admin password" autofocus>
+    <button onclick="doLogin()">Sign in</button>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <div class="header">
+    <h1 class="sf">Admin</h1>
+    <div class="header-links">
+      <a href="/">Site</a>
+      <a href="/leads">Leads</a>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-tab="agents">Agents <span class="count" id="cnt-agents">0</span></div>
+    <div class="tab" data-tab="inspections">Inspections <span class="count" id="cnt-inspections">0</span></div>
+    <div class="tab" data-tab="leads">Leads <span class="count" id="cnt-leads">0</span></div>
+    <div class="tab" data-tab="listings">Listings <span class="count" id="cnt-listings">0</span></div>
+  </div>
+
+  <div id="stats-bar"></div>
+  <div id="content"></div>
+  <div class="detail" id="detail"></div>
+</div>
+
+<script>
+const token = () => localStorage.getItem('na_token') || '';
+let currentTab = 'agents';
+let data = { agents: [], inspections: [], leads: [], listings: [] };
+
+if (token()) init();
+
+async function doLogin() {
+  const pw = document.getElementById('pw').value;
+  try {
+    const r = await fetch('/api/admin-auth', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({password:pw}) });
+    if (!r.ok) throw 0;
+    const d = await r.json();
+    localStorage.setItem('na_token', d.token);
+    init();
+  } catch { document.getElementById('loginErr').style.display = 'block'; }
+}
+document.getElementById('pw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+async function init() {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  await loadAll();
+}
+
+async function apiFetch(url, opts = {}) {
+  const h = { 'x-admin-token': token(), ...opts.headers };
+  if (opts.body) h['Content-Type'] = 'application/json';
+  const r = await fetch(url, { ...opts, headers: h });
+  if (r.status === 401) { localStorage.removeItem('na_token'); location.reload(); return null; }
+  return r.json();
+}
+
+async function loadAll() {
+  const [agents, inspections, leads] = await Promise.all([
+    apiFetch('/api/agents'),
+    apiFetch('/api/inspections'),
+    apiFetch('/api/leads?token=' + token()),
+  ]);
+  data.agents = Array.isArray(agents) ? agents : [];
+  data.inspections = Array.isArray(inspections) ? inspections : [];
+  data.leads = (leads && leads.leads) ? leads.leads : [];
+  try {
+    const lr = await fetch('/api/listing-store', { headers: { 'x-api-secret': token() } });
+    if (lr.ok) { const ld = await lr.json(); data.listings = ld.listings || []; }
+  } catch {}
+
+  document.getElementById('cnt-agents').textContent = data.agents.length;
+  document.getElementById('cnt-inspections').textContent = data.inspections.length;
+  document.getElementById('cnt-leads').textContent = data.leads.length;
+  document.getElementById('cnt-listings').textContent = data.listings.length;
+
+  renderTab();
+}
+
+// Tabs
+document.getElementById('tabs').addEventListener('click', e => {
+  const t = e.target.closest('.tab');
+  if (!t) return;
+  currentTab = t.dataset.tab;
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === currentTab));
+  closeDetail();
+  renderTab();
+});
+
+function renderTab() {
+  const fns = { agents: renderAgents, inspections: renderInspections, leads: renderLeads, listings: renderListings };
+  fns[currentTab]();
+}
+
+// ── Agents ──
+
+function renderAgents() {
+  const a = data.agents;
+  const pending = a.filter(x => x.status === 'pending').length;
+  const approved = a.filter(x => x.status === 'approved').length;
+  const suspended = a.filter(x => x.status === 'suspended').length;
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="n">${a.length}</div><div class="l">Total</div></div>
+      <div class="stat"><div class="n" style="color:#e65100">${pending}</div><div class="l">Pending</div></div>
+      <div class="stat"><div class="n" style="color:#2e7d32">${approved}</div><div class="l">Approved</div></div>
+      <div class="stat"><div class="n" style="color:#c62828">${suspended}</div><div class="l">Suspended</div></div>
+    </div>`;
+
+  if (!a.length) { document.getElementById('content').innerHTML = '<div class="empty">No agent applications yet.</div>'; return; }
+
+  document.getElementById('content').innerHTML = a.map(ag => `
+    <div class="card" onclick="showAgent('${ag.id}')">
+      <div class="card-top">
+        <div>
+          <div class="card-name">${esc(ag.name)}</div>
+          <div class="card-sub">Licence: ${esc(ag.licence)}${ag.suburb ? ' &middot; ' + esc(ag.suburb) : ''}</div>
+        </div>
+        <span class="badge badge-${ag.status}">${ag.status}</span>
+      </div>
+      <div class="card-meta">
+        <span>${esc(ag.email)}</span>
+        <span>${esc(ag.phone)}</span>
+        <span>${timeAgo(ag.appliedAt)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showAgent(id) {
+  const ag = data.agents.find(x => x.id === id);
+  if (!ag) return;
+  hideList();
+  const el = document.getElementById('detail');
+  el.style.display = 'block';
+
+  const inspCount = data.inspections.filter(i => i.agentId === id || i.agentName === ag.name).length;
+  const inspOwed = data.inspections.filter(i => (i.agentId === id || i.agentName === ag.name) && !i.commissionPaid).reduce((s, i) => s + (i.commissionOwed || 70), 0);
+
+  el.innerHTML = `
+    <button class="back-btn" onclick="closeDetail()">&larr; Back</button>
+    <h2>${esc(ag.name)}</h2>
+    <div class="detail-grid">
+      <span class="lbl">Status</span><span class="badge badge-${ag.status}">${ag.status}</span>
+      <span class="lbl">Email</span><span>${esc(ag.email)}</span>
+      <span class="lbl">Phone</span><span>${esc(ag.phone)}</span>
+      <span class="lbl">Licence</span><span>${esc(ag.licence)}</span>
+      <span class="lbl">Licence File</span><span>${ag.licenceFileData ? '<a href="'+ag.licenceFileData+'" target="_blank" download="'+(ag.licenceFileName||'licence')+'">'+esc(ag.licenceFileName||'Download')+'</a>' : 'Not uploaded'}</span>
+      <span class="lbl">Suburbs</span><span>${esc(ag.suburb || 'Not specified')}</span>
+      <span class="lbl">Applied</span><span>${ag.appliedAt ? new Date(ag.appliedAt).toLocaleDateString('en-AU') : 'N/A'}</span>
+      ${ag.approvedAt ? `<span class="lbl">Approved</span><span>${new Date(ag.approvedAt).toLocaleDateString('en-AU')}</span>` : ''}
+      <span class="lbl">Inspections</span><span>${inspCount}</span>
+      <span class="lbl">Owed</span><span>$${inspOwed}</span>
+      ${ag.message ? `<span class="lbl">Message</span><span style="font-style:italic">"${esc(ag.message)}"</span>` : ''}
+      ${ag.notes ? `<span class="lbl">Notes</span><span>${esc(ag.notes)}</span>` : ''}
+    </div>
+    <div class="actions">
+      ${ag.status !== 'approved' ? `<button class="btn btn-approve" onclick="updateAgent('${id}','approved')">Approve</button>` : ''}
+      ${ag.status !== 'suspended' ? `<button class="btn btn-suspend" onclick="updateAgent('${id}','suspended')">Suspend</button>` : ''}
+      ${ag.status === 'suspended' ? `<button class="btn btn-approve" onclick="updateAgent('${id}','pending')">Reactivate</button>` : ''}
+    </div>`;
+}
+
+async function updateAgent(id, status) {
+  await apiFetch(`/api/agents?id=${id}`, { method: 'PATCH', body: JSON.stringify({ status }) });
+  const ag = data.agents.find(x => x.id === id);
+  if (ag) { ag.status = status; if (status === 'approved') ag.approvedAt = new Date().toISOString(); }
+  document.getElementById('cnt-agents').textContent = data.agents.length;
+  showAgent(id);
+}
+
+// ── Inspections ──
+
+function renderInspections() {
+  const ins = data.inspections;
+  const total = ins.length;
+  const unpaid = ins.filter(x => !x.commissionPaid);
+  const owed = unpaid.reduce((s, x) => s + (x.commissionOwed || 70), 0);
+  const paid = ins.filter(x => x.commissionPaid).reduce((s, x) => s + (x.commissionOwed || 70), 0);
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="n">${total}</div><div class="l">Total</div></div>
+      <div class="stat"><div class="n">${unpaid.length}</div><div class="l">Unpaid</div></div>
+      <div class="stat"><div class="n" style="color:#e65100">$${owed}</div><div class="l">Owed</div></div>
+      <div class="stat"><div class="n" style="color:#2e7d32">$${paid}</div><div class="l">Paid</div></div>
+    </div>`;
+
+  const postForm = `
+    <div class="card" style="border:2px dashed #e5e0d6;margin-bottom:16px">
+      <div style="font-weight:600;margin-bottom:12px">Post inspection for agents to claim</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <input id="req-address" placeholder="Property address" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;grid-column:1/-1">
+        <input id="req-date" type="date" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px">
+        <input id="req-time" type="time" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px">
+        <input id="req-buyer" placeholder="Buyer name (optional)" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px">
+        <input id="req-notes" placeholder="Notes (optional)" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px">
+      </div>
+      <button class="btn" style="margin-top:10px;background:#1a1a1a;color:#fff" onclick="postInspectionRequest()">Post to Agent Portal</button>
+    </div>`;
+
+  if (!ins.length) { document.getElementById('content').innerHTML = postForm + '<div class="empty">No inspections recorded yet.</div>'; return; }
+
+  document.getElementById('content').innerHTML = postForm + ins.map(i => `
+    <div class="card" onclick="showInspection('${i.id}')">
+      <div class="card-top">
+        <div>
+          <div class="card-name">${esc(i.listingAddress)}</div>
+          <div class="card-sub">${esc(i.agentName)}${i.buyerName ? ' &middot; Buyer: ' + esc(i.buyerName) : ''}</div>
+        </div>
+        <span class="badge badge-${i.commissionPaid ? 'paid' : 'unpaid'}">${i.commissionPaid ? 'Paid' : '$' + (i.commissionOwed || 70) + ' owed'}</span>
+      </div>
+      <div class="card-meta">
+        <span>${esc(i.date)}${i.time ? ' ' + esc(i.time) : ''}</span>
+        <span>${timeAgo(i.recordedAt)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showInspection(id) {
+  const i = data.inspections.find(x => x.id === id);
+  if (!i) return;
+  hideList();
+  const el = document.getElementById('detail');
+  el.style.display = 'block';
+  el.innerHTML = `
+    <button class="back-btn" onclick="closeDetail()">&larr; Back</button>
+    <h2>${esc(i.listingAddress)}</h2>
+    <div class="detail-grid">
+      <span class="lbl">Agent</span><span>${esc(i.agentName)}</span>
+      <span class="lbl">Agent Email</span><span>${esc(i.agentEmail || 'N/A')}</span>
+      <span class="lbl">Date</span><span>${esc(i.date)}${i.time ? ' ' + esc(i.time) : ''}</span>
+      <span class="lbl">Buyer</span><span>${esc(i.buyerName || 'N/A')}</span>
+      <span class="lbl">Commission</span><span>$${i.commissionOwed || 70}</span>
+      <span class="lbl">Paid</span><span class="badge badge-${i.commissionPaid ? 'paid' : 'unpaid'}">${i.commissionPaid ? 'Paid' + (i.paidAt ? ' ' + new Date(i.paidAt).toLocaleDateString('en-AU') : '') : 'Unpaid'}</span>
+      <span class="lbl">Recorded</span><span>${i.recordedAt ? new Date(i.recordedAt).toLocaleDateString('en-AU') : 'N/A'}</span>
+    </div>
+    ${!i.commissionPaid ? `<div class="actions"><button class="btn btn-pay" onclick="markPaid('${id}')">Mark as Paid</button></div>` : ''}`;
+}
+
+async function markPaid(id) {
+  await apiFetch(`/api/inspections?id=${id}`, { method: 'PATCH', body: JSON.stringify({}) });
+  const i = data.inspections.find(x => x.id === id);
+  if (i) { i.commissionPaid = true; i.paidAt = new Date().toISOString(); }
+  showInspection(id);
+}
+
+async function postInspectionRequest() {
+  const address = document.getElementById('req-address').value.trim();
+  const date = document.getElementById('req-date').value;
+  if (!address || !date) { alert('Address and date are required.'); return; }
+  const body = {
+    address,
+    date,
+    time: document.getElementById('req-time').value,
+    buyerName: document.getElementById('req-buyer').value.trim(),
+    notes: document.getElementById('req-notes').value.trim(),
+  };
+  await apiFetch('/api/inspections?type=request', { method: 'POST', body: JSON.stringify(body) });
+  document.getElementById('req-address').value = '';
+  document.getElementById('req-date').value = '';
+  document.getElementById('req-time').value = '';
+  document.getElementById('req-buyer').value = '';
+  document.getElementById('req-notes').value = '';
+  alert('Inspection posted to agent portal.');
+}
+
+// ── Leads ──
+
+function renderLeads() {
+  const ld = data.leads;
+  const s = { new:0, contacted:0, qualified:0, converted:0, lost:0 };
+  ld.forEach(l => { s[l.status] = (s[l.status]||0) + 1; });
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="n">${ld.length}</div><div class="l">Total</div></div>
+      <div class="stat"><div class="n" style="color:#2e7d32">${s.new}</div><div class="l">New</div></div>
+      <div class="stat"><div class="n" style="color:#1565c0">${s.contacted + s.qualified}</div><div class="l">In Progress</div></div>
+      <div class="stat"><div class="n" style="color:#7b1fa2">${s.converted}</div><div class="l">Converted</div></div>
+    </div>`;
+
+  if (!ld.length) { document.getElementById('content').innerHTML = '<div class="empty">No leads yet. Calls handled by Ari will appear here.</div>'; return; }
+
+  document.getElementById('content').innerHTML = ld.map(l => `
+    <div class="card" onclick="showLead('${l.id}')" style="border-left:4px solid ${l.urgency==='High'?'#e74c3c':l.urgency==='Medium'?'#f39c12':'#27ae60'}">
+      <div class="card-top">
+        <div>
+          <div class="card-name">${esc(l.callerName || 'Unknown')}</div>
+          <div class="card-sub">${esc(l.property || 'No address')}</div>
+        </div>
+        <span class="badge badge-${l.status}">${l.status}</span>
+      </div>
+      <div class="card-meta">
+        <span>${esc(l.callerNumber || '')}</span>
+        <span>${timeAgo(l.timestamp)}</span>
+        ${l.enquiry ? `<span>${esc(l.enquiry)}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function showLead(id) {
+  const l = data.leads.find(x => x.id === id);
+  if (!l) return;
+  hideList();
+  const el = document.getElementById('detail');
+  el.style.display = 'block';
+  el.innerHTML = `
+    <button class="back-btn" onclick="closeDetail()">&larr; Back</button>
+    <h2>${esc(l.callerName || 'Unknown')}</h2>
+    <div style="margin-bottom:16px">
+      <select class="status-sel" onchange="updateLead('${l.id}', this.value)">
+        ${['new','contacted','qualified','converted','lost'].map(s => `<option value="${s}" ${l.status===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="detail-grid">
+      <span class="lbl">Phone</span><span>${esc(l.callbackNumber || l.callerNumber || 'N/A')}</span>
+      <span class="lbl">Caller Number</span><span>${esc(l.callerNumber || 'N/A')}</span>
+      <span class="lbl">Type</span><span>${esc(l.callerType || 'N/A')}</span>
+      <span class="lbl">Property</span><span>${esc(l.property || 'Not provided')}</span>
+      <span class="lbl">Urgency</span><span>${l.urgency || 'Low'}</span>
+      <span class="lbl">Time</span><span>${esc(l.timestampLocal || l.timestamp || 'N/A')}</span>
+      <span class="lbl">Enquiry</span><span>${esc(l.enquiry || 'N/A')}</span>
+    </div>
+    ${l.actionItems && l.actionItems.length ? `<h3 style="margin-bottom:8px">Action Items</h3><ul style="margin-bottom:16px;padding-left:20px">${l.actionItems.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : ''}
+    <h3 style="margin-bottom:8px">Conversation</h3>
+    <div class="convo">
+      ${(l.conversation||[]).map(m => `<div class="convo-line"><span class="${m.role==='assistant'?'speaker-ari':'speaker-caller'}">${m.role==='assistant'?'Ari':'Caller'}:</span> ${esc(m.content)}</div>`).join('')}
+      ${!(l.conversation||[]).length ? '<span style="color:#999">No transcript available.</span>' : ''}
+    </div>`;
+}
+
+async function updateLead(id, status) {
+  await fetch('/api/leads', { method: 'PATCH', headers: {'Content-Type':'application/json', 'x-admin-token': token()}, body: JSON.stringify({id, status}) });
+  const l = data.leads.find(x => x.id === id);
+  if (l) l.status = status;
+  document.getElementById('cnt-leads').textContent = data.leads.length;
+}
+
+// ── Listings ──
+
+function renderListings() {
+  const ls = data.listings;
+  const current = ls.filter(x => x.status === 'current').length;
+  const sold = ls.filter(x => x.status === 'sold').length;
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="n">${ls.length}</div><div class="l">Total</div></div>
+      <div class="stat"><div class="n" style="color:#2e7d32">${current}</div><div class="l">Current</div></div>
+      <div class="stat"><div class="n" style="color:#7b1fa2">${sold}</div><div class="l">Sold</div></div>
+      <div class="stat"><div class="n">${ls.length - current - sold}</div><div class="l">Other</div></div>
+    </div>`;
+
+  if (!ls.length) { document.getElementById('content').innerHTML = '<div class="empty">No listings yet.</div>'; return; }
+
+  document.getElementById('content').innerHTML = ls.map(l => `
+    <div class="card" onclick="showListing('${l.id}')">
+      <div class="card-top">
+        <div>
+          <div class="card-name">${esc(l.address || 'No address')}${l.suburb ? ', ' + esc(l.suburb) : ''}</div>
+          <div class="card-sub">${esc(l.type || '')} ${l.beds ? l.beds + ' bed' : ''} ${l.baths ? l.baths + ' bath' : ''} ${l.cars ? l.cars + ' car' : ''}</div>
+        </div>
+        <span class="badge badge-${l.status === 'current' ? 'approved' : l.status === 'sold' ? 'converted' : 'pending'}">${l.status}</span>
+      </div>
+      <div class="card-meta">
+        <span>${esc(l.priceView || l.price || '')}</span>
+        <span>${esc(l.sellerName || '')}</span>
+        <span>${timeAgo(l.createdAt)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showListing(id) {
+  const l = data.listings.find(x => x.id === id);
+  if (!l) return;
+  hideList();
+  const el = document.getElementById('detail');
+  el.style.display = 'block';
+  el.innerHTML = `
+    <button class="back-btn" onclick="closeDetail()">&larr; Back</button>
+    <h2>${esc(l.address || 'No address')}${l.suburb ? ', ' + esc(l.suburb) : ''}</h2>
+    <div class="detail-grid">
+      <span class="lbl">Status</span><span class="badge badge-${l.status === 'current' ? 'approved' : 'pending'}">${l.status}</span>
+      <span class="lbl">Price</span><span>${esc(l.priceView || l.price || 'N/A')}</span>
+      <span class="lbl">Type</span><span>${esc(l.type || 'N/A')}</span>
+      <span class="lbl">Beds / Bath / Car</span><span>${l.beds || '-'} / ${l.baths || '-'} / ${l.cars || '-'}</span>
+      <span class="lbl">Land</span><span>${l.landSize ? l.landSize + ' m²' : 'N/A'}</span>
+      <span class="lbl">Floor</span><span>${l.floor ? l.floor + ' m²' : 'N/A'}</span>
+      <span class="lbl">Seller</span><span>${esc(l.sellerName || 'N/A')}</span>
+      <span class="lbl">Seller Email</span><span>${esc(l.sellerEmail || 'N/A')}</span>
+      <span class="lbl">Seller Phone</span><span>${esc(l.sellerPhone || 'N/A')}</span>
+      <span class="lbl">Created</span><span>${l.createdAt ? new Date(l.createdAt).toLocaleDateString('en-AU') : 'N/A'}</span>
+      <span class="lbl">Headline</span><span>${esc(l.headline || 'N/A')}</span>
+    </div>
+    ${l.description ? `<h3 style="margin-bottom:8px">Description</h3><p style="background:#f9f9f9;padding:12px;border-radius:8px;font-size:14px;white-space:pre-wrap">${esc(l.description)}</p>` : ''}
+    ${l.images && l.images.length ? `<h3 style="margin:16px 0 8px">Images</h3><div style="display:flex;gap:8px;flex-wrap:wrap">${l.images.map(img => `<img src="${esc(img)}" style="width:120px;height:90px;object-fit:cover;border-radius:8px">`).join('')}</div>` : ''}`;
+}
+
+// ── Helpers ──
+
+function hideList() {
+  document.getElementById('content').style.display = 'none';
+  document.getElementById('stats-bar').style.display = 'none';
+}
+
+function closeDetail() {
+  document.getElementById('detail').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
+  document.getElementById('stats-bar').style.display = 'block';
+  renderTab();
+}
+
+function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
+
+function timeAgo(iso) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  const days = Math.floor(hrs / 24);
+  return days + 'd ago';
+}
+</script>
+</body>
+</html>

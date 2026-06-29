@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "functions": {
+    "api/**/*.js": {
+      "memory": 512,
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    { "source": "/leads", "destination": "/leads.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/portal", "destination": "/portal.html" },
+    { "source": "/offer/:path*", "destination": "/" }
+  ]
+}
