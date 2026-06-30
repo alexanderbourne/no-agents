@@ -66,6 +66,7 @@ export default async function handler(req, res) {
     images:       meta.images ? JSON.parse(meta.images) : [],
     sellerEmail:  meta.sellerEmail || session.customer_details?.email || '',
     sellerName:   meta.sellerName || '',
+    sellerPhone:  meta.sellerPhone || '',
   };
 
   try {

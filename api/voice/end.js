@@ -17,7 +17,7 @@ async function kvSet(key, value) {
   await fetch(`${KV_REST_API_URL}/set/${encodeURIComponent(key)}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${KV_REST_API_TOKEN}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ value }),
+    body: value,
   });
 }
 

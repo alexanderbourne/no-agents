@@ -741,6 +741,7 @@ function Sell(){
           <input style="${IS};margin-bottom:8px" value=${form.sellerName} onInput=${e=>up('sellerName',e.target.value)} placeholder="Full name"/>
           <input style="${IS};margin-bottom:8px" type="email" value=${form.sellerEmail} onInput=${e=>up('sellerEmail',e.target.value)} placeholder="Email address"/>
           <input style="${IS}" type="tel" value=${form.sellerPhone} onInput=${e=>up('sellerPhone',e.target.value)} placeholder="Mobile number"/>
+          <div style="font-size:12px;color:${T.tu};margin-top:6px">🔐 This mobile number becomes your seller dashboard login — we'll text you a one-time code each time you sign in at "My listing". Make sure it's correct.</div>
         </div>
         <div style="${fg}"><label style="${LB};margin-bottom:12px">Tenanted?</label>
           <div style="display:flex;gap:8px">${[['no','Vacant / Owner-occupied'],['yes','Tenanted']].map(([v,l])=>html`<button onclick=${()=>up('tenanted',v)} style="${B(form.tenanted===v?'p':'o')};flex:1">${l}</button>`)}</div>
@@ -795,7 +796,8 @@ function Sell(){
 
       ${step===4&&html`<div>
         <h3 class="sf" style="font-size:20px;font-weight:600;margin-bottom:20px">Review your listing</h3>
-        <div style="margin-bottom:20px">${[['Address',form.address||'Not entered'],['Property',`${form.beds}bd · ${form.baths}ba · ${form.type}${form.floor?` · Level ${form.floor}`:''}`],['Price guide',form.price?`$${parseInt(form.price).toLocaleString()}`:'Not set'],['Tenanted',form.tenanted==='yes'?`Yes — ${form.tenantName||'details provided'}`:'No'],['On-site visits',form.inspection==='agent'?'Human agent ($99 per visit)':'Self-facilitated (free)'],['Available days',form.availableDays.length>0?form.availableDays.join(', '):'Not set']].map(([k,v])=>html`<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid ${T.bd};gap:16px;flex-wrap:wrap"><span style="font-size:13px;color:${T.tu};font-weight:500">${k}</span><span style="font-size:13px;color:${T.t};text-align:right">${v}</span></div>`)}</div>
+        <div style="margin-bottom:20px">${[['Address',form.address||'Not entered'],['Property',`${form.beds}bd · ${form.baths}ba · ${form.type}${form.floor?` · Level ${form.floor}`:''}`],['Price guide',form.price?`$${parseInt(form.price).toLocaleString()}`:'Not set'],['Tenanted',form.tenanted==='yes'?`Yes — ${form.tenantName||'details provided'}`:'No'],['On-site visits',form.inspection==='agent'?'Human agent ($99 per visit)':'Self-facilitated (free)'],['Available days',form.availableDays.length>0?form.availableDays.join(', '):'Not set'],['Seller dashboard login',form.sellerPhone||'Not set']].map(([k,v])=>html`<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid ${T.bd};gap:16px;flex-wrap:wrap"><span style="font-size:13px;color:${T.tu};font-weight:500">${k}</span><span style="font-size:13px;color:${T.t};text-align:right">${v}</span></div>`)}</div>
+        <div style="display:flex;gap:10px;background:${T.bw};border-radius:10px;padding:12px 14px;border:1px solid ${T.bdd};align-items:flex-start;margin-bottom:20px"><span style="flex-shrink:0;font-size:16px">🔐</span><div style="font-size:12px;color:${T.tm};line-height:1.6">We'll text a one-time code to <strong style="color:${T.t}">${form.sellerPhone||'your mobile'}</strong> each time you sign in to your seller dashboard at "My listing" — no password to remember.</div></div>
         <div style="border-radius:14px;background:${T.bg};border:1px solid ${T.bd};padding:20px;margin-bottom:20px">
           <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px"><span style="color:${T.tm}">Complete Listing Package (incl. Domain, photography, 3D tour)</span><span style="font-weight:500">$798.00</span></div>
           <div style="display:flex;justify-content:space-between;font-size:13px;color:${T.tu};margin-bottom:4px"><span>Human agent visits — billed after each</span><span>$99 per visit</span></div>
@@ -1051,30 +1053,110 @@ function Buy(){
     </div>
   </div>`;}
 
+function SellerLogin({onAuthed}){
+  const[step,setStep]=useState('phone');
+  const[phone,setPhone]=useState('');
+  const[code,setCode]=useState('');
+  const[smsTok,setSmsTok]=useState(null);
+  const[ts,setTs]=useState(null);
+  const[err,setErr]=useState('');
+  const[busy,setBusy]=useState(false);
+  const[listings,setListings]=useState([]);
+  const[sellerTok,setSellerTok]=useState(null);
+
+  const sendCode=async()=>{
+    if(!phone.trim()){setErr('Enter your phone number.');return;}
+    setErr('');setBusy(true);
+    try{
+      const r=await fetch('/api/seller-auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone})});
+      const d=await r.json();
+      if(!r.ok){setErr(d.error||'Could not send code.');setBusy(false);return;}
+      setSmsTok(d.token);setTs(d.ts);setStep('code');
+    }catch{setErr('Connection error. Try again.');}
+    setBusy(false);
+  };
+
+  const verify=async()=>{
+    if(!code.trim()){setErr('Enter the 6-digit code.');return;}
+    setErr('');setBusy(true);
+    try{
+      const r=await fetch('/api/seller-auth?action=verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,code,token:smsTok,ts})});
+      const d=await r.json();
+      if(!r.ok){setErr(d.error||'Verification failed.');setBusy(false);return;}
+      if(d.listings.length===1){
+        onAuthed(d.token,d.listings[0].id);
+      }else{
+        setSellerTok(d.token);setListings(d.listings);setStep('pick');
+      }
+    }catch{setErr('Connection error. Try again.');}
+    setBusy(false);
+  };
+
+  if(step==='pick'){
+    return html`<div style="max-width:420px;margin:0 auto;padding:64px 24px" class="mp">
+      <div style="${CD}">
+        <h1 class="sf" style="font-size:22px;font-weight:600;margin-bottom:6px">Choose a listing</h1>
+        <p style="font-size:13px;color:${T.tu};margin-bottom:20px">We found multiple listings for this phone number.</p>
+        ${listings.map(l=>html`<button style="${B('o','m')};width:100%;justify-content:flex-start;text-align:left;margin-bottom:8px" onclick=${()=>onAuthed(sellerTok,l.id)}>${l.address}</button>`)}
+      </div>
+    </div>`;
+  }
+
+  return html`<div style="max-width:420px;margin:0 auto;padding:64px 24px" class="mp">
+    <div style="${CD}">
+      <${Logo}/>
+      <h1 class="sf" style="font-size:22px;font-weight:600;margin:16px 0 6px">Seller login</h1>
+      <p style="font-size:13px;color:${T.tu};margin-bottom:20px">${step==='phone'?'Sign in with the phone number on your listing.':`Enter the code we sent to ${phone}.`}</p>
+      ${err&&html`<div style="${P('r')};margin-bottom:14px;display:block">${err}</div>`}
+      ${step==='phone'?html`
+        <label style="${LB}">Phone number</label>
+        <input style="${IS};margin-bottom:14px" type="tel" value=${phone} onInput=${e=>setPhone(e.target.value)} placeholder="0412 345 678" onKeyDown=${e=>e.key==='Enter'&&sendCode()}/>
+        <button style="${B('p','m')};width:100%;opacity:${busy?.6:1}" disabled=${busy} onclick=${sendCode}>${busy?'Sending…':'Send code →'}</button>
+      `:html`
+        <label style="${LB}">6-digit code</label>
+        <input style="${IS};margin-bottom:14px" type="text" inputmode="numeric" maxlength="6" value=${code} onInput=${e=>setCode(e.target.value)} placeholder="123456" onKeyDown=${e=>e.key==='Enter'&&verify()}/>
+        <button style="${B('p','m')};width:100%;opacity:${busy?.6:1}" disabled=${busy} onclick=${verify}>${busy?'Verifying…':'Verify →'}</button>
+        <button style="${B('g','s')};width:100%;margin-top:8px" onclick=${()=>{setStep('phone');setCode('');setErr('');}}>← Use a different number</button>
+      `}
+    </div>
+  </div>`;
+}
+
 function Dash({go}){
+  const[token,setToken]=useState(()=>localStorage.getItem('na_seller_token')||'');
+  const[listingId,setListingId]=useState(()=>localStorage.getItem('na_seller_listing')||'');
+  const onAuthed=(tok,lid)=>{
+    localStorage.setItem('na_seller_token',tok);
+    localStorage.setItem('na_seller_listing',lid);
+    setToken(tok);setListingId(lid);
+  };
+  const onLogout=()=>{
+    localStorage.removeItem('na_seller_token');
+    localStorage.removeItem('na_seller_listing');
+    setToken('');setListingId('');
+  };
+  if(!token||!listingId)return html`<${SellerLogin} onAuthed=${onAuthed}/>`;
+  return html`<${SellerDash} go=${go} token=${token} listingId=${listingId} onLogout=${onLogout}/>`;
+}
+
+function SellerDash({go,token,listingId,onLogout}){
   const[tab,setTab]=useState('offers');
-  const[insp,setInsp]=useState([
-    {id:1,buyer:'T. Harrison',date:'Sat 31 May',time:'10:00am',status:'confirmed',type:'agent',email:'t.harrison@email.com'},
-    {id:2,buyer:'L. Nguyen',date:'Sat 31 May',time:'10:30am',status:'pending',type:'self',email:'l.nguyen@email.com'},
-    {id:3,buyer:'J. Okafor',date:'Sun 1 Jun',time:'2:00pm',status:'confirmed',type:'agent',email:'j.okafor@email.com'},
-  ]);
+  const[loading,setLoading]=useState(true);
+  const[loadErr,setLoadErr]=useState('');
+  const[data,setData]=useState(null);
+  const[insp,setInsp]=useState([]);
   const[notices,setNotices]=useState({});
   const[acceptM,setAcceptM]=useState(false);
   const[counterM,setCounterM]=useState(false);
   const[counterAmt,setCounterAmt]=useState('');
-  const[accepted,setAccepted]=useState(false);
-  const[enquiries]=useState([
-    {id:1,name:'T. Harrison',email:'t.harrison@email.com',phone:'0412 345 678',message:'Very interested. Is the car space included?',time:'2h ago',replied:true},
-    {id:2,name:'S. Chen',email:'s.chen@email.com',phone:'0423 456 789',message:'What are the body corporate fees?',time:'5h ago',replied:true},
-    {id:3,name:'R. Patel',email:'r.patel@email.com',phone:'0434 567 890',message:'Can I do a virtual inspection?',time:'1d ago',replied:false},
-    {id:4,name:'L. Nguyen',email:'l.nguyen@email.com',phone:'0445 678 901',message:'Is the owner open to a 90-day settlement?',time:'1d ago',replied:false},
-  ]);
+  const[photoBusy,setPhotoBusy]=useState(false);
+  const[enquiries,setEnquiries]=useState([]);
   const[docFiles,setDocFiles]=useState({});
   const[conveyancer,setConveyancer]=useState({name:'',email:'',phone:''});
   const[listingDesc,setListingDesc]=useState('');
   const[descLoading,setDescLoading]=useState(false);
   const[descSaved,setDescSaved]=useState(false);
-  const generateDesc=async()=>{setDescLoading(true);setDescSaved(false);try{const r=await fetch('/api/generate-description',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:p.address,beds:p.beds,baths:p.baths,cars:p.cars,type:p.type,floor:p.floor,suburb:'Brisbane City',postcode:'4000',price:p.priceGuide})});if(r.ok){const d=await r.json();setListingDesc(d.description);}else{setListingDesc('Could not generate description. Try again or write your own.');}}catch{setListingDesc('Connection error. Try again.');}setDescLoading(false);};
+  const generateDesc=async()=>{setDescLoading(true);setDescSaved(false);try{const r=await fetch('/api/generate-description',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:p.address,beds:p.beds,baths:p.baths,cars:p.cars,type:p.type,floor:p.floor,suburb:p.suburb||'',postcode:p.postcode||'',price:p.priceView||p.price})});if(r.ok){const d=await r.json();setListingDesc(d.description);}else{setListingDesc('Could not generate description. Try again or write your own.');}}catch{setListingDesc('Connection error. Try again.');}setDescLoading(false);};
   const[documents]=useState([
     {id:'contract',name:'Contract of Sale (Draft)',status:'pending',date:'—',who:'seller'},
     {id:'form6',name:'Form 6 — Property Disclosure',status:'pending',date:'—',who:'seller'},
@@ -1082,31 +1164,69 @@ function Dash({go}){
     {id:'bp_report',name:'Building & Pest Report',status:'pending',date:'—',who:'buyer'},
     {id:'settlement',name:'Settlement Statement',status:'pending',date:'—',who:'conveyancer'},
   ]);
-  const p=DEMO,top=OFFERS[0];
+  useEffect(()=>{
+    let cancelled=false;
+    setLoading(true);setLoadErr('');
+    fetch(`/api/seller-portal?listingId=${encodeURIComponent(listingId)}`,{headers:{'x-seller-token':token}})
+      .then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||'Could not load your dashboard.');return d;})
+      .then(d=>{if(cancelled)return;setData(d);setInsp(d.inspections||[]);setEnquiries(d.enquiries||[]);})
+      .catch(e=>{if(!cancelled)setLoadErr(e.message);})
+      .finally(()=>{if(!cancelled)setLoading(false);});
+    return()=>{cancelled=true;};
+  },[token,listingId]);
+
+  const acceptOffer=async(offerId)=>{
+    const r=await fetch(`/api/seller-portal?listingId=${encodeURIComponent(listingId)}&action=accept-offer`,{method:'POST',headers:{'Content-Type':'application/json','x-seller-token':token},body:JSON.stringify({offerId})});
+    if(r.ok){const d=await r.json();setData(prev=>({...prev,offers:d.offers,listing:{...prev.listing,status:'agreed'}}));}
+    setAcceptM(false);
+  };
+  const sendCounter=async(offerId)=>{
+    if(!counterAmt)return;
+    const r=await fetch(`/api/seller-portal?listingId=${encodeURIComponent(listingId)}&action=counter-offer`,{method:'POST',headers:{'Content-Type':'application/json','x-seller-token':token},body:JSON.stringify({offerId,amount:counterAmt.replace(/[^0-9]/g,'')})});
+    if(r.ok){const dd=await r.json();setData(prev=>({...prev,offers:prev.offers.map(o=>o.id===offerId?dd.offer:o)}));}
+    setCounterM(false);setCounterAmt('');
+  };
+  const requestPhotoshoot=async()=>{
+    setPhotoBusy(true);
+    try{
+      const r=await fetch(`/api/seller-portal?listingId=${encodeURIComponent(listingId)}&action=photoshoot`,{method:'POST',headers:{'Content-Type':'application/json','x-seller-token':token},body:'{}'});
+      if(r.ok){const d=await r.json();setData(prev=>({...prev,photoShoot:d.photoShoot}));}
+    }catch{}
+    setPhotoBusy(false);
+  };
+
+  if(loading)return html`<div style="max-width:1100px;margin:0 auto;padding:120px 32px;text-align:center" class="mp"><div style="font-size:14px;color:${T.tm}">Loading your dashboard…</div></div>`;
+  if(loadErr)return html`<div style="max-width:480px;margin:0 auto;padding:120px 32px;text-align:center" class="mp">
+    <div style="font-size:14px;color:${T.tm};margin-bottom:16px">${loadErr}</div>
+    <button style="${B('o','m')}" onclick=${onLogout}>← Back to login</button>
+  </div>`;
+
+  const p=data.listing,offers=(data.offers||[]).slice().sort((a,b)=>(b.amount||0)-(a.amount||0));
+  const top=offers[0]||null;
+  const accepted=p.status==='agreed'||p.status==='sold';
+  const photoShoot=data.photoShoot||{status:'not_booked',date:null};
 
   return html`<div style="max-width:1100px;margin:0 auto;padding:32px 32px" class="mp">
-    <div style="background:${T.bw};border:1px solid ${T.bdd};border-radius:12px;padding:12px 20px;margin-bottom:24px;display:flex;gap:10px;align-items:center">
-      <span>ℹ️</span><span style="font-size:13px;color:${T.tm}"><strong>Demo listing.</strong> In production this shows your live property, real offers and actual bookings.</span>
-    </div>
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:12px">
       <div style="display:flex;align-items:center;gap:12px">
         <${Logo}/>
         <div>
           <div style="font-size:12px;color:${T.tu};font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Seller dashboard</div>
           <h1 class="sf" style="font-size:24px;font-weight:600;letter-spacing:-.3px;margin-bottom:6px">${p.address}</h1>
-          <div style="display:flex;gap:8px"><span style="${P('g')};font-size:11px">● Live</span><span style="font-size:12px;color:${T.tu}">Deadline 30 Aug 2026</span></div>
+          <div style="display:flex;gap:8px"><span style="${P(p.status==='current'?'g':'u')};font-size:11px">● ${p.status||'current'}</span>${p.deadline&&html`<span style="font-size:12px;color:${T.tu}">Deadline ${p.deadline}</span>`}</div>
         </div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button style="${B('o','s')}" onclick=${()=>go('buy')}>View as buyer →</button>
+        <button style="${B('g','s')}" onclick=${onLogout}>Sign out</button>
       </div>
     </div>
 
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px" class="g1">
-      ${[{l:'Views',v:p.views},{l:'Enquiries',v:p.enquiries},{l:'Offers',v:OFFERS.length,a:true},{l:'Inspections',v:insp.length},{l:'Top offer',v:`$${(top.amount/1000).toFixed(0)}k`,a:true}].map(s=>html`<div style="${CD};text-align:center;padding:16px 12px"><div class="sf" style="font-size:${s.a?24:22}px;font-weight:600;color:${s.a?T.a:T.t};letter-spacing:-.3px">${s.v}</div><div style="font-size:11px;color:${T.tu};font-weight:500;margin-top:4px;text-transform:uppercase;letter-spacing:.04em">${s.l}</div></div>`)}
+      ${[{l:'Views',v:data.stats.views},{l:'Enquiries',v:data.stats.enquiries},{l:'Offers',v:data.stats.offers,a:true},{l:'Inspections',v:data.stats.inspections},{l:'Top offer',v:top?`$${(top.amount/1000).toFixed(0)}k`:'—',a:true}].map(s=>html`<div style="${CD};text-align:center;padding:16px 12px"><div class="sf" style="font-size:${s.a?24:22}px;font-weight:600;color:${s.a?T.a:T.t};letter-spacing:-.3px">${s.v}</div><div style="font-size:11px;color:${T.tu};font-weight:500;margin-top:4px;text-transform:uppercase;letter-spacing:.04em">${s.l}</div></div>`)}
     </div>
 
-    ${!accepted?html`<div style="border-radius:16px;background:${T.k};padding:20px 24px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+    ${!top?html`<div style="${CD};margin-bottom:20px;text-align:center;color:${T.tu};font-size:13px">No offers yet. They'll appear here as soon as a buyer submits one.</div>`:!accepted?html`<div style="border-radius:16px;background:${T.k};padding:20px 24px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
       <div>
         <div style="font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">🏆 Top offer</div>
         <div class="sf" style="font-size:32px;font-weight:600;color:${T.al};letter-spacing:-.5px">$${top.amount.toLocaleString()}</div>
@@ -1115,25 +1235,25 @@ function Dash({go}){
       <div style="display:flex;gap:8px"><button style="${B('a','m')}" onclick=${()=>setAcceptM(true)}>Accept offer</button><button style="${B('w','m')}" onclick=${()=>setCounterM(true)}>Counter →</button></div>
     </div>`:html`<div style="border-radius:16px;background:#d4ede1;border:1px solid ${T.g};padding:20px 24px;margin-bottom:20px"><div style="font-size:14px;font-weight:600;color:${T.g};margin-bottom:4px">✓ Offer accepted — $${top.amount.toLocaleString()} from ${top.buyer}</div><div style="font-size:13px;color:${T.tm}">Your conveyancer will now prepare the contract. Settlement in ${top.settlement} days from signing.</div></div>`}
 
-    ${acceptM&&html`<div class="modal-bg" onclick=${()=>setAcceptM(false)}><div style="${CD};max-width:480px;width:100%" onclick=${e=>e.stopPropagation()}>
+    ${acceptM&&top&&html`<div class="modal-bg" onclick=${()=>setAcceptM(false)}><div style="${CD};max-width:480px;width:100%" onclick=${e=>e.stopPropagation()}>
       <h3 class="sf" style="font-size:22px;font-weight:600;margin-bottom:8px">Accept offer</h3>
       <p style="font-size:14px;color:${T.tm};line-height:1.6;margin-bottom:16px">Accepting <strong>$${top.amount.toLocaleString()}</strong> from ${top.buyer}, ${top.settlement}-day settlement.</p>
       <div style="background:${T.bw};border-radius:10px;padding:14px 16px;font-size:13px;color:${T.tm};margin-bottom:20px;line-height:1.7"><strong>What happens next:</strong><br/>1. Buyer notified immediately.<br/>2. Your conveyancer prepares the contract.<br/>3. Both parties sign. Buyer pays deposit (typically 10%).<br/>4. Settlement in ${top.settlement} days from signing.<br/>5. Keys and title transfer on settlement day.</div>
-      <div style="display:flex;gap:8px"><button style="${B('p','m')};flex:1" onclick=${()=>{setAccepted(true);setAcceptM(false);}}>Confirm acceptance</button><button style="${B('o','m')};flex:1" onclick=${()=>setAcceptM(false)}>Cancel</button></div>
+      <div style="display:flex;gap:8px"><button style="${B('p','m')};flex:1" onclick=${()=>acceptOffer(top.id)}>Confirm acceptance</button><button style="${B('o','m')};flex:1" onclick=${()=>setAcceptM(false)}>Cancel</button></div>
     </div></div>`}
 
-    ${counterM&&html`<div class="modal-bg" onclick=${()=>setCounterM(false)}><div style="${CD};max-width:480px;width:100%" onclick=${e=>e.stopPropagation()}>
+    ${counterM&&top&&html`<div class="modal-bg" onclick=${()=>setCounterM(false)}><div style="${CD};max-width:480px;width:100%" onclick=${e=>e.stopPropagation()}>
       <h3 class="sf" style="font-size:22px;font-weight:600;margin-bottom:8px">Counter offer</h3>
       <p style="font-size:14px;color:${T.tm};line-height:1.6;margin-bottom:20px">Send a counter to ${top.buyer}. They will be notified immediately.</p>
       <div style="margin-bottom:20px"><label style="${LB}">Your counter amount</label><div style="position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:${T.tu};font-size:15px">$</span><input style="${IS};padding-left:28px" type="number" value=${counterAmt} onInput=${e=>setCounterAmt(e.target.value)} placeholder="860,000"/></div></div>
-      <div style="display:flex;gap:8px"><button style="${B('p','m')};flex:1" onclick=${()=>setCounterM(false)}>Send counter offer</button><button style="${B('o','m')};flex:1" onclick=${()=>setCounterM(false)}>Cancel</button></div>
+      <div style="display:flex;gap:8px"><button style="${B('p','m')};flex:1" onclick=${()=>sendCounter(top.id)}>Send counter offer</button><button style="${B('o','m')};flex:1" onclick=${()=>setCounterM(false)}>Cancel</button></div>
     </div></div>`}
 
 
     <div style="${CD};margin-bottom:20px;overflow-x:auto">
       <div style="font-size:12px;font-weight:600;color:${T.tu};text-transform:uppercase;letter-spacing:.05em;margin-bottom:16px">Transaction progress</div>
       <div style="display:flex;align-items:center;min-width:600px">
-        ${STAGES.map((stage,i)=>{const done=i<3,active=i===3;return html`<div style="display:flex;align-items:center;flex:0 0 auto">
+        ${STAGES.map((stage,i)=>{const stageIdx=accepted?4:offers.length?3:insp.length?2:enquiries.length?1:0;const done=i<stageIdx,active=i===stageIdx;return html`<div style="display:flex;align-items:center;flex:0 0 auto">
           <div style="display:flex;flex-direction:column;align-items:center;width:72px">
             <div style="width:32px;height:32px;border-radius:50%;border:2px solid ${done||active?T.k:T.bd};background:${done?T.k:active?T.bw:'transparent'};display:flex;align-items:center;justify-content:center;margin-bottom:6px">
               ${done?html`<span style="color:#fff;font-size:12px">✓</span>`:html`<div style="width:8px;height:8px;border-radius:50%;background:${active?T.k:T.bd}"></div>`}
@@ -1150,8 +1270,9 @@ function Dash({go}){
     </div>
 
     ${tab==='offers'&&html`<div>
-      <div style="font-size:13px;color:${T.tu};margin-bottom:12px">${OFFERS.length} offers received. All buyers can see each other's offers.</div>
-      ${OFFERS.map((o,i)=>html`<div style="display:flex;gap:12px;padding:16px;border-radius:12px;margin-bottom:8px;background:${i===0?T.bg:T.w};border:1px solid ${i===0?T.bdd:T.bd};align-items:center">
+      <div style="font-size:13px;color:${T.tu};margin-bottom:12px">${offers.length} offer${offers.length===1?'':'s'} received. All buyers can see each other's offers.</div>
+      ${!offers.length&&html`<div style="${CD};text-align:center;color:${T.tu};font-size:13px">No offers yet.</div>`}
+      ${offers.map((o,i)=>html`<div style="display:flex;gap:12px;padding:16px;border-radius:12px;margin-bottom:8px;background:${i===0?T.bg:T.w};border:1px solid ${i===0?T.bdd:T.bd};align-items:center">
         <div style="width:32px;text-align:center;font-size:18px">${i===0?'🏆':i===1?'🥈':''}</div>
         <div style="flex:1">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
@@ -1159,6 +1280,7 @@ function Dash({go}){
             ${o.finance&&html`<span style="${P('u')};font-size:11px">Finance</span>`}
             ${o.building&&html`<span style="${P('u')};font-size:11px">B&P</span>`}
             ${o.verified&&html`<span style="${P('g')};font-size:11px">✓ Verified</span>`}
+            ${o.status&&o.status!=='open'&&html`<span style="${P(o.status==='accepted'?'g':'u')};font-size:11px">${o.status}</span>`}
           </div>
           <div style="font-size:12px;color:${T.tu}">${o.buyer} · ${o.time} · ${o.settlement}-day settlement</div>
         </div>
@@ -1166,13 +1288,14 @@ function Dash({go}){
     </div>`}
 
     ${tab==='inspections'&&html`<div>
+      ${!insp.length&&html`<div style="${CD};text-align:center;color:${T.tu};font-size:13px;margin-bottom:12px">No inspections booked yet.</div>`}
       ${insp.map(i=>html`<div style="${CD};margin-bottom:10px">
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-          <div style="flex:1"><div style="font-weight:600;font-size:14px;margin-bottom:2px">${i.buyer}</div><div style="font-size:12px;color:${T.tu}">${i.date} at ${i.time} · ${i.email}</div></div>
-          <span style="${P(i.type==='agent'?'w':'u')};font-size:11px">${i.type==='agent'?'Human agent $99':'Self'}</span>
-          ${i.status==='pending'?html`<button style="${B('p','s')}" onclick=${async()=>{setInsp(ins=>ins.map(x=>x.id===i.id?{...x,status:'confirmed'}:x));if(i.type==='agent')fetch('/api/inspections',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agentName:'Panel agent',agentEmail:i.email,listingAddress:p.address,date:i.date,time:i.time,buyerName:i.buyer})}).catch(()=>{});}}>Approve</button>`:html`<span style="${P('g')};font-size:11px">Confirmed</span>`}
+          <div style="flex:1"><div style="font-weight:600;font-size:14px;margin-bottom:2px">${i.buyerName||i.buyer}</div><div style="font-size:12px;color:${T.tu}">${i.date} at ${i.time} · ${i.agentEmail||i.email||''}</div></div>
+          <span style="${P('u')};font-size:11px">${i.agentName?i.agentName+' · $99':'Self'}</span>
+          <span style="${P('g')};font-size:11px">${i.status||'confirmed'}</span>
         </div>
-        ${i.status==='confirmed'&&i.type==='agent'&&html`<div style="margin-top:12px;padding-top:12px;border-top:1px solid ${T.bd};display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        ${i.status==='confirmed'&&i.agentName&&html`<div style="margin-top:12px;padding-top:12px;border-top:1px solid ${T.bd};display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
           <span style="font-size:12px;color:${notices[i.id]?T.g:T.tu}">${notices[i.id]?'✓ Entry notice sent':'Entry notice not yet sent'}</span>
           ${!notices[i.id]&&html`<button style="${B('o','s')}" onclick=${()=>setNotices(n=>({...n,[i.id]:true}))}>Send entry notice →</button>`}
         </div>`}
@@ -1181,7 +1304,8 @@ function Dash({go}){
     </div>`}
 
     ${tab==='enquiries'&&html`<div>
-      <div style="font-size:13px;color:${T.tu};margin-bottom:12px">${enquiries.length} enquiries received. AI handles initial responses automatically.</div>
+      <div style="font-size:13px;color:${T.tu};margin-bottom:12px">${enquiries.length} enquir${enquiries.length===1?'y':'ies'} received. AI handles initial responses automatically.</div>
+      ${!enquiries.length&&html`<div style="${CD};text-align:center;color:${T.tu};font-size:13px">No enquiries yet.</div>`}
       ${enquiries.map(e=>html`<div style="${CD};margin-bottom:10px">
         <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap">
           <div style="flex:1">
@@ -1224,7 +1348,7 @@ function Dash({go}){
       <div style="${CD};margin-top:12px">
         <div style="font-size:14px;font-weight:600;margin-bottom:12px">Listing preview</div>
         <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px">
-          ${[['Address',p.address],['Type',p.type],['Layout',p.beds+'bd · '+p.baths+'ba · '+p.cars+'car'],['Floor','Level '+p.floor],['Price guide','$'+p.priceGuide.toLocaleString()]].map(([l,v])=>html`<div><div style="font-size:10px;color:${T.tu};text-transform:uppercase;font-weight:500">${l}</div><div style="font-size:13px;font-weight:500">${v}</div></div>`)}
+          ${[['Address',p.address],['Type',p.type],['Layout',(p.beds||0)+'bd · '+(p.baths||0)+'ba · '+(p.cars||0)+'car'],['Floor',p.floor?p.floor+'m²':'N/A'],['Price guide',p.priceView||p.price||'N/A']].map(([l,v])=>html`<div><div style="font-size:10px;color:${T.tu};text-transform:uppercase;font-weight:500">${l}</div><div style="font-size:13px;font-weight:500">${v}</div></div>`)}
         </div>
         ${listingDesc&&html`<div style="background:${T.bg};border-radius:10px;padding:16px;font-size:14px;color:${T.tm};line-height:1.75;border:1px solid ${T.bd}">${listingDesc}</div>`}
       </div>
@@ -1252,7 +1376,7 @@ function Dash({go}){
     ${tab==='analytics'&&html`<div>
       <div style="font-size:13px;color:${T.tu};margin-bottom:16px">Listing performance over the last 14 days.</div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px" class="g1">
-        ${[{l:'Total views',v:p.views,d:'+38 this week'},{l:'Unique visitors',v:287,d:'+22 this week'},{l:'Enquiries',v:p.enquiries,d:'68% response rate'},{l:'Avg. time on listing',v:'2m 14s',d:'Above average'}].map(s=>html`<div style="${CD};text-align:center;padding:16px 12px"><div class="sf" style="font-size:22px;font-weight:600;color:${T.t};letter-spacing:-.3px">${s.v}</div><div style="font-size:11px;color:${T.tu};font-weight:500;margin-top:4px;text-transform:uppercase;letter-spacing:.04em">${s.l}</div><div style="font-size:11px;color:${T.g};margin-top:4px">${s.d}</div></div>`)}
+        ${[{l:'Total views',v:data.stats.views,d:''},{l:'Enquiries',v:data.stats.enquiries,d:''},{l:'Offers',v:data.stats.offers,d:''},{l:'Inspections',v:data.stats.inspections,d:''}].map(s=>html`<div style="${CD};text-align:center;padding:16px 12px"><div class="sf" style="font-size:22px;font-weight:600;color:${T.t};letter-spacing:-.3px">${s.v}</div><div style="font-size:11px;color:${T.tu};font-weight:500;margin-top:4px;text-transform:uppercase;letter-spacing:.04em">${s.l}</div></div>`)}
       </div>
       <div style="${CD}">
         <div style="font-size:12px;font-weight:600;color:${T.tu};text-transform:uppercase;letter-spacing:.05em;margin-bottom:16px">Traffic sources</div>
@@ -1260,10 +1384,21 @@ function Dash({go}){
       </div>
     </div>`}
 
-    ${tab==='settings'&&html`<div style="${CD}">
+    ${tab==='settings'&&html`<div>
+      <div style="${CD};margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+          <div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:2px">Photography</div>
+            <div style="font-size:12px;color:${T.tu}">${photoShoot.status==='not_booked'?'Not yet requested.':photoShoot.status==='requested'?'Requested — our team will be in touch to schedule.':photoShoot.status==='booked'?`Booked${photoShoot.date?' for '+photoShoot.date:''}.`:'Completed — photos are ready.'}</div>
+          </div>
+          <span style="${P(photoShoot.status==='completed'?'g':photoShoot.status==='booked'?'b':photoShoot.status==='requested'?'o':'u')};font-size:11px">${photoShoot.status.replace('_',' ')}</span>
+        </div>
+        ${photoShoot.status==='not_booked'&&html`<button style="${B('p','s')};opacity:${photoBusy?.6:1}" disabled=${photoBusy} onclick=${requestPhotoshoot}>${photoBusy?'Requesting…':'Request photography →'}</button>`}
+      </div>
+      <div style="${CD}">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-        <div><label style="${LB}">Offer deadline</label><input style="${IS}" type="date" value="2026-08-30"/></div>
-        <div><label style="${LB}">Price guide</label><input style="${IS}" value="$720,000"/></div>
+        <div><label style="${LB}">Offer deadline</label><input style="${IS}" type="date" value=${p.deadline||''}/></div>
+        <div><label style="${LB}">Price guide</label><input style="${IS}" value=${p.priceView||p.price||''}/></div>
       </div>
       <div style="margin-bottom:16px"><label style="${LB}">Your conveyancer</label>
         <input style="${IS};margin-bottom:8px" value=${conveyancer.name} onInput=${e=>setConveyancer(c=>({...c,name:e.target.value}))} placeholder="Conveyancer or solicitor name"/>
@@ -1274,6 +1409,7 @@ function Dash({go}){
         <div style="font-size:12px;color:${T.tu};margin-top:6px">Nominate your own conveyancer or solicitor. They'll be contacted when a contract is ready.</div>
       </div>
       <div style="display:flex;gap:8px"><button style="${B('p','m')}">Save changes</button><button style="${B('o','m')}">Withdraw listing</button></div>
+      </div>
     </div>`}
   </div>`;}
 

@@ -45,6 +45,8 @@
 //     sellerEmail:    string
 //     sellerPhone:    string
 //     stripeSessionId: string   // traceability
+//     views:          number    // listing page views, used by seller dashboard stats
+//     photoShoot:     { status: "not_booked"|"requested"|"booked"|"completed", date: string|null, notes: string }
 //   }
 
 const { KV_REST_API_URL, KV_REST_API_TOKEN, LISTING_API_SECRET } = process.env;
@@ -101,6 +103,7 @@ async function handleCreate(req, res) {
     id,
     status: data.status || 'current',
     createdAt: data.createdAt || new Date().toISOString(),
+    photoShoot: data.photoShoot || { status: 'not_booked', date: null, notes: '' },
   };
 
   // Save listing

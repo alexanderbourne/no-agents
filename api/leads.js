@@ -15,7 +15,7 @@ async function kvSet(key, value) {
   await fetch(`${KV_REST_API_URL}/set/${encodeURIComponent(key)}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${KV_REST_API_TOKEN}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ value }),
+    body: value,
   });
 }
 
@@ -41,7 +41,12 @@ export default async function handler(req, res) {
   }
 
   const idsRaw = await kvGet('leads:index');
-  const ids = idsRaw ? JSON.parse(idsRaw) : [];
+  let ids = [];
+  if (Array.isArray(idsRaw)) {
+    ids = idsRaw;
+  } else if (typeof idsRaw === 'string' && idsRaw) {
+    try { const p = JSON.parse(idsRaw); if (Array.isArray(p)) ids = p; } catch { /* leave [] */ }
+  }
 
   const leads = (await Promise.all(
     ids.map(async id => {

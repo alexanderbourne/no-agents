@@ -1,11 +1,4 @@
-// api/verify-sms-code.js
-// Checks a submitted OTP against the one stored in KV for that phone number.
-// Deletes the code on successful match (one-time use).
-//
-// POST { phone, code }  →  { ok: true } or 400/401
-//
-// Required env vars:
-//   KV_REST_API_URL, KV_REST_API_TOKEN
+import { createHmac } from 'crypto';
 
 function normalisePhone(raw) {
   const digits = raw.replace(/\D/g, '');
@@ -14,43 +7,29 @@ function normalisePhone(raw) {
   return raw.trim();
 }
 
-async function kvGet(key) {
-  const { KV_REST_API_URL: url, KV_REST_API_TOKEN: token } = process.env;
-  if (!url || !token) return null;
-  const r = await fetch(`${url}/get/${encodeURIComponent(key)}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!r.ok) return null;
-  const { result } = await r.json();
-  return result ?? null;
-}
-
-async function kvDel(key) {
-  const { KV_REST_API_URL: url, KV_REST_API_TOKEN: token } = process.env;
-  if (!url || !token) return;
-  await fetch(`${url}/del/${encodeURIComponent(key)}`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
-  });
+function makeToken(code, phone, ts) {
+  const secret = process.env.ADMIN_PASSWORD || 'no-agents-sms-secret';
+  return createHmac('sha256', secret).update(`${code}:${phone}:${ts}`).digest('hex').slice(0, 16);
 }
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { phone, code } = req.body || {};
-  if (!phone || !code) return res.status(400).json({ error: 'phone and code are required' });
-
-  const to = normalisePhone(phone);
-  const stored = await kvGet(`sms:${to}`);
-
-  if (!stored) {
-    return res.status(401).json({ error: 'Code expired or not found. Please resend.' });
+  const { phone, code, token, ts } = req.body || {};
+  if (!phone || !code || !token || !ts) {
+    return res.status(400).json({ error: 'phone, code, token and ts are required' });
   }
 
-  if (stored !== code.trim()) {
+  const to = normalisePhone(phone);
+
+  if (Date.now() - Number(ts) > 10 * 60 * 1000) {
+    return res.status(401).json({ error: 'Code expired. Please resend.' });
+  }
+
+  const expected = makeToken(code.trim(), to, ts);
+  if (expected !== token) {
     return res.status(401).json({ error: 'Incorrect code.' });
   }
 
-  await kvDel(`sms:${to}`);
   return res.status(200).json({ ok: true });
 }

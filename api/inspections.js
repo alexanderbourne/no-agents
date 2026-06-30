@@ -33,7 +33,7 @@ async function kvSet(key, value) {
   const r = await fetch(`${url}/set/${encodeURIComponent(key)}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ value: JSON.stringify(value) }),
+    body: JSON.stringify(value),
   });
   return r.ok;
 }
@@ -68,7 +68,12 @@ export default async function handler(req, res) {
       await kvSet(`inspection-req:${id}`, request);
 
       const existingRaw = await kvGet('inspections:available');
-      const ids = existingRaw ? JSON.parse(existingRaw) : [];
+      let ids = [];
+      if (Array.isArray(existingRaw)) {
+        ids = existingRaw;
+      } else if (typeof existingRaw === 'string' && existingRaw) {
+        try { const p = JSON.parse(existingRaw); if (Array.isArray(p)) ids = p; } catch { /* leave [] */ }
+      }
       ids.push(id);
       await kvSet('inspections:available', ids);
 
@@ -113,7 +118,7 @@ export default async function handler(req, res) {
     }
 
     // POST — record a confirmed inspection (from Dash)
-    const { agentId, agentName, agentEmail, listingAddress, date, time, buyerName } = req.body || {};
+    const { agentId, agentName, agentEmail, listingAddress, listingId, date, time, buyerName } = req.body || {};
 
     if (!agentName || !listingAddress || !date) {
       return res.status(400).json({ error: 'agentName, listingAddress and date are required' });
@@ -126,6 +131,7 @@ export default async function handler(req, res) {
       agentName:       agentName.trim(),
       agentEmail:      (agentEmail || '').trim(),
       listingAddress:  listingAddress.trim(),
+      listingId:       listingId || null,
       date,
       time:            time || '',
       buyerName:       (buyerName || '').trim(),
@@ -137,7 +143,12 @@ export default async function handler(req, res) {
 
     await kvSet(`inspection:${id}`, inspection);
     const existingRaw = await kvGet('inspections:all');
-    const ids = existingRaw ? JSON.parse(existingRaw) : [];
+    let ids = [];
+    if (Array.isArray(existingRaw)) {
+      ids = existingRaw;
+    } else if (typeof existingRaw === 'string' && existingRaw) {
+      try { const p = JSON.parse(existingRaw); if (Array.isArray(p)) ids = p; } catch { /* leave [] */ }
+    }
     ids.push(id);
     await kvSet('inspections:all', ids);
 

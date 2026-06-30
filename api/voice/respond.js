@@ -11,7 +11,7 @@ async function kvSet(key, value) {
   await fetch(`${KV_REST_API_URL}/set/${encodeURIComponent(key)}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${KV_REST_API_TOKEN}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ value }),
+    body: value,
   }).catch(() => {});
 }
 
@@ -124,10 +124,7 @@ export default async function handler(req, res) {
 
     if (isEnding) {
       twiml.say({ voice: VOICE }, ariResponse);
-      twiml.redirect(
-        { method: 'POST' },
-        `${BASE}/api/voice/end?history=${encodedHistory}&caller=${encodeURIComponent(callerNumber)}`
-      );
+      twiml.redirect({ method: 'POST' }, `${BASE}/api/voice/end`);
     } else {
       const gather = twiml.gather({
         input: 'speech',

@@ -34,7 +34,7 @@ async function kvSet(key, value) {
   const r = await fetch(`${url}/set/${encodeURIComponent(key)}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ value: JSON.stringify(value) }),
+    body: JSON.stringify(value),
   });
   return r.ok;
 }
