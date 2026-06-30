@@ -210,7 +210,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 <body>
 <div id="app"></div>
 <script type="module">
-import{html,render,useState,useEffect}from'https://unpkg.com/htm/preact/standalone.module.js';
+import{html,render,useState,useEffect,useRef}from'https://unpkg.com/htm/preact/standalone.module.js';
 
 const SK='pk_live_51TaFXi94AreLVHIU2ybkPujIIL0JY7PZGiEqvQurwn3Vc5lrFRYzYEhb40XCXZF8468K2jcodH29mwGlxi1VPUtx00HPYfV5YM';
 const T={bg:'#faf9f6',bw:'#f5f0e8',w:'#ffffff',bd:'#e5e0d6',bdd:'#d0c8b8',t:'#1a1a1a',tm:'#4a4540',tu:'#8a8078',a:'#c8973a',al:'#e8d5b0',ad:'#a07828',r:'#c0392b',g:'#2d7d52',k:'#1a1a1a'};
@@ -262,6 +262,38 @@ async function doStripe(meta={}){
 }
 
 function Logo(){return html`<div style="width:36px;height:36px;border-radius:9px;background:${T.k};display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="sf" style="color:${T.al};font-size:14px;font-weight:700;letter-spacing:-.5px;line-height:1">na</span></div>`;}
+
+function SignaturePad({onChange}){
+  const canvasRef=useRef(null);
+  const drawing=useRef(false);
+  const last=useRef(null);
+  const hasMark=useRef(false);
+  const pos=e=>{
+    const c=canvasRef.current,r=c.getBoundingClientRect();
+    const t=e.touches&&e.touches[0]?e.touches[0]:e;
+    return [(t.clientX-r.left)*(c.width/r.width),(t.clientY-r.top)*(c.height/r.height)];
+  };
+  const start=e=>{e.preventDefault();drawing.current=true;last.current=pos(e);};
+  const move=e=>{
+    if(!drawing.current)return;e.preventDefault();
+    const c=canvasRef.current,ctx=c.getContext('2d'),p=pos(e);
+    ctx.strokeStyle='#1a1a1a';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.lineJoin='round';
+    ctx.beginPath();ctx.moveTo(last.current[0],last.current[1]);ctx.lineTo(p[0],p[1]);ctx.stroke();
+    last.current=p;hasMark.current=true;
+  };
+  const end=()=>{if(!drawing.current)return;drawing.current=false;if(hasMark.current)onChange(canvasRef.current.toDataURL('image/png'));};
+  const clear=()=>{const c=canvasRef.current,ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);hasMark.current=false;onChange(null);};
+  return html`<div style="margin-bottom:14px">
+    <label style="${LB}">Sign here</label>
+    <canvas ref=${canvasRef} width="500" height="150" style="width:100%;height:120px;display:block;border:1.5px dashed ${T.bd};border-radius:10px;background:#fff;touch-action:none;cursor:crosshair"
+      onMouseDown=${start} onMouseMove=${move} onMouseUp=${end} onMouseLeave=${end}
+      onTouchStart=${start} onTouchMove=${move} onTouchEnd=${end}></canvas>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+      <span style="font-size:11px;color:${T.tu}">Draw your signature with mouse or finger</span>
+      <button type="button" onclick=${clear} style="${B('g','s')}">Clear</button>
+    </div>
+  </div>`;
+}
 function Bdg({st=''}){return html`<div style="display:flex;gap:8px;align-items:center;${st}"><span style="${P('b')};font-weight:700;border:1px solid #bbdefb;font-size:11px">domain.com.au</span></div>`;}
 
 function Nav({v,go,gl}){
@@ -1199,10 +1231,12 @@ function SellerDash({go,token,listingId,onLogout}){
   const[form6M,setForm6M]=useState(false);
   const[signName,setSignName]=useState('');
   const[signAgree,setSignAgree]=useState(false);
+  const[signImg,setSignImg]=useState(null);
   const[signing,setSigning]=useState(false);
   const[contractM,setContractM]=useState(false);
   const[csignName,setCsignName]=useState('');
   const[csignAgree,setCsignAgree]=useState(false);
+  const[csignImg,setCsignImg]=useState(null);
   const[csigning,setCsigning]=useState(false);
   const[conveyancer,setConveyancer]=useState({name:'',email:'',phone:''});
   const[listingDesc,setListingDesc]=useState('');
@@ -1241,20 +1275,20 @@ function SellerDash({go,token,listingId,onLogout}){
   };
 
   const signForm6=async()=>{
-    if(!signAgree||!signName.trim())return;
+    if(!signAgree||!signName.trim()||!signImg)return;
     setSigning(true);
     try{
-      const r=await fetch(`/api/seller-portal?listingId=${encodeURIComponent(listingId)}&action=sign-form6`,{method:'POST',headers:{'Content-Type':'application/json','x-seller-token':token},body:JSON.stringify({signedByName:signName.trim()})});
+      const r=await fetch(`/api/seller-portal?listingId=${encodeURIComponent(listingId)}&action=sign-form6`,{method:'POST',headers:{'Content-Type':'application/json','x-seller-token':token},body:JSON.stringify({signedByName:signName.trim(),signatureImage:signImg})});
       if(r.ok){const d=await r.json();setData(prev=>({...prev,documents:{...prev.documents,form6:d.form6}}));setForm6M(false);}
     }catch{}
     setSigning(false);
   };
 
   const signContract=async()=>{
-    if(!csignAgree||!csignName.trim())return;
+    if(!csignAgree||!csignName.trim()||!csignImg)return;
     setCsigning(true);
     try{
-      const r=await fetch(`/api/seller-portal?listingId=${encodeURIComponent(listingId)}&action=sign-contract`,{method:'POST',headers:{'Content-Type':'application/json','x-seller-token':token},body:JSON.stringify({signedByName:csignName.trim()})});
+      const r=await fetch(`/api/seller-portal?listingId=${encodeURIComponent(listingId)}&action=sign-contract`,{method:'POST',headers:{'Content-Type':'application/json','x-seller-token':token},body:JSON.stringify({signedByName:csignName.trim(),signatureImage:csignImg})});
       if(r.ok){const d=await r.json();setData(prev=>({...prev,contract:d.contract}));setContractM(false);}
     }catch{}
     setCsigning(false);
@@ -1272,12 +1306,14 @@ function SellerDash({go,token,listingId,onLogout}){
   const photoShoot=data.photoShoot||{status:'not_booked',date:null};
   const docState=data.documents||{contractOfSale:{status:'pending',fileUrl:null},form6:{status:'pending',fileUrl:null,signedAt:null,signedByName:null}};
   const contract=data.contract||null;
-  const contractStatus=contract?(contract.sellerSigned&&contract.buyerSigned?'executed':contract.sellerSigned?'awaiting_buyer':'sign_required'):null;
+  // Buyer signs first, then seller. Until the buyer has signed, the seller has nothing to do yet.
+  const contractStatus=contract?(contract.sellerSigned&&contract.buyerSigned?'executed':contract.buyerSigned?'sign_required':'awaiting_buyer'):null;
   const docs=[
     contract
       ?{id:'contract',name:'Contract of Sale',kind:'contract',status:contractStatus,contract}
-      :{id:'contract',name:'Contract of Sale (Draft)',kind:'agent',status:docState.contractOfSale.status,fileUrl:docState.contractOfSale.fileUrl},
+      :{id:'contract',name:'Contract of Sale',kind:'agent',status:docState.contractOfSale.status,fileUrl:docState.contractOfSale.fileUrl},
     {id:'form6',name:'Form 6 — Exclusive Sales Agency Agreement',kind:'sign',status:docState.form6.status,signedAt:docState.form6.signedAt,signedByName:docState.form6.signedByName,fileUrl:docState.form6.fileUrl},
+    {id:'property_disclosure',name:'Property Disclosure Statement',kind:'seller'},
     {id:'body_corp',name:'Body Corporate Records',kind:'seller'},
     {id:'bp_report',name:'Building & Pest Report',kind:'buyer'},
     {id:'settlement',name:'Settlement Statement',kind:'conveyancer'},
@@ -1433,7 +1469,7 @@ function SellerDash({go,token,listingId,onLogout}){
     </div>`}
 
     ${tab==='documents'&&html`<div>
-      <div style="font-size:13px;color:${T.tu};margin-bottom:12px">Your contract is prepared and provided by us. Some documents are provided by your buyer or conveyancer and will appear here automatically once submitted.</div>
+      <div style="font-size:13px;color:${T.tu};margin-bottom:12px">Your Contract of Sale is auto-populated as soon as you accept an offer, then sent to the buyer to sign first, then to you. Some documents are provided by your buyer or conveyancer and will appear here automatically once submitted.</div>
       ${actionDocs.length>0&&html`<div style="border-radius:12px;background:#fff3e0;border:1px solid #ffe0b2;padding:14px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start">
         <span style="flex-shrink:0;font-size:16px">✍️</span>
         <div>
@@ -1448,8 +1484,8 @@ function SellerDash({go,token,listingId,onLogout}){
             <div>
               <div style="font-weight:600;font-size:14px;margin-bottom:2px">${d.name}</div>
               <div style="font-size:12px;color:${T.tu}">
-                ${d.kind==='contract'?(d.status==='executed'?`Fully executed — ${d.contract.sellerSigned.signedByName} & ${d.contract.buyerSigned.signedByName}`:d.status==='awaiting_buyer'?`You signed — awaiting ${d.contract.buyerName}`:`$${d.contract.amount.toLocaleString()} from ${d.contract.buyerName} — your signature is required`):
-                  d.kind==='agent'?(d.status==='provided'?'Provided by your agent':'Provided by your agent — preparing'):
+                ${d.kind==='contract'?(d.status==='executed'?`Fully executed — ${d.contract.sellerSigned.signedByName} & ${d.contract.buyerSigned.signedByName}`:d.status==='awaiting_buyer'?`Sent to ${d.contract.buyerName} to sign first`:`${d.contract.buyerName} has signed — your signature is required`):
+                  d.kind==='agent'?'Auto-generated as soon as you accept an offer':
                   d.kind==='sign'?(d.status==='signed'?`Signed by ${d.signedByName} on ${new Date(d.signedAt).toLocaleDateString('en-AU')}`:'Your signature is required'):
                   docFiles[d.id]?docFiles[d.id].name:
                   d.kind==='seller'?'Upload required':
@@ -1458,9 +1494,9 @@ function SellerDash({go,token,listingId,onLogout}){
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
-            ${d.kind==='contract'?(d.status==='executed'?html`<span style="${P('g')};font-size:11px">✓ Executed</span>`:d.status==='awaiting_buyer'?html`<span style="${P('u')};font-size:11px">Awaiting buyer</span>`:html`<button style="${B('p','s')}" onclick=${()=>{setCsignName(p.sellerName||'');setCsignAgree(false);setContractM(true);}}>Review & sign →</button>`):
+            ${d.kind==='contract'?(d.status==='executed'?html`<span style="${P('g')};font-size:11px">✓ Executed</span>`:d.status==='awaiting_buyer'?html`<span style="${P('u')};font-size:11px">Awaiting buyer</span>`:html`<button style="${B('p','s')}" onclick=${()=>{setCsignName(p.sellerName||'');setCsignAgree(false);setCsignImg(null);setContractM(true);}}>Review & sign →</button>`):
               d.kind==='agent'?(d.status==='provided'?html`<span style="${P('g')};font-size:11px">✓ Provided</span>`:html`<span style="${P('w')};font-size:11px">Awaiting</span>`):
-              d.kind==='sign'?(d.status==='signed'?html`<span style="${P('g')};font-size:11px">✓ Signed</span>`:html`<button style="${B('p','s')}" onclick=${()=>{setSignName(p.sellerName||'');setSignAgree(false);setForm6M(true);}}>Review & sign →</button>`):
+              d.kind==='sign'?(d.status==='signed'?html`<span style="${P('g')};font-size:11px">✓ Signed</span>`:html`<button style="${B('p','s')}" onclick=${()=>{setSignName(p.sellerName||'');setSignAgree(false);setSignImg(null);setForm6M(true);}}>Review & sign →</button>`):
               docFiles[d.id]?html`<span style="${P('g')};font-size:11px">✓ Uploaded</span>`:d.kind==='seller'?html`<label style="${B('o','s')};cursor:pointer"><input type="file" accept=".pdf,.doc,.docx,image/*" style="display:none" onChange=${e=>{if(e.target.files[0])setDocFiles(f=>({...f,[d.id]:e.target.files[0]}))}}/>Upload →</label>`:html`<span style="${P('w')};font-size:11px">Awaiting</span>`}
           </div>
         </div>
@@ -1474,9 +1510,10 @@ function SellerDash({go,token,listingId,onLogout}){
       <div style="background:${T.bw};border-radius:10px;padding:14px 16px;font-size:12px;color:${T.tm};margin-bottom:16px;line-height:1.7;max-height:160px;overflow-y:auto">
         This Form 6 appointment authorises No Agents Pty Ltd to market and sell the above property on your behalf for the duration of the listing. It confirms the agreed fee structure, your obligations as seller, and your authority to instruct us in line with the Property Occupations Act 2014 (QLD). A copy will be available for download here once countersigned by our office.
       </div>
-      <div style="margin-bottom:14px"><label style="${LB}">Your full legal name (as signature)</label><input style="${IS}" value=${signName} onInput=${e=>setSignName(e.target.value)} placeholder="Full name"/></div>
-      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:${T.tm};margin-bottom:20px;cursor:pointer"><input type="checkbox" checked=${signAgree} onChange=${e=>setSignAgree(e.target.checked)} style="margin-top:3px"/>I have read and agree to the Form 6 Exclusive Sales Agency Agreement and confirm the above is my legal signature.</label>
-      <div style="display:flex;gap:8px"><button style="${B('p','m')};flex:1;opacity:${signAgree&&signName.trim()&&!signing?1:.5}" disabled=${!signAgree||!signName.trim()||signing} onclick=${signForm6}>${signing?'Signing…':'Sign & submit →'}</button><button style="${B('o','m')};flex:1" onclick=${()=>setForm6M(false)}>Cancel</button></div>
+      <div style="margin-bottom:14px"><label style="${LB}">Your full legal name</label><input style="${IS}" value=${signName} onInput=${e=>setSignName(e.target.value)} placeholder="Full name"/></div>
+      <${SignaturePad} onChange=${setSignImg}/>
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:${T.tm};margin-bottom:20px;cursor:pointer"><input type="checkbox" checked=${signAgree} onChange=${e=>setSignAgree(e.target.checked)} style="margin-top:3px"/>I have read and agree to the Form 6 Exclusive Sales Agency Agreement and confirm the above signature is mine.</label>
+      <div style="display:flex;gap:8px"><button style="${B('p','m')};flex:1;opacity:${signAgree&&signName.trim()&&signImg&&!signing?1:.5}" disabled=${!signAgree||!signName.trim()||!signImg||signing} onclick=${signForm6}>${signing?'Signing…':'Sign & submit →'}</button><button style="${B('o','m')};flex:1" onclick=${()=>setForm6M(false)}>Cancel</button></div>
     </div></div>`}
 
     ${contractM&&contract&&html`<div class="modal-bg" onclick=${()=>setContractM(false)}><div style="${CD};max-width:560px;width:100%;max-height:85vh;overflow-y:auto" onclick=${e=>e.stopPropagation()}>
@@ -1493,9 +1530,10 @@ function SellerDash({go,token,listingId,onLogout}){
         ${contract.building&&html`<div style="display:flex;justify-content:space-between"><span>B&P condition</span><strong style="color:${T.t}">${contract.buildingDays} days</strong></div>`}
         ${contract.conditions&&html`<div style="margin-top:6px"><span>Other conditions</span><div style="color:${T.t};margin-top:2px">${contract.conditions}</div></div>`}
       </div>
-      <div style="margin-bottom:14px"><label style="${LB}">Your full legal name (as signature)</label><input style="${IS}" value=${csignName} onInput=${e=>setCsignName(e.target.value)} placeholder="Full name"/></div>
-      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:${T.tm};margin-bottom:20px;cursor:pointer"><input type="checkbox" checked=${csignAgree} onChange=${e=>setCsignAgree(e.target.checked)} style="margin-top:3px"/>I have read and agree to the above terms and confirm the above is my legal signature on this Contract of Sale.</label>
-      <div style="display:flex;gap:8px"><button style="${B('p','m')};flex:1;opacity:${csignAgree&&csignName.trim()&&!csigning?1:.5}" disabled=${!csignAgree||!csignName.trim()||csigning} onclick=${signContract}>${csigning?'Signing…':'Sign & submit →'}</button><button style="${B('o','m')};flex:1" onclick=${()=>setContractM(false)}>Cancel</button></div>
+      <div style="margin-bottom:14px"><label style="${LB}">Your full legal name</label><input style="${IS}" value=${csignName} onInput=${e=>setCsignName(e.target.value)} placeholder="Full name"/></div>
+      <${SignaturePad} onChange=${setCsignImg}/>
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:${T.tm};margin-bottom:20px;cursor:pointer"><input type="checkbox" checked=${csignAgree} onChange=${e=>setCsignAgree(e.target.checked)} style="margin-top:3px"/>I have read and agree to the above terms and confirm the above signature is mine on this Contract of Sale.</label>
+      <div style="display:flex;gap:8px"><button style="${B('p','m')};flex:1;opacity:${csignAgree&&csignName.trim()&&csignImg&&!csigning?1:.5}" disabled=${!csignAgree||!csignName.trim()||!csignImg||csigning} onclick=${signContract}>${csigning?'Signing…':'Sign & submit →'}</button><button style="${B('o','m')};flex:1" onclick=${()=>setContractM(false)}>Cancel</button></div>
     </div></div>`}
 
     ${tab==='analytics'&&html`<div>
@@ -2048,6 +2086,7 @@ function ContractSign(){
   const[data,setData]=useState(null);
   const[name,setName]=useState('');
   const[agree,setAgree]=useState(false);
+  const[sigImg,setSigImg]=useState(null);
   const[signing,setSigning]=useState(false);
 
   useEffect(()=>{
@@ -2059,10 +2098,10 @@ function ContractSign(){
   },[]);
 
   const sign=async()=>{
-    if(!agree||!name.trim())return;
+    if(!agree||!name.trim()||!sigImg)return;
     setSigning(true);
     try{
-      const r=await fetch(`/api/contract?listingId=${encodeURIComponent(listingId)}&token=${encodeURIComponent(token)}&action=sign`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({signedByName:name.trim()})});
+      const r=await fetch(`/api/contract?listingId=${encodeURIComponent(listingId)}&token=${encodeURIComponent(token)}&action=sign`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({signedByName:name.trim(),signatureImage:sigImg})});
       const d=await r.json();
       if(r.ok)setData(prev=>({...prev,contract:d.contract}));
       else setErr(d.error||'Could not sign.');
@@ -2093,9 +2132,10 @@ function ContractSign(){
           ${c.building&&html`<div style="display:flex;justify-content:space-between"><span>B&P condition</span><strong style="color:${T.t}">${c.buildingDays} days</strong></div>`}
           ${c.conditions&&html`<div style="margin-top:6px"><span>Other conditions</span><div style="color:${T.t};margin-top:2px">${c.conditions}</div></div>`}
         </div>
-        <div style="margin-bottom:14px"><label style="${LB}">Your full legal name (as signature)</label><input style="${IS}" value=${name} onInput=${e=>setName(e.target.value)} placeholder="Full name"/></div>
-        <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:${T.tm};margin-bottom:20px;cursor:pointer"><input type="checkbox" checked=${agree} onChange=${e=>setAgree(e.target.checked)} style="margin-top:3px"/>I have read and agree to the above terms and confirm the above is my legal signature on this Contract of Sale.</label>
-        <button style="${B('p','m')};width:100%;opacity:${agree&&name.trim()&&!signing?1:.5}" disabled=${!agree||!name.trim()||signing} onclick=${sign}>${signing?'Signing…':'Sign & submit →'}</button>
+        <div style="margin-bottom:14px"><label style="${LB}">Your full legal name</label><input style="${IS}" value=${name} onInput=${e=>setName(e.target.value)} placeholder="Full name"/></div>
+        <${SignaturePad} onChange=${setSigImg}/>
+        <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:${T.tm};margin-bottom:20px;cursor:pointer"><input type="checkbox" checked=${agree} onChange=${e=>setAgree(e.target.checked)} style="margin-top:3px"/>I have read and agree to the above terms and confirm the above signature is mine on this Contract of Sale.</label>
+        <button style="${B('p','m')};width:100%;opacity:${agree&&name.trim()&&sigImg&&!signing?1:.5}" disabled=${!agree||!name.trim()||!sigImg||signing} onclick=${sign}>${signing?'Signing…':'Sign & submit →'}</button>
       </div>`}
     </div>
   </div>`;

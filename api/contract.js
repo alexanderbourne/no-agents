@@ -40,6 +40,25 @@ function safeParse(raw) {
   return v;
 }
 
+async function notifySellerTurn(listing) {
+  if (!RESEND_API_KEY || !listing.sellerEmail) return;
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'No Agents <office@no-agents.com.au>',
+        to: [listing.sellerEmail],
+        subject: `${listing.contract.buyerName} has signed — your turn — ${listing.address}`,
+        html: `<div style="font-family:sans-serif;max-width:500px;">
+          <h2>The buyer has signed</h2>
+          <p>${listing.contract.buyerName} has signed the contract for <strong>${listing.address}</strong>. It's now ready for your signature on your seller dashboard, under the Documents tab.</p>
+        </div>`,
+      }),
+    });
+  } catch (e) { console.error('contract seller-turn notify error:', e.message); }
+}
+
 async function notifyBothExecuted(listing) {
   if (!RESEND_API_KEY) return;
   const recipients = [listing.sellerEmail, listing.contract.buyerEmail].filter(Boolean);
@@ -82,15 +101,18 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST' && req.query.action === 'sign') {
-    const { signedByName } = req.body || {};
+    const { signedByName, signatureImage } = req.body || {};
     const name = (signedByName || listing.contract.buyerName || '').trim();
     if (!name) return res.status(400).json({ error: 'signedByName required' });
+    if (!signatureImage) return res.status(400).json({ error: 'signatureImage required' });
 
-    listing.contract.buyerSigned = { signedAt: new Date().toISOString(), signedByName: name };
+    listing.contract.buyerSigned = { signedAt: new Date().toISOString(), signedByName: name, signatureImage };
     await kvSet(`listing:${listingId}`, listing);
 
     if (listing.contract.sellerSigned) {
       await notifyBothExecuted(listing);
+    } else {
+      await notifySellerTurn(listing);
     }
 
     return res.status(200).json({ ok: true, contract: listing.contract });

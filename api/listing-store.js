@@ -49,15 +49,17 @@
 //     photoShoot:     { status: "not_booked"|"requested"|"booked"|"completed", date: string|null, notes: string }
 //     documents:      {
 //                        contractOfSale: { status: "pending"|"provided", fileUrl: string|null, providedAt: string|null },
-//                        form6: { status: "pending"|"signed", fileUrl: string|null, signedAt: string|null, signedByName: string|null }
+//                        form6: { status: "pending"|"signed", fileUrl: string|null, signedAt: string|null, signedByName: string|null, signatureImage: string|null }
 //                      }
 //     contract:       null | {
 //                        offerId, buyerName, buyerEmail, buyerPhone, amount, settlement,
 //                        finance, financeDays, building, buildingDays, conditions,
 //                        initialDeposit, balanceDeposit, coolingOff,
 //                        buyerAccessToken: string,
-//                        sellerSigned: null | { signedAt, signedByName },
-//                        buyerSigned:  null | { signedAt, signedByName },
+//                        // Buyer signs first, then seller — sign-contract on seller-portal rejects
+//                        // until buyerSigned is set.
+//                        buyerSigned:  null | { signedAt, signedByName, signatureImage },
+//                        sellerSigned: null | { signedAt, signedByName, signatureImage },
 //                        populatedAt
 //                      }
 //   }

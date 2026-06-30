@@ -130,9 +130,10 @@ export default async function handler(req, res) {
     }
 
     if (action === 'sign-form6') {
-      const { signedByName } = req.body || {};
+      const { signedByName, signatureImage } = req.body || {};
       const name = (signedByName || listing.sellerName || '').trim();
       if (!name) return res.status(400).json({ error: 'signedByName required' });
+      if (!signatureImage) return res.status(400).json({ error: 'signatureImage required' });
       listing.documents = listing.documents || {
         contractOfSale: { status: 'pending', fileUrl: null, providedAt: null },
         form6: { status: 'pending', fileUrl: null, signedAt: null, signedByName: null },
@@ -142,6 +143,7 @@ export default async function handler(req, res) {
         fileUrl: listing.documents.form6?.fileUrl || null,
         signedAt: new Date().toISOString(),
         signedByName: name,
+        signatureImage,
       };
       await kvSet(`listing:${listingId}`, listing);
       return res.status(200).json({ ok: true, form6: listing.documents.form6 });
@@ -193,6 +195,7 @@ export default async function handler(req, res) {
               html: `<div style="font-family:sans-serif;max-width:500px;">
                 <h2>Your offer was accepted</h2>
                 <p>$${offer.amount.toLocaleString()} for <strong>${listing.address}</strong>, ${offer.settlement}-day settlement.</p>
+                <p>You're the first to sign. Once you do, it's sent to the seller to countersign.</p>
                 <p><a href="${signUrl}" style="display:inline-block;padding:12px 24px;background:#1a1a1a;color:#fff;border-radius:8px;text-decoration:none;font-weight:500">Review & sign your contract</a></p>
               </div>`,
             }),
@@ -205,10 +208,12 @@ export default async function handler(req, res) {
 
     if (action === 'sign-contract') {
       if (!listing.contract) return res.status(400).json({ error: 'No contract to sign yet' });
-      const { signedByName } = req.body || {};
+      if (!listing.contract.buyerSigned) return res.status(400).json({ error: 'The buyer signs first — awaiting their signature.' });
+      const { signedByName, signatureImage } = req.body || {};
       const name = (signedByName || listing.sellerName || '').trim();
       if (!name) return res.status(400).json({ error: 'signedByName required' });
-      listing.contract.sellerSigned = { signedAt: new Date().toISOString(), signedByName: name };
+      if (!signatureImage) return res.status(400).json({ error: 'signatureImage required' });
+      listing.contract.sellerSigned = { signedAt: new Date().toISOString(), signedByName: name, signatureImage };
       await kvSet(`listing:${listingId}`, listing);
       return res.status(200).json({ ok: true, contract: listing.contract });
     }
