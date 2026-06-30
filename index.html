@@ -2043,6 +2043,34 @@ function Fractional({go}){
             <ul style="list-style:none;display:grid;gap:10px">${['You hold the bulk of ownership — lower risk for everyone','Stay in your home — no need to sell and move out','Investors get a real asset backed by property','Trust structure provides full legal protection','75%+ vote required for any full sale — you retain control','Occupancy fee gives investors a return even when you live there'].map(s=>html`<li style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:${T.tm}"><span style="color:${T.g};flex-shrink:0">✓</span>${s}</li>`)}</ul>
           </div>
         </div>
+
+        <div style="${CD};margin-bottom:32px">
+          <h3 class="sf" style="font-size:18px;font-weight:600;margin-bottom:16px">How a sale actually works</h3>
+          <div style="display:grid;gap:16px">
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <span style="width:24px;height:24px;border-radius:50%;background:${T.k};color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">1</span>
+              <div><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">You hold the full property until each Slice sells</div><div style="font-size:13px;color:${T.tm};line-height:1.6">Say you list 10% (1,000 Slices) for sale. You remain the owner of those Slices — and the full property — right up until an investor actually buys them. We don't buy your equity off you up front and carry it ourselves. We never hold the mortgage, rates, insurance or any other carrying cost on your behalf — those stay with you, the title owner, throughout.</div></div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <span style="width:24px;height:24px;border-radius:50%;background:${T.k};color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">2</span>
+              <div><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">Funds are batched and paid out once a month</div><div style="font-size:13px;color:${T.tm};line-height:1.6">As investors buy Slices through the month, their funds sit with the trust rather than being paid to you Slice-by-Slice. At end of month we settle the whole batch in one distribution — e.g. $10,000 of Slices sold in the month is paid to you at EOM. Those Slices only activate (start counting toward investor ownership and income rights) once that distribution clears.</div></div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <span style="width:24px;height:24px;border-radius:50%;background:${T.k};color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">3</span>
+              <div><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">Why we batch it this way</div><div style="font-size:13px;color:${T.tm};line-height:1.6">Income and capital growth are split strictly in proportion to how the property is divided at that point in time. Settling in one EOM batch — rather than activating each Slice the instant it's bought — keeps the ownership register and that month's distribution calculation in sync, so nobody's share of rent or revaluation gets miscounted mid-month.</div></div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <span style="width:24px;height:24px;border-radius:50%;background:${T.k};color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">4</span>
+              <div><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">Every Slice is owned by someone, always</div><div style="font-size:13px;color:${T.tm};line-height:1.6">All 10,000 Slices are accounted for at all times — the ones you haven't sold yet are still yours, recorded on the register the same as a sold Slice is recorded to its buyer. There's no unallocated or unowned portion of the property at any point.</div></div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <span style="width:24px;height:24px;border-radius:50%;background:${T.k};color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">5</span>
+              <div><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">Buying back your Slices</div><div style="font-size:13px;color:${T.tm};line-height:1.6">You don't get special voting power to force a buyout — every Slice carries equal rights. But you do get first option: if a holder lists their Slices on the secondary marketplace, you're offered the chance to buy them back before anyone else, at the listed price. If you want to buy back 100% in one go, you can table a full buyout offer at the 5-year trust vote, where holders vote on it at an independently assessed valuation, same as any other major decision.</div></div>
+            </div>
+          </div>
+          <div style="margin-top:16px;padding:12px 14px;background:${T.bw};border:1px solid ${T.bdd};border-radius:8px;font-size:12px;color:${T.tm};line-height:1.6"><strong style="color:${T.ad}">Regulatory note:</strong> pooling investor funds into a trust like this is likely to fall under Australia's managed investment scheme rules (Corporations Act 2001). We are not yet licensed to operate this as a live financial product — this page describes the EOI-stage concept only, pending an Australian Financial Services Licence and full legal structuring before any real funds are accepted.</div>
+        </div>
+
         ${!sellerSent?html`<div style="${CD};max-width:600px;margin:0 auto">
           <h3 class="sf" style="font-size:20px;font-weight:600;margin-bottom:8px">Homeowner expression of interest</h3>
           <p style="font-size:14px;color:${T.tm};margin-bottom:20px;line-height:1.6">Interested in releasing equity? Tell us about your situation.</p>
