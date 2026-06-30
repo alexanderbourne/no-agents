@@ -47,6 +47,10 @@
 //     stripeSessionId: string   // traceability
 //     views:          number    // listing page views, used by seller dashboard stats
 //     photoShoot:     { status: "not_booked"|"requested"|"booked"|"completed", date: string|null, notes: string }
+//     documents:      {
+//                        contractOfSale: { status: "pending"|"provided", fileUrl: string|null, providedAt: string|null },
+//                        form6: { status: "pending"|"signed", fileUrl: string|null, signedAt: string|null, signedByName: string|null }
+//                      }
 //   }
 
 const { KV_REST_API_URL, KV_REST_API_TOKEN, LISTING_API_SECRET } = process.env;
@@ -58,15 +62,12 @@ export default async function handler(req, res) {
     const query = req.query.search.toLowerCase().trim();
     const ids = await getActiveIds();
     for (const lid of ids) {
-      const r = await kvGet(`listing:${lid}`);
-      if (!r) continue;
-      try {
-        const listing = JSON.parse(r);
-        const addr = `${listing.address || ''} ${listing.suburb || ''} ${listing.state || ''} ${listing.postcode || ''}`.toLowerCase();
-        if (addr.includes(query) || query.includes((listing.address || '').toLowerCase())) {
-          return res.status(200).json({ listing });
-        }
-      } catch {}
+      const listing = safeParse(await kvGet(`listing:${lid}`));
+      if (!listing) continue;
+      const addr = `${listing.address || ''} ${listing.suburb || ''} ${listing.state || ''} ${listing.postcode || ''}`.toLowerCase();
+      if (addr.includes(query) || query.includes((listing.address || '').toLowerCase())) {
+        return res.status(200).json({ listing });
+      }
     }
     return res.status(200).json({ listing: null });
   }
@@ -104,6 +105,10 @@ async function handleCreate(req, res) {
     status: data.status || 'current',
     createdAt: data.createdAt || new Date().toISOString(),
     photoShoot: data.photoShoot || { status: 'not_booked', date: null, notes: '' },
+    documents: data.documents || {
+      contractOfSale: { status: 'pending', fileUrl: null, providedAt: null },
+      form6: { status: 'pending', fileUrl: null, signedAt: null, signedByName: null },
+    },
   };
 
   // Save listing
@@ -127,17 +132,15 @@ async function handleGet(req, res) {
 
   if (id) {
     const raw = await kvGet(`listing:${id}`);
-    if (!raw) return res.status(404).json({ error: 'Not found' });
-    return res.status(200).json({ listing: JSON.parse(raw) });
+    const listing = safeParse(raw);
+    if (!listing) return res.status(404).json({ error: 'Not found' });
+    return res.status(200).json({ listing });
   }
 
   // All active listings
   const ids = await getActiveIds();
   const listings = (await Promise.all(
-    ids.map(async lid => {
-      const r = await kvGet(`listing:${lid}`);
-      try { return r ? JSON.parse(r) : null; } catch { return null; }
-    })
+    ids.map(async lid => safeParse(await kvGet(`listing:${lid}`)))
   )).filter(Boolean);
 
   return res.status(200).json({ count: listings.length, listings });
@@ -150,9 +153,9 @@ async function handleDelete(req, res) {
   if (!id) return res.status(400).json({ error: 'id required' });
 
   // Mark as withdrawn rather than hard-delete (REAXML portals need to see it disappear)
-  const raw = await kvGet(`listing:${id}`);
-  if (raw) {
-    const listing = { ...JSON.parse(raw), status: 'withdrawn', withdrawnAt: new Date().toISOString() };
+  const existing = safeParse(await kvGet(`listing:${id}`));
+  if (existing) {
+    const listing = { ...existing, status: 'withdrawn', withdrawnAt: new Date().toISOString() };
     await kvSet(`listing:${id}`, JSON.stringify(listing));
   }
 
@@ -166,6 +169,21 @@ async function handleDelete(req, res) {
 }
 
 // ─── KV helpers ─────────────────────────────────────────────────────────────
+
+// Tolerant parse: handles a value already deserialized by Upstash (object/array),
+// a JSON-encoded string, or a legacy double-wrapped `{ value: "<json>" }` shape
+// from a since-fixed write-path bug. Self-heals on next write.
+function safeParse(raw) {
+  if (raw === null || raw === undefined) return null;
+  let v = raw;
+  for (let i = 0; i < 2 && typeof v === 'string'; i++) {
+    try { v = JSON.parse(v); } catch { return null; }
+  }
+  if (v && typeof v === 'object' && !Array.isArray(v) && typeof v.value === 'string') {
+    try { v = JSON.parse(v.value); } catch {}
+  }
+  return v;
+}
 
 async function kvGet(key) {
   const r = await fetch(`${KV_REST_API_URL}/get/${encodeURIComponent(key)}`, {
@@ -183,7 +201,7 @@ async function kvSet(key, value) {
       Authorization: `Bearer ${KV_REST_API_TOKEN}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ value }),
+    body: value,
   });
   if (!r.ok) throw new Error(`KV set failed for key ${key}: ${r.status}`);
   return r.json();
@@ -191,6 +209,6 @@ async function kvSet(key, value) {
 
 async function getActiveIds() {
   const raw = await kvGet('listings:active');
-  if (!raw) return [];
-  try { return JSON.parse(raw); } catch { return []; }
+  const ids = safeParse(raw);
+  return Array.isArray(ids) ? ids : [];
 }

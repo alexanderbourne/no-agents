@@ -28,20 +28,24 @@ async function kvSet(key, value) {
   const r = await fetch(`${KV_REST_API_URL}/set/${encodeURIComponent(key)}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${KV_REST_API_TOKEN}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ value: JSON.stringify(value) }),
+    body: JSON.stringify(value),
   });
   if (!r.ok) throw new Error(`KV set failed for ${key}: ${r.status}`);
 }
 
+// Tolerant parse: handles an already-deserialized value (object/array), a
+// JSON-encoded string, or a legacy double-wrapped `{ value: "<json>" }` shape
+// from a since-fixed write-path bug.
 function safeParse(raw) {
-  if (!raw) return null;
-  try {
-    let v = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    if (typeof v === 'string') v = JSON.parse(v);
-    return v;
-  } catch {
-    return null;
+  if (raw === null || raw === undefined) return null;
+  let v = raw;
+  for (let i = 0; i < 2 && typeof v === 'string'; i++) {
+    try { v = JSON.parse(v); } catch { return null; }
   }
+  if (v && typeof v === 'object' && !Array.isArray(v) && typeof v.value === 'string') {
+    try { v = JSON.parse(v.value); } catch {}
+  }
+  return v;
 }
 
 async function getListing(id) {
@@ -96,6 +100,10 @@ export default async function handler(req, res) {
     return res.status(200).json({
       listing,
       photoShoot: listing.photoShoot || { status: 'not_booked', date: null, notes: '' },
+      documents: listing.documents || {
+        contractOfSale: { status: 'pending', fileUrl: null, providedAt: null },
+        form6: { status: 'pending', fileUrl: null, signedAt: null, signedByName: null },
+      },
       offers,
       inspections,
       enquiries,
@@ -116,6 +124,24 @@ export default async function handler(req, res) {
       listing.photoShoot = { status: 'requested', date: null, notes: '', requestedAt: new Date().toISOString() };
       await kvSet(`listing:${listingId}`, listing);
       return res.status(200).json({ ok: true, photoShoot: listing.photoShoot });
+    }
+
+    if (action === 'sign-form6') {
+      const { signedByName } = req.body || {};
+      const name = (signedByName || listing.sellerName || '').trim();
+      if (!name) return res.status(400).json({ error: 'signedByName required' });
+      listing.documents = listing.documents || {
+        contractOfSale: { status: 'pending', fileUrl: null, providedAt: null },
+        form6: { status: 'pending', fileUrl: null, signedAt: null, signedByName: null },
+      };
+      listing.documents.form6 = {
+        status: 'signed',
+        fileUrl: listing.documents.form6?.fileUrl || null,
+        signedAt: new Date().toISOString(),
+        signedByName: name,
+      };
+      await kvSet(`listing:${listingId}`, listing);
+      return res.status(200).json({ ok: true, form6: listing.documents.form6 });
     }
 
     if (action === 'accept-offer') {

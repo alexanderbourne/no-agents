@@ -692,10 +692,22 @@ function Home({go}){
 function Sell(){
   const[step,setStep]=useState(1);
   const[paying,setPaying]=useState(false);
-  const[form,setForm]=useState({address:'',type:'Apartment',beds:2,baths:1,cars:1,floor:'',description:'',price:'',deadline:'',tenanted:'no',inspection:'agent',tenantName:'',tenantEmail:'',tenantPhone:'',tenantAddress:'',availableDays:[],availableTimes:[],sellerName:'',sellerEmail:'',sellerPhone:'',listingStartDate:''});
+  const[form,setForm]=useState({address:'',addrState:'',type:'Apartment',beds:2,baths:1,cars:1,floor:'',description:'',price:'',deadline:'',tenanted:'no',inspection:'agent',tenantName:'',tenantEmail:'',tenantPhone:'',tenantAddress:'',availableDays:[],availableTimes:[],sellerName:'',sellerEmail:'',sellerPhone:'',listingStartDate:''});
   const up=(k,v)=>setForm(f=>({...f,[k]:v}));
   const[errors,setErrors]=useState({});
-  const validate=s=>{const e={};if(s===1){if(!form.address.trim())e.address='Property address required';if(!form.sellerName.trim())e.name='Full name required';if(!form.sellerEmail.trim())e.email='Email required';else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.sellerEmail))e.email='Valid email required';if(!form.sellerPhone.trim())e.phone='Mobile required';}if(s===2){if(!form.availableDays.length)e.days='Select at least one available day';if(!form.availableTimes.length)e.times='Select at least one available time';}setErrors(e);return!Object.keys(e).length;};
+  const[eoiSent,setEoiSent]=useState(false);
+  const[eoiBusy,setEoiBusy]=useState(false);
+  const outOfArea=form.addrState&&form.addrState!=='QLD';
+  const submitEoi=async()=>{
+    if(!form.sellerName.trim()||!form.sellerEmail.trim())return;
+    setEoiBusy(true);
+    try{
+      await fetch('/api/eoi',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:form.sellerName,email:form.sellerEmail,phone:form.sellerPhone,address:form.address,state:form.addrState})});
+      setEoiSent(true);
+    }catch{}
+    setEoiBusy(false);
+  };
+  const validate=s=>{const e={};if(s===1){if(!form.address.trim())e.address='Property address required';else if(outOfArea)e.address='We only operate in Queensland currently';if(!form.sellerName.trim())e.name='Full name required';if(!form.sellerEmail.trim())e.email='Email required';else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.sellerEmail))e.email='Valid email required';if(!form.sellerPhone.trim())e.phone='Mobile required';}if(s===2){if(!form.availableDays.length)e.days='Select at least one available day';if(!form.availableTimes.length)e.times='Select at least one available time';}setErrors(e);return!Object.keys(e).length;};
   const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   const times=['8:00am','9:00am','10:00am','11:00am','12:00pm','2:00pm','3:00pm','4:00pm','5:00pm'];
   const fg='margin-bottom:20px';
@@ -709,8 +721,13 @@ function Sell(){
         try{
           const el=document.getElementById('addr-inp');
           if(!el)return;
-          const ac=new window.google.maps.places.Autocomplete(el,{componentRestrictions:{country:'au'},types:['address']});
-          ac.addListener('place_changed',()=>{const p=ac.getPlace();if(p.formatted_address)up('address',p.formatted_address);});
+          const ac=new window.google.maps.places.Autocomplete(el,{componentRestrictions:{country:'au'},types:['address'],fields:['formatted_address','address_components']});
+          ac.addListener('place_changed',()=>{
+            const p=ac.getPlace();
+            if(p.formatted_address)up('address',p.formatted_address);
+            const stateComp=(p.address_components||[]).find(c=>c.types.includes('administrative_area_level_1'));
+            up('addrState',stateComp?stateComp.short_name:'');
+          });
         }catch(e){}
       }else if(attempts<10){attempts++;setTimeout(tryInit,600);}
     };
@@ -725,8 +742,18 @@ function Sell(){
     <div style="${CD}">
       ${step===1&&html`<div>
         <div style="${fg}"><label style="${LB}">Property address</label>
-          <input id="addr-inp" style="${IS}" value=${form.address} onInput=${e=>up('address',e.target.value)} placeholder="Start typing your address..."/>
+          <input id="addr-inp" style="${IS}" value=${form.address} onInput=${e=>{up('address',e.target.value);up('addrState','');}} placeholder="Start typing your address..."/>
           </div>
+        ${outOfArea&&html`<div style="border-radius:12px;background:#fde8e6;border:1px solid #f5c6c3;padding:18px 20px;margin-bottom:20px">
+          ${!eoiSent?html`<div>
+            <div style="font-weight:600;font-size:14px;color:${T.r};margin-bottom:4px">We only operate in Queensland right now</div>
+            <div style="font-size:13px;color:${T.tm};line-height:1.6;margin-bottom:14px">${form.addrState} isn't in our service area yet. Leave your details below and we'll let you know as soon as we expand there.</div>
+            <input style="${IS};margin-bottom:8px" value=${form.sellerName} onInput=${e=>up('sellerName',e.target.value)} placeholder="Full name"/>
+            <input style="${IS};margin-bottom:8px" type="email" value=${form.sellerEmail} onInput=${e=>up('sellerEmail',e.target.value)} placeholder="Email address"/>
+            <input style="${IS};margin-bottom:12px" type="tel" value=${form.sellerPhone} onInput=${e=>up('sellerPhone',e.target.value)} placeholder="Mobile number (optional)"/>
+            <button style="${B('p','m')};opacity:${eoiBusy?.6:1}" disabled=${eoiBusy||!form.sellerName.trim()||!form.sellerEmail.trim()} onclick=${submitEoi}>${eoiBusy?'Sending…':'Notify me when you expand →'}</button>
+          </div>`:html`<div style="font-size:14px;color:${T.r};font-weight:500">✓ Thanks — we'll be in touch when we launch in ${form.addrState}.</div>`}
+        </div>`}
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;${fg}">
           ${[['Bedrooms','beds'],['Bathrooms','baths'],['Car spaces','cars']].map(([l,k])=>html`<div><label style="${LB}">${l}</label><input style="${IS}" type="number" value=${form[k]} onInput=${e=>up(k,e.target.value)}/></div>`)}
         </div>
@@ -1152,18 +1179,15 @@ function SellerDash({go,token,listingId,onLogout}){
   const[photoBusy,setPhotoBusy]=useState(false);
   const[enquiries,setEnquiries]=useState([]);
   const[docFiles,setDocFiles]=useState({});
+  const[form6M,setForm6M]=useState(false);
+  const[signName,setSignName]=useState('');
+  const[signAgree,setSignAgree]=useState(false);
+  const[signing,setSigning]=useState(false);
   const[conveyancer,setConveyancer]=useState({name:'',email:'',phone:''});
   const[listingDesc,setListingDesc]=useState('');
   const[descLoading,setDescLoading]=useState(false);
   const[descSaved,setDescSaved]=useState(false);
   const generateDesc=async()=>{setDescLoading(true);setDescSaved(false);try{const r=await fetch('/api/generate-description',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:p.address,beds:p.beds,baths:p.baths,cars:p.cars,type:p.type,floor:p.floor,suburb:p.suburb||'',postcode:p.postcode||'',price:p.priceView||p.price})});if(r.ok){const d=await r.json();setListingDesc(d.description);}else{setListingDesc('Could not generate description. Try again or write your own.');}}catch{setListingDesc('Connection error. Try again.');}setDescLoading(false);};
-  const[documents]=useState([
-    {id:'contract',name:'Contract of Sale (Draft)',status:'pending',date:'—',who:'seller'},
-    {id:'form6',name:'Form 6 — Property Disclosure',status:'pending',date:'—',who:'seller'},
-    {id:'body_corp',name:'Body Corporate Records',status:'pending',date:'—',who:'seller'},
-    {id:'bp_report',name:'Building & Pest Report',status:'pending',date:'—',who:'buyer'},
-    {id:'settlement',name:'Settlement Statement',status:'pending',date:'—',who:'conveyancer'},
-  ]);
   useEffect(()=>{
     let cancelled=false;
     setLoading(true);setLoadErr('');
@@ -1195,6 +1219,16 @@ function SellerDash({go,token,listingId,onLogout}){
     setPhotoBusy(false);
   };
 
+  const signForm6=async()=>{
+    if(!signAgree||!signName.trim())return;
+    setSigning(true);
+    try{
+      const r=await fetch(`/api/seller-portal?listingId=${encodeURIComponent(listingId)}&action=sign-form6`,{method:'POST',headers:{'Content-Type':'application/json','x-seller-token':token},body:JSON.stringify({signedByName:signName.trim()})});
+      if(r.ok){const d=await r.json();setData(prev=>({...prev,documents:{...prev.documents,form6:d.form6}}));setForm6M(false);}
+    }catch{}
+    setSigning(false);
+  };
+
   if(loading)return html`<div style="max-width:1100px;margin:0 auto;padding:120px 32px;text-align:center" class="mp"><div style="font-size:14px;color:${T.tm}">Loading your dashboard…</div></div>`;
   if(loadErr)return html`<div style="max-width:480px;margin:0 auto;padding:120px 32px;text-align:center" class="mp">
     <div style="font-size:14px;color:${T.tm};margin-bottom:16px">${loadErr}</div>
@@ -1205,6 +1239,15 @@ function SellerDash({go,token,listingId,onLogout}){
   const top=offers[0]||null;
   const accepted=p.status==='agreed'||p.status==='sold';
   const photoShoot=data.photoShoot||{status:'not_booked',date:null};
+  const docState=data.documents||{contractOfSale:{status:'pending',fileUrl:null},form6:{status:'pending',fileUrl:null,signedAt:null,signedByName:null}};
+  const docs=[
+    {id:'contract',name:'Contract of Sale (Draft)',kind:'agent',status:docState.contractOfSale.status,fileUrl:docState.contractOfSale.fileUrl},
+    {id:'form6',name:'Form 6 — Exclusive Sales Agency Agreement',kind:'sign',status:docState.form6.status,signedAt:docState.form6.signedAt,signedByName:docState.form6.signedByName,fileUrl:docState.form6.fileUrl},
+    {id:'body_corp',name:'Body Corporate Records',kind:'seller'},
+    {id:'bp_report',name:'Building & Pest Report',kind:'buyer'},
+    {id:'settlement',name:'Settlement Statement',kind:'conveyancer'},
+  ];
+  const actionDocs=docs.filter(d=>(d.kind==='seller'&&!docFiles[d.id])||(d.kind==='sign'&&d.status!=='signed'));
 
   return html`<div style="max-width:1100px;margin:0 auto;padding:32px 32px" class="mp">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:12px">
@@ -1355,23 +1398,49 @@ function SellerDash({go,token,listingId,onLogout}){
     </div>`}
 
     ${tab==='documents'&&html`<div>
-      <div style="font-size:13px;color:${T.tu};margin-bottom:12px">Upload your documents below. Some documents are provided by your buyer or conveyancer and will appear here automatically once submitted.</div>
-      ${documents.map(d=>html`<div style="${CD};margin-bottom:10px">
+      <div style="font-size:13px;color:${T.tu};margin-bottom:12px">Your contract is prepared and provided by us. Some documents are provided by your buyer or conveyancer and will appear here automatically once submitted.</div>
+      ${actionDocs.length>0&&html`<div style="border-radius:12px;background:#fff3e0;border:1px solid #ffe0b2;padding:14px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start">
+        <span style="flex-shrink:0;font-size:16px">✍️</span>
+        <div>
+          <div style="font-weight:600;font-size:13px;color:#e65100;margin-bottom:4px">Sign or action required</div>
+          <div style="font-size:12px;color:${T.tm};line-height:1.6">${actionDocs.map(d=>d.name).join(' · ')}</div>
+        </div>
+      </div>`}
+      ${docs.map(d=>html`<div style="${CD};margin-bottom:10px">
         <div style="display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap">
           <div style="display:flex;align-items:center;gap:10px">
-            <span style="font-size:18px">${docFiles[d.id]?'📄':'📝'}</span>
+            <span style="font-size:18px">${d.kind==='sign'?(d.status==='signed'?'✅':'✍️'):docFiles[d.id]?'📄':'📝'}</span>
             <div>
               <div style="font-weight:600;font-size:14px;margin-bottom:2px">${d.name}</div>
-              <div style="font-size:12px;color:${T.tu}">${docFiles[d.id]?docFiles[d.id].name:d.who==='seller'?'Upload required':d.who==='buyer'?'Provided by buyer':'Provided by conveyancer'}</div>
+              <div style="font-size:12px;color:${T.tu}">
+                ${d.kind==='agent'?(d.status==='provided'?'Provided by your agent':'Provided by your agent — preparing'):
+                  d.kind==='sign'?(d.status==='signed'?`Signed by ${d.signedByName} on ${new Date(d.signedAt).toLocaleDateString('en-AU')}`:'Your signature is required'):
+                  docFiles[d.id]?docFiles[d.id].name:
+                  d.kind==='seller'?'Upload required':
+                  d.kind==='buyer'?'Provided by buyer':'Provided by conveyancer'}
+              </div>
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
-            ${docFiles[d.id]?html`<span style="${P('g')};font-size:11px">✓ Uploaded</span>`:d.who==='seller'?html`<label style="${B('o','s')};cursor:pointer"><input type="file" accept=".pdf,.doc,.docx,image/*" style="display:none" onChange=${e=>{if(e.target.files[0])setDocFiles(f=>({...f,[d.id]:e.target.files[0]}))}}/>Upload →</label>`:html`<span style="${P('w')};font-size:11px">Awaiting</span>`}
+            ${d.kind==='agent'?(d.status==='provided'?html`<span style="${P('g')};font-size:11px">✓ Provided</span>`:html`<span style="${P('w')};font-size:11px">Awaiting</span>`):
+              d.kind==='sign'?(d.status==='signed'?html`<span style="${P('g')};font-size:11px">✓ Signed</span>`:html`<button style="${B('p','s')}" onclick=${()=>{setSignName(p.sellerName||'');setSignAgree(false);setForm6M(true);}}>Review & sign →</button>`):
+              docFiles[d.id]?html`<span style="${P('g')};font-size:11px">✓ Uploaded</span>`:d.kind==='seller'?html`<label style="${B('o','s')};cursor:pointer"><input type="file" accept=".pdf,.doc,.docx,image/*" style="display:none" onChange=${e=>{if(e.target.files[0])setDocFiles(f=>({...f,[d.id]:e.target.files[0]}))}}/>Upload →</label>`:html`<span style="${P('w')};font-size:11px">Awaiting</span>`}
           </div>
         </div>
       </div>`)}
       <div style="background:${T.bw};border-radius:10px;padding:12px 16px;font-size:12px;color:${T.tm};line-height:1.6">Documents marked "Upload required" need to be provided by you. Your conveyancer and buyer will upload their documents directly, and they'll appear here once submitted.</div>
     </div>`}
+
+    ${form6M&&html`<div class="modal-bg" onclick=${()=>setForm6M(false)}><div style="${CD};max-width:520px;width:100%" onclick=${e=>e.stopPropagation()}>
+      <h3 class="sf" style="font-size:22px;font-weight:600;margin-bottom:8px">Form 6 — Exclusive Sales Agency Agreement</h3>
+      <p style="font-size:13px;color:${T.tm};line-height:1.6;margin-bottom:16px">By signing, you appoint No Agents Pty Ltd (Licence 4542501) as your exclusive selling agent for <strong>${p.address}</strong>, under the $798 Complete Listing Package terms — no commission, flat fee only.</p>
+      <div style="background:${T.bw};border-radius:10px;padding:14px 16px;font-size:12px;color:${T.tm};margin-bottom:16px;line-height:1.7;max-height:160px;overflow-y:auto">
+        This Form 6 appointment authorises No Agents Pty Ltd to market and sell the above property on your behalf for the duration of the listing. It confirms the agreed fee structure, your obligations as seller, and your authority to instruct us in line with the Property Occupations Act 2014 (QLD). A copy will be available for download here once countersigned by our office.
+      </div>
+      <div style="margin-bottom:14px"><label style="${LB}">Your full legal name (as signature)</label><input style="${IS}" value=${signName} onInput=${e=>setSignName(e.target.value)} placeholder="Full name"/></div>
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:${T.tm};margin-bottom:20px;cursor:pointer"><input type="checkbox" checked=${signAgree} onChange=${e=>setSignAgree(e.target.checked)} style="margin-top:3px"/>I have read and agree to the Form 6 Exclusive Sales Agency Agreement and confirm the above is my legal signature.</label>
+      <div style="display:flex;gap:8px"><button style="${B('p','m')};flex:1;opacity:${signAgree&&signName.trim()&&!signing?1:.5}" disabled=${!signAgree||!signName.trim()||signing} onclick=${signForm6}>${signing?'Signing…':'Sign & submit →'}</button><button style="${B('o','m')};flex:1" onclick=${()=>setForm6M(false)}>Cancel</button></div>
+    </div></div>`}
 
     ${tab==='analytics'&&html`<div>
       <div style="font-size:13px;color:${T.tu};margin-bottom:16px">Listing performance over the last 14 days.</div>
@@ -1654,7 +1723,7 @@ function Fractional({go}){
   const faqs=[
     ["How does fractional ownership work?","Every property is divided into 10,000 Slices. Each Slice represents an equal fractional interest in the property, held through a unit trust structure registered on the title. You receive proportional income and capital appreciation. Ownership is recorded on-chain via a smart contract."],
     ["What is a Slice?","One Slice = 1/10,000th of a property. The Slice Valuation is the latest independent property valuation divided by 10,000. When the property is revalued (every 6–12 months), your Slice valuation updates automatically — no new Slices are created. For example, if a property goes from $2.4M to $2.5M, each Slice goes from $240 to $250."],
-    ["What's the difference between Yield and Equity listings?","Yield listings are tenanted properties — investors earn monthly rental income plus capital growth. Equity listings are owner-occupied — the owner continues living there and pays fair market rent to the trust, which is distributed to investors the same way tenant rent would be. Both types offer capital growth."],
+    ["Is an owner-occupied property a different investment to a tenanted one?","No — every property pays yield plus capital growth, regardless of who lives there. A tenanted property pays market rent; an owner-occupied property pays an independently assessed market-rate occupancy fee. Both are distributed to Slice holders the same way and both carry the same capital growth on revaluation. Occupancy type is just a detail about who's living there, not a different return structure."],
     ["What if the owner occupies the property — how do investors earn income?","The owner pays a fair market occupancy fee to the trust each month, independently assessed. This is distributed to all Slice holders proportionally, exactly like rental income from a tenant. The owner effectively pays rent to the pool of investors (including themselves for their own Slices)."],
     ["What if the majority owner wants to sell the whole property?","No one can force a sale unilaterally. The smart contract requires a supermajority vote (75%+) to trigger a full property sale. If approved, all owners receive their proportional share of the proceeds. If you vote against and it passes, you are paid out at independent valuation — never below market value."],
     ["How do I exit if the property doesn't sell?","You are never locked in. List your Slices on the secondary marketplace anytime — we facilitate buyer matching and handle settlement. Every 5 years, all Slice holders participate in a trust vote: continue, restructure, or liquidate. This gives every investor a structured exit window, even if no buyer appears on the marketplace."],
@@ -1678,26 +1747,26 @@ function Fractional({go}){
 
     <section style="padding:40px 32px 0" class="mp">
       <div style="max-width:1000px;margin:0 auto">
-        <div style="text-align:center;margin-bottom:32px"><h2 class="sf" style="font-size:28px;font-weight:600;letter-spacing:-.5px;margin-bottom:12px">Two ways to invest</h2><p style="font-size:15px;color:${T.tm}">Every property falls into one of two categories.</p></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px" class="g1">
-          <div style="border-radius:16px;border:2px solid ${T.k};padding:28px;background:${T.k}">
-            <div style="font-size:24px;margin-bottom:12px">📊</div>
-            <div style="${P('w')};margin-bottom:10px;font-size:11px">YIELD</div>
-            <div class="sf" style="font-size:22px;font-weight:600;color:#fff;margin-bottom:8px">Tenanted property</div>
-            <p style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:16px">Property is rented to a tenant. Net rental income (after expenses, insurance and management) is distributed to all Slice holders monthly.</p>
-            <ul style="list-style:none;display:grid;gap:6px">${['Monthly rental income','Capital growth on revaluation','Tenant managed by property manager','Ideal for passive income investors'].map(i=>html`<li style="display:flex;gap:8px;font-size:12px;color:rgba(255,255,255,.5)"><span style="color:${T.al}">✓</span>${i}</li>`)}</ul>
-          </div>
-          <div style="border-radius:16px;border:1px solid ${T.bd};padding:28px;background:${T.bg}">
-            <div style="font-size:24px;margin-bottom:12px">🏠</div>
-            <div style="${P('b')};margin-bottom:10px;font-size:11px">EQUITY</div>
-            <div class="sf" style="font-size:22px;font-weight:600;color:${T.t};margin-bottom:8px">Owner-occupied</div>
-            <p style="font-size:13px;color:${T.tm};line-height:1.6;margin-bottom:16px">Owner continues living in the property and pays fair market rent to the trust (independently assessed). This occupancy fee is distributed to Slice holders the same way tenant rent would be.</p>
-            <ul style="list-style:none;display:grid;gap:6px">${['Monthly occupancy fee income','Capital growth on revaluation','Owner maintains the property','Ideal for equity + income investors'].map(i=>html`<li style="display:flex;gap:8px;font-size:12px;color:${T.tm}"><span style="color:${T.g}">✓</span>${i}</li>`)}</ul>
+        <div style="text-align:center;margin-bottom:32px"><h2 class="sf" style="font-size:28px;font-weight:600;letter-spacing:-.5px;margin-bottom:12px">Yield + capital growth, on every property</h2><p style="font-size:15px;color:${T.tm};max-width:560px;margin:0 auto">Every property pays monthly income at market rate, whether it's tenanted or owner-occupied — plus capital growth as the property is revalued.</p></div>
+        <div style="border-radius:16px;border:2px solid ${T.k};padding:28px;background:${T.k};margin-bottom:32px">
+          <div style="font-size:24px;margin-bottom:12px">📊</div>
+          <div style="${P('w')};margin-bottom:10px;font-size:11px">YIELD + CAPITAL GROWTH</div>
+          <div class="sf" style="font-size:22px;font-weight:600;color:#fff;margin-bottom:8px">Every property, one return structure</div>
+          <p style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:16px">Whoever occupies the property — a tenant or the owner — pays an independently assessed, market-rate amount into the trust each month. That income is distributed to all Slice holders proportionally. Your return is the same either way: monthly income plus capital growth on revaluation.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+            <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:14px">
+              <div style="font-size:11px;font-weight:600;color:${T.al};margin-bottom:6px;letter-spacing:.04em">TENANTED</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.5">Rented to a tenant, managed by a property manager. Net rental income distributed monthly.</div>
+            </div>
+            <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:14px">
+              <div style="font-size:11px;font-weight:600;color:${T.al};margin-bottom:6px;letter-spacing:.04em">OWNER-OCCUPIED</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.5">Owner lives there and pays a fair market occupancy fee. Distributed monthly the same way rent would be.</div>
+            </div>
           </div>
         </div>
 
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px" class="g1">
-          ${[{n:'1',t:'Choose a property',d:'Browse properties listed as Yield (tenanted) or Equity (owner-occupied). Each divided into 10,000 Slices.'},{n:'2',t:'Buy Slices',d:'Slice price = property valuation ÷ 10,000. An $800k home = $80/Slice. A $2.4M home = $240/Slice. Buy as many as you like.'},{n:'3',t:'Earn monthly income',d:'Rental income or occupancy fees distributed to Slice holders proportionally each month. Automated via smart contract.'},{n:'4',t:'Sell when ready',d:'List your Slices on the secondary marketplace anytime (0.5% fee). Or wait for the 5-year trust vote — a structured exit window where all holders vote to continue or liquidate the property.'}].map(s=>html`<div style="${CD}"><div style="width:28px;height:28px;background:${T.al};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:${T.ad};margin-bottom:8px">${s.n}</div><div style="font-weight:600;font-size:13px;margin-bottom:4px">${s.t}</div><div style="font-size:12px;color:${T.tm};line-height:1.5">${s.d}</div></div>`)}
+          ${[{n:'1',t:'Choose a property',d:'Browse listed properties, tenanted or owner-occupied. Each divided into 10,000 Slices.'},{n:'2',t:'Buy Slices',d:'Slice price = property valuation ÷ 10,000. An $800k home = $80/Slice. A $2.4M home = $240/Slice. Buy as many as you like.'},{n:'3',t:'Earn monthly income',d:'Rental income or occupancy fees distributed to Slice holders proportionally each month. Automated via smart contract.'},{n:'4',t:'Sell when ready',d:'List your Slices on the secondary marketplace anytime (0.5% fee). Or wait for the 5-year trust vote — a structured exit window where all holders vote to continue or liquidate the property.'}].map(s=>html`<div style="${CD}"><div style="width:28px;height:28px;background:${T.al};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:${T.ad};margin-bottom:8px">${s.n}</div><div style="font-weight:600;font-size:13px;margin-bottom:4px">${s.t}</div><div style="font-size:12px;color:${T.tm};line-height:1.5">${s.d}</div></div>`)}
         </div>
       </div>
     </section>
@@ -1708,7 +1777,7 @@ function Fractional({go}){
           <div style="${CD};padding:0;overflow:hidden">
             <div style="height:220px;background:linear-gradient(135deg,#c8e6d4 0%,#a8d5bc 50%,#88c4a4 100%);display:flex;align-items:center;justify-content:center;position:relative">
               <span style="font-size:60px">🏡</span>
-              <div style="position:absolute;top:12px;left:12px"><span style="${P('w')};font-size:11px;font-weight:700;border:1px solid rgba(200,151,58,.3)">YIELD · Tenanted</span></div>
+              <div style="position:absolute;top:12px;left:12px"><span style="${P('w')};font-size:11px;font-weight:700;border:1px solid rgba(200,151,58,.3)">Tenanted</span></div>
               <div style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,.95);font-size:11px;font-weight:600;color:${T.ad};padding:4px 10px;border-radius:6px;display:flex;align-items:center;gap:4px">✓ Verified title</div>
             </div>
             <div style="padding:20px">
@@ -1816,7 +1885,7 @@ function Fractional({go}){
               <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
                 <div>
                   <div style="font-weight:600;font-size:14px;margin-bottom:2px">14 Riverview Tce, New Farm</div>
-                  <div style="font-size:12px;color:${T.tu}">30 Slices · 0.30% ownership · Yield listing</div>
+                  <div style="font-size:12px;color:${T.tu}">30 Slices · 0.30% ownership · Tenanted</div>
                 </div>
                 <div style="text-align:right">
                   <div class="sf" style="font-size:18px;font-weight:600;color:${T.t}">$7,200</div>
@@ -1832,11 +1901,11 @@ function Fractional({go}){
           ${demoTab==='marketplace'&&html`<div style="padding:24px">
             <div style="font-size:12px;font-weight:600;color:${T.tu};text-transform:uppercase;letter-spacing:.05em;margin-bottom:16px">Secondary marketplace</div>
             <div style="display:grid;gap:10px">
-              ${[{addr:'14 Riverview Tce, New Farm',type:'Yield',price:242,slices:50,seller:'Investor #47'},{addr:'8/22 James St, Fortitude Valley',type:'Equity',price:88,slices:100,seller:'Investor #12'},{addr:'3 Laidlaw Pde, East Brisbane',type:'Yield',price:156,slices:25,seller:'Investor #31'}].map(l=>html`<div style="${CD};padding:16px">
+              ${[{addr:'14 Riverview Tce, New Farm',type:'Tenanted',price:242,slices:50,seller:'Investor #47'},{addr:'8/22 James St, Fortitude Valley',type:'Owner-occ',price:88,slices:100,seller:'Investor #12'},{addr:'3 Laidlaw Pde, East Brisbane',type:'Tenanted',price:156,slices:25,seller:'Investor #31'}].map(l=>html`<div style="${CD};padding:16px">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
                   <div>
                     <div style="font-weight:600;font-size:13px;margin-bottom:4px">${l.addr}</div>
-                    <div style="display:flex;gap:6px;align-items:center"><span style="${P(l.type==='Yield'?'w':'b')};font-size:10px">${l.type}</span><span style="font-size:12px;color:${T.tu}">${l.slices} Slices · $${l.price}/slice</span></div>
+                    <div style="display:flex;gap:6px;align-items:center"><span style="${P(l.type==='Tenanted'?'w':'b')};font-size:10px">${l.type}</span><span style="font-size:12px;color:${T.tu}">${l.slices} Slices · $${l.price}/slice</span></div>
                   </div>
                   <div style="text-align:right">
                     <div style="font-weight:600;font-size:14px">$${(l.price*l.slices).toLocaleString()}</div>
@@ -1918,12 +1987,37 @@ function App(){
   const initView=()=>{
     if(window.location.hash==='#agentmanagement')return 'admin';
     if(window.location.pathname.startsWith('/offer/'))return 'buy';
+    const params=new URLSearchParams(window.location.search);
+    if(params.get('payment')==='success'&&params.get('listingId')&&params.get('session_id'))return 'checkout-redirect';
     return 'home';
   };
   const[view,setView]=useState(initView());
   const[legalPage,setLegalPage]=useState('privacy');
   const go=v=>{setView(v);window.scrollTo(0,0);};
   const gl=p=>setLegalPage(p);
+
+  useEffect(()=>{
+    if(view!=='checkout-redirect')return;
+    let cancelled=false;
+    const params=new URLSearchParams(window.location.search);
+    const listingId=params.get('listingId'),sessionId=params.get('session_id');
+    const finish=v=>{window.history.replaceState({},'','/');if(!cancelled)setView(v);};
+    const tryExchange=async(attempt=0)=>{
+      try{
+        const r=await fetch('/api/seller-auth?action=from-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId,listingId})});
+        if(r.status===202&&attempt<8){setTimeout(()=>!cancelled&&tryExchange(attempt+1),2000);return;}
+        const d=await r.json();
+        if(r.ok&&d.token){
+          localStorage.setItem('na_seller_token',d.token);
+          localStorage.setItem('na_seller_listing',d.listingId);
+          finish('dash');
+        }else finish('home');
+      }catch{finish('home');}
+    };
+    tryExchange();
+    return()=>{cancelled=true;};
+  },[view]);
+
   return html`<div>
     <${Nav} v=${view} go=${go} gl=${gl}/>
     <div style="min-height:80vh">
@@ -1935,6 +2029,7 @@ function App(){
       ${view==='agents'&&html`<${Agents} go=${go}/>`}
       ${view==='legal'&&html`<${Legal} page=${legalPage}/>`}
       ${view==='admin'&&html`<${Admin}/>`}
+      ${view==='checkout-redirect'&&html`<div style="max-width:480px;margin:0 auto;padding:140px 32px;text-align:center" class="mp"><div style="font-size:14px;color:${T.tm}">Setting up your seller dashboard…</div></div>`}
     </div>
     <${Footer} go=${go} gl=${gl}/>
   </div>`;}

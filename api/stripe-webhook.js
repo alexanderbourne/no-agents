@@ -45,7 +45,7 @@ export default async function handler(req, res) {
   console.log('Payment complete:', meta.address || session.id);
 
   const addressParts = parseAddress(meta.address || '');
-  const uniqueId = generateListingId('NA');
+  const uniqueId = meta.listingId || generateListingId('NA');
 
   const listing = {
     uniqueId,
