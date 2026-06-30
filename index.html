@@ -1310,8 +1310,8 @@ function SellerDash({go,token,listingId,onLogout}){
   const contractStatus=contract?(contract.sellerSigned&&contract.buyerSigned?'executed':contract.buyerSigned?'sign_required':'awaiting_buyer'):null;
   const docs=[
     contract
-      ?{id:'contract',name:'Contract of Sale',kind:'contract',status:contractStatus,contract}
-      :{id:'contract',name:'Contract of Sale',kind:'agent',status:docState.contractOfSale.status,fileUrl:docState.contractOfSale.fileUrl},
+      ?{id:'contract',name:'Heads of Agreement',kind:'contract',status:contractStatus,contract}
+      :{id:'contract',name:'Heads of Agreement',kind:'agent',status:docState.contractOfSale.status,fileUrl:docState.contractOfSale.fileUrl},
     {id:'form6',name:'Form 6 — Exclusive Sales Agency Agreement',kind:'sign',status:docState.form6.status,signedAt:docState.form6.signedAt,signedByName:docState.form6.signedByName,fileUrl:docState.form6.fileUrl},
     {id:'property_disclosure',name:'Property Disclosure Statement',kind:'seller'},
     {id:'body_corp',name:'Body Corporate Records',kind:'seller'},
@@ -1469,7 +1469,7 @@ function SellerDash({go,token,listingId,onLogout}){
     </div>`}
 
     ${tab==='documents'&&html`<div>
-      <div style="font-size:13px;color:${T.tu};margin-bottom:12px">Your Contract of Sale is auto-populated as soon as you accept an offer, then sent to the buyer to sign first, then to you. Some documents are provided by your buyer or conveyancer and will appear here automatically once submitted.</div>
+      <div style="font-size:13px;color:${T.tu};margin-bottom:12px">A Heads of Agreement summarising the deal terms is auto-populated as soon as you accept an offer, then sent to the buyer to sign first, then to you. It's not the formal Contract of Sale — once both sides sign, it's passed to your conveyancer to prepare and finalise that. Some documents are provided by your buyer or conveyancer and will appear here automatically once submitted.</div>
       ${actionDocs.length>0&&html`<div style="border-radius:12px;background:#fff3e0;border:1px solid #ffe0b2;padding:14px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start">
         <span style="flex-shrink:0;font-size:16px">✍️</span>
         <div>
@@ -1484,7 +1484,7 @@ function SellerDash({go,token,listingId,onLogout}){
             <div>
               <div style="font-weight:600;font-size:14px;margin-bottom:2px">${d.name}</div>
               <div style="font-size:12px;color:${T.tu}">
-                ${d.kind==='contract'?(d.status==='executed'?`Fully executed — ${d.contract.sellerSigned.signedByName} & ${d.contract.buyerSigned.signedByName}`:d.status==='awaiting_buyer'?`Sent to ${d.contract.buyerName} to sign first`:`${d.contract.buyerName} has signed — your signature is required`):
+                ${d.kind==='contract'?(d.status==='executed'?`Signed by both — ${d.contract.sellerSigned.signedByName} & ${d.contract.buyerSigned.signedByName} — passed to your conveyancer to finalise`:d.status==='awaiting_buyer'?`Sent to ${d.contract.buyerName} to sign first`:`${d.contract.buyerName} has signed — your signature is required`):
                   d.kind==='agent'?'Auto-generated as soon as you accept an offer':
                   d.kind==='sign'?(d.status==='signed'?`Signed by ${d.signedByName} on ${new Date(d.signedAt).toLocaleDateString('en-AU')}`:'Your signature is required'):
                   docFiles[d.id]?docFiles[d.id].name:
@@ -1494,7 +1494,7 @@ function SellerDash({go,token,listingId,onLogout}){
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
-            ${d.kind==='contract'?(d.status==='executed'?html`<span style="${P('g')};font-size:11px">✓ Executed</span>`:d.status==='awaiting_buyer'?html`<span style="${P('u')};font-size:11px">Awaiting buyer</span>`:html`<button style="${B('p','s')}" onclick=${()=>{setCsignName(p.sellerName||'');setCsignAgree(false);setCsignImg(null);setContractM(true);}}>Review & sign →</button>`):
+            ${d.kind==='contract'?(d.status==='executed'?html`<span style="${P('g')};font-size:11px">✓ With conveyancer</span>`:d.status==='awaiting_buyer'?html`<span style="${P('u')};font-size:11px">Awaiting buyer</span>`:html`<button style="${B('p','s')}" onclick=${()=>{setCsignName(p.sellerName||'');setCsignAgree(false);setCsignImg(null);setContractM(true);}}>Review & sign →</button>`):
               d.kind==='agent'?(d.status==='provided'?html`<span style="${P('g')};font-size:11px">✓ Provided</span>`:html`<span style="${P('w')};font-size:11px">Awaiting</span>`):
               d.kind==='sign'?(d.status==='signed'?html`<span style="${P('g')};font-size:11px">✓ Signed</span>`:html`<button style="${B('p','s')}" onclick=${()=>{setSignName(p.sellerName||'');setSignAgree(false);setSignImg(null);setForm6M(true);}}>Review & sign →</button>`):
               docFiles[d.id]?html`<span style="${P('g')};font-size:11px">✓ Uploaded</span>`:d.kind==='seller'?html`<label style="${B('o','s')};cursor:pointer"><input type="file" accept=".pdf,.doc,.docx,image/*" style="display:none" onChange=${e=>{if(e.target.files[0])setDocFiles(f=>({...f,[d.id]:e.target.files[0]}))}}/>Upload →</label>`:html`<span style="${P('w')};font-size:11px">Awaiting</span>`}
@@ -1517,8 +1517,8 @@ function SellerDash({go,token,listingId,onLogout}){
     </div></div>`}
 
     ${contractM&&contract&&html`<div class="modal-bg" onclick=${()=>setContractM(false)}><div style="${CD};max-width:560px;width:100%;max-height:85vh;overflow-y:auto" onclick=${e=>e.stopPropagation()}>
-      <h3 class="sf" style="font-size:22px;font-weight:600;margin-bottom:8px">Contract of Sale</h3>
-      <p style="font-size:13px;color:${T.tm};line-height:1.6;margin-bottom:16px">Populated from the offer you accepted from <strong>${contract.buyerName}</strong>. Once both you and the buyer have signed, this contract is binding.</p>
+      <h3 class="sf" style="font-size:22px;font-weight:600;margin-bottom:8px">Heads of Agreement</h3>
+      <p style="font-size:13px;color:${T.tm};line-height:1.6;margin-bottom:16px">Populated from the offer you accepted from <strong>${contract.buyerName}</strong>. This is a summary of agreed terms, not the formal Contract of Sale. Once both you and the buyer have signed, it's passed to your conveyancer to prepare and finalise the official contract.</p>
       <div style="background:${T.bw};border-radius:10px;padding:16px;font-size:13px;color:${T.tm};margin-bottom:16px;line-height:1.9">
         <div style="display:flex;justify-content:space-between"><span>Property</span><strong style="color:${T.t}">${p.address}</strong></div>
         <div style="display:flex;justify-content:space-between"><span>Seller</span><strong style="color:${T.t}">${p.sellerName}</strong></div>
@@ -1532,7 +1532,7 @@ function SellerDash({go,token,listingId,onLogout}){
       </div>
       <div style="margin-bottom:14px"><label style="${LB}">Your full legal name</label><input style="${IS}" value=${csignName} onInput=${e=>setCsignName(e.target.value)} placeholder="Full name"/></div>
       <${SignaturePad} onChange=${setCsignImg}/>
-      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:${T.tm};margin-bottom:20px;cursor:pointer"><input type="checkbox" checked=${csignAgree} onChange=${e=>setCsignAgree(e.target.checked)} style="margin-top:3px"/>I have read and agree to the above terms and confirm the above signature is mine on this Contract of Sale.</label>
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:${T.tm};margin-bottom:20px;cursor:pointer"><input type="checkbox" checked=${csignAgree} onChange=${e=>setCsignAgree(e.target.checked)} style="margin-top:3px"/>I have read and agree to the above terms and confirm the above signature is mine on this Heads of Agreement, to be finalised by my conveyancer into the formal Contract of Sale.</label>
       <div style="display:flex;gap:8px"><button style="${B('p','m')};flex:1;opacity:${csignAgree&&csignName.trim()&&csignImg&&!csigning?1:.5}" disabled=${!csignAgree||!csignName.trim()||!csignImg||csigning} onclick=${signContract}>${csigning?'Signing…':'Sign & submit →'}</button><button style="${B('o','m')};flex:1" onclick=${()=>setContractM(false)}>Cancel</button></div>
     </div></div>`}
 
@@ -2117,12 +2117,13 @@ function ContractSign(){
   return html`<div style="max-width:560px;margin:0 auto;padding:64px 32px" class="mp">
     <div style="${CD}">
       <${Logo}/>
-      <h1 class="sf" style="font-size:24px;font-weight:600;margin:16px 0 6px">Contract of Sale</h1>
+      <h1 class="sf" style="font-size:24px;font-weight:600;margin:16px 0 6px">Heads of Agreement</h1>
       <p style="font-size:13px;color:${T.tu};margin-bottom:20px">${data.address}</p>
       ${signed?html`<div style="border-radius:12px;background:#d4ede1;border:1px solid ${T.g};padding:16px;text-align:center">
         <div style="font-size:14px;font-weight:600;color:${T.g};margin-bottom:4px">✓ You signed on ${new Date(c.buyerSigned.signedAt).toLocaleDateString('en-AU')}</div>
-        <div style="font-size:13px;color:${T.tm}">${c.sellerSigned?'Both parties have signed — your conveyancer will be in touch to finalise settlement.':'Waiting on the seller to countersign.'}</div>
+        <div style="font-size:13px;color:${T.tm}">${c.sellerSigned?'Both parties have signed — your conveyancer will be in touch to prepare the formal Contract of Sale.':'Waiting on the seller to countersign.'}</div>
       </div>`:html`<div>
+        <div style="font-size:13px;color:${T.tm};line-height:1.6;margin-bottom:16px">This is a summary of the agreed terms, not the formal Contract of Sale. Once both parties sign, it's passed to the seller's conveyancer to prepare the official contract.</div>
         <div style="background:${T.bw};border-radius:10px;padding:16px;font-size:13px;color:${T.tm};margin-bottom:16px;line-height:1.9">
           <div style="display:flex;justify-content:space-between"><span>Seller</span><strong style="color:${T.t}">${data.sellerName}</strong></div>
           <div style="display:flex;justify-content:space-between"><span>Purchase price</span><strong style="color:${T.t}">$${c.amount.toLocaleString()}</strong></div>
@@ -2134,7 +2135,7 @@ function ContractSign(){
         </div>
         <div style="margin-bottom:14px"><label style="${LB}">Your full legal name</label><input style="${IS}" value=${name} onInput=${e=>setName(e.target.value)} placeholder="Full name"/></div>
         <${SignaturePad} onChange=${setSigImg}/>
-        <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:${T.tm};margin-bottom:20px;cursor:pointer"><input type="checkbox" checked=${agree} onChange=${e=>setAgree(e.target.checked)} style="margin-top:3px"/>I have read and agree to the above terms and confirm the above signature is mine on this Contract of Sale.</label>
+        <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:${T.tm};margin-bottom:20px;cursor:pointer"><input type="checkbox" checked=${agree} onChange=${e=>setAgree(e.target.checked)} style="margin-top:3px"/>I have read and agree to the above terms and confirm the above signature is mine on this Heads of Agreement, to be finalised by the seller's conveyancer into the formal Contract of Sale.</label>
         <button style="${B('p','m')};width:100%;opacity:${agree&&name.trim()&&sigImg&&!signing?1:.5}" disabled=${!agree||!name.trim()||!sigImg||signing} onclick=${sign}>${signing?'Signing…':'Sign & submit →'}</button>
       </div>`}
     </div>

@@ -70,11 +70,11 @@ async function notifyBothExecuted(listing) {
       body: JSON.stringify({
         from: 'No Agents <office@no-agents.com.au>',
         to: recipients,
-        subject: `Contract fully executed — ${listing.address}`,
+        subject: `Heads of Agreement signed by both parties — ${listing.address}`,
         html: `<div style="font-family:sans-serif;max-width:500px;">
-          <h2>Contract signed by both parties</h2>
-          <p>The sales contract for <strong>${listing.address}</strong> has now been signed by both the seller and the buyer.</p>
-          <p>Your conveyancer will be in touch to finalise settlement.</p>
+          <h2>Heads of Agreement signed by both parties</h2>
+          <p>The agreed terms for <strong>${listing.address}</strong> have now been signed by both the seller and the buyer.</p>
+          <p>This is being passed to the seller's conveyancer, who will prepare the formal Contract of Sale and be in touch to finalise it.</p>
         </div>`,
       }),
     });

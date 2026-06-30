@@ -191,12 +191,12 @@ export default async function handler(req, res) {
             body: JSON.stringify({
               from: 'No Agents <office@no-agents.com.au>',
               to: [listing.contract.buyerEmail],
-              subject: `Your offer was accepted — sign your contract for ${listing.address}`,
+              subject: `Your offer was accepted — sign your Heads of Agreement for ${listing.address}`,
               html: `<div style="font-family:sans-serif;max-width:500px;">
                 <h2>Your offer was accepted</h2>
                 <p>$${offer.amount.toLocaleString()} for <strong>${listing.address}</strong>, ${offer.settlement}-day settlement.</p>
-                <p>You're the first to sign. Once you do, it's sent to the seller to countersign.</p>
-                <p><a href="${signUrl}" style="display:inline-block;padding:12px 24px;background:#1a1a1a;color:#fff;border-radius:8px;text-decoration:none;font-weight:500">Review & sign your contract</a></p>
+                <p>This Heads of Agreement summarises the deal terms — it's not the formal Contract of Sale. You're the first to sign; once you do, it's sent to the seller to countersign, then passed to the seller's conveyancer to prepare the official contract.</p>
+                <p><a href="${signUrl}" style="display:inline-block;padding:12px 24px;background:#1a1a1a;color:#fff;border-radius:8px;text-decoration:none;font-weight:500">Review & sign</a></p>
               </div>`,
             }),
           });
