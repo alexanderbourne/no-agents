@@ -1,0 +1,8 @@
+node_modules
+_background
+.env.local
+*.log
+*.docx
+*.pdf
+*.pptx
+*.xlsx

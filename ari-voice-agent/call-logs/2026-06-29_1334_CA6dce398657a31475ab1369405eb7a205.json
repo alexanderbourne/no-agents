@@ -1,0 +1,16 @@
+{
+  "callSid": "CA6dce398657a31475ab1369405eb7a205",
+  "callerNumber": "+61427964390",
+  "timestamp": "29/06/2026, 1:34:28 pm AEST",
+  "direction": "inbound",
+  "summary": "No conversation captured — history was lost before summary generation. Ari responded with template instructions instead of a structured summary.",
+  "callerType": "Unknown",
+  "callerName": "Unknown",
+  "callbackNumber": "+61427964390",
+  "property": "Not mentioned",
+  "enquiry": "Unknown — conversation not recorded",
+  "actionItems": ["Callback needed — caller reached Ari but no dialogue was captured"],
+  "urgency": "Medium",
+  "conversation": [],
+  "issue": "History parameter was empty at /api/voice/end — conversation context lost between respond and end endpoints"
+}
