@@ -28,6 +28,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 input[type=range]::-moz-range-track{height:4px;background:#e5e0d6;border-radius:2px}
 input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#1a1a1a;border:3px solid #faf9f6;box-shadow:0 0 0 2px #1a1a1a;cursor:pointer}
 .gm-err-container,.gm-style-pbc,.dismissable-map{display:none!important}
+.pac-container{font-family:'Inter',sans-serif;border:1.5px solid #e5e0d6;border-radius:10px;margin-top:6px;box-shadow:0 8px 24px rgba(0,0,0,.08);padding:6px;background:#fff}
+.pac-item{font-family:'Inter',sans-serif;font-size:14px;color:#1a1a1a;padding:10px 12px;border:none;border-radius:8px;cursor:pointer}
+.pac-item:hover,.pac-item-selected{background:#faf9f6}
+.pac-item-query{font-family:'Inter',sans-serif;font-size:14px;color:#1a1a1a;font-weight:500}
+.pac-matched{font-weight:600}
+.pac-icon{display:none}
+.pac-item span:not(.pac-item-query){font-family:'Inter',sans-serif;font-size:13px;color:#6b6b6b}
 .sf{font-family:'Playfair Display',Georgia,serif}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
 @media(max-width:768px){
@@ -816,7 +823,7 @@ function Buy(){
   const[photo,setPhoto]=useState(0);
   const[vs,setVs]=useState(0);
   const[vf,setVf]=useState({name:'',email:'',phone:''});
-  const[smsCode]=useState('');
+  const[smsToken,setSmsToken]=useState({token:'',ts:0});
   const[smsIn,setSmsIn]=useState('');
   const[smsErr,setSmsErr]=useState(false);
   const[terms,setTerms]=useState([false,false]);
@@ -838,8 +845,8 @@ function Buy(){
   const mMid=Math.round((p.rea.mid+p.dom.mid)/2);
   const mLow=Math.round((p.rea.low+p.dom.low)/2);
   const mHigh=Math.round((p.rea.high+p.dom.high)/2);
-  const sendCode=async()=>{setSending(true);setSmsErr(false);try{const r=await fetch('/api/send-sms-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:vf.phone})});if(r.ok){setVs(2);}else{const d=await r.json();setSmsErr(d.error||'Failed to send code. Try again.');}}catch{setSmsErr('Connection error. Try again.');}setSending(false);};
-  const verifyCode=async()=>{setSmsErr(false);try{const r=await fetch('/api/verify-sms-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:vf.phone,code:smsIn})});if(r.ok){setVs(3);setSmsErr(false);}else{const d=await r.json();setSmsErr(d.error||'Incorrect code.');}}catch{setSmsErr('Connection error. Try again.');}};
+  const sendCode=async()=>{setSending(true);setSmsErr(false);try{const r=await fetch('/api/send-sms-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:vf.phone})});const d=await r.json();if(r.ok&&d.token){setSmsToken({token:d.token,ts:d.ts});setVs(2);}else{setSmsErr(d.error||'Failed to send code. Try again.');}}catch{setSmsErr('Connection error. Try again.');}setSending(false);};
+  const verifyCode=async()=>{setSmsErr(false);try{const r=await fetch('/api/verify-sms-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:vf.phone,code:smsIn,token:smsToken.token,ts:smsToken.ts})});if(r.ok){setVs(3);setSmsErr(false);}else{const d=await r.json();setSmsErr(d.error||'Incorrect code.');}}catch{setSmsErr('Connection error. Try again.');}};
   const slots=[{date:'Sat 31 May',times:['9:00am','10:00am','10:30am','11:00am']},{date:'Sun 1 Jun',times:['10:00am','11:00am','2:00pm','3:00pm']},{date:'Sat 7 Jun',times:['9:00am','10:00am','11:00am','2:00pm']}];
 
   const ADDR_DB=['12/47 Queens Road, Brisbane City QLD 4000','1/22 Barry Parade, Fortitude Valley QLD 4006','8/100 Boundary Street, West End QLD 4101','15 Macquarie Street, Teneriffe QLD 4005','42/19 Stanley Street, Woolloongabba QLD 4102','3/88 Vulture Street, South Brisbane QLD 4101','201/55 Railway Terrace, Milton QLD 4064','7 Moreton Street, New Farm QLD 4005','5/12 Cordelia Street, South Brisbane QLD 4101','28 James Street, Fortitude Valley QLD 4006'];
@@ -960,9 +967,9 @@ function Buy(){
           ${!verified&&vs>0&&html`<div style="${CD}">
             <div style="display:flex;gap:4px;margin-bottom:20px">${['Details','SMS','Terms'].map((l,i)=>html`<div style="flex:1"><div style="height:3px;border-radius:2px;background:${vs>i+1?T.k:vs===i+1?T.a:T.bd};margin-bottom:6px;transition:background .3s"></div><div style="font-size:10px;color:${vs>i+1?T.t:vs===i+1?T.a:T.tu};text-transform:uppercase;letter-spacing:.05em;font-weight:500">${l}</div></div>`)}</div>
             ${vs===1&&html`<div>
-              <div style="margin-bottom:16px"><label style="${LB}">Full legal name</label><input style="${IS}" value=${vf.name} onInput=${e=>setVf(f=>({...f,name:e.target.value}))} placeholder="Jane Smith"/></div>
-              <div style="margin-bottom:16px"><label style="${LB}">Email</label><input style="${IS}" type="email" value=${vf.email} onInput=${e=>setVf(f=>({...f,email:e.target.value}))} placeholder="jane@email.com"/></div>
-              <div style="margin-bottom:20px"><label style="${LB}">Mobile number</label><input style="${IS}" type="tel" value=${vf.phone} onInput=${e=>setVf(f=>({...f,phone:e.target.value}))} placeholder="04XX XXX XXX"/></div>
+              <div style="margin-bottom:16px"><label style="${LB}">Full legal name</label><input style="${IS}" value=${vf.name} onInput=${e=>setVf(f=>({...f,name:e.target.value}))} onChange=${e=>setVf(f=>({...f,name:e.target.value}))} placeholder="Jane Smith"/></div>
+              <div style="margin-bottom:16px"><label style="${LB}">Email</label><input style="${IS}" type="email" value=${vf.email} onInput=${e=>setVf(f=>({...f,email:e.target.value}))} onChange=${e=>setVf(f=>({...f,email:e.target.value}))} placeholder="jane@email.com"/></div>
+              <div style="margin-bottom:20px"><label style="${LB}">Mobile number</label><input style="${IS}" type="tel" value=${vf.phone} onInput=${e=>setVf(f=>({...f,phone:e.target.value}))} onChange=${e=>setVf(f=>({...f,phone:e.target.value}))} placeholder="04XX XXX XXX"/></div>
               <button style="${B('p','m')};width:100%;opacity:${vf.name&&vf.email&&vf.phone?1:.5}" onclick=${()=>vf.name&&vf.email&&vf.phone&&sendCode()} disabled=${sending}>${sending?'Sending…':'Send verification code →'}</button>
             </div>`}
             ${vs===2&&html`<div>
@@ -1019,7 +1026,7 @@ function Buy(){
             <div style="margin-bottom:14px"><label style="${LB}">Other conditions <span style="text-transform:none;letter-spacing:0;font-weight:400;color:${T.tu}">(optional)</span></label><textarea style="${IS};min-height:56px;resize:vertical" value=${offer.conditions} onInput=${e=>setOffer(o=>({...o,conditions:e.target.value}))} placeholder="e.g. Subject to valuation, subject to solicitor's approval"></textarea></div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;align-items:start">
               <div><label style="${LB}">Initial deposit</label><div style="position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:${T.tu};font-size:15px">$</span><input style="${IS};padding-left:28px" type="number" value=${offer.initialDeposit} onInput=${e=>setOffer(o=>({...o,initialDeposit:e.target.value}))} placeholder="2,000"/></div><div style="font-size:11px;color:${T.tu};margin-top:4px">Typically $2,000</div></div>
-              <div><label style="${LB}">Balance of deposit</label><div style="position:relative"><input style="${IS};padding-right:28px" type="number" value=${offer.balanceDeposit} onInput=${e=>setOffer(o=>({...o,balanceDeposit:e.target.value}))} placeholder="5"/><span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:${T.tu};font-size:15px">%</span></div><div style="font-size:11px;color:${T.tu};margin-top:4px">Typically 5%</div></div>
+              <div><label style="${LB};white-space:nowrap">Balance due</label><div style="position:relative"><input style="${IS};padding-right:28px" type="number" value=${offer.balanceDeposit} onInput=${e=>setOffer(o=>({...o,balanceDeposit:e.target.value}))} placeholder="5"/><span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:${T.tu};font-size:15px">%</span></div><div style="font-size:11px;color:${T.tu};margin-top:4px">Typically 5%</div></div>
             </div>
             <div style="border-top:1px solid ${T.bd};padding-top:14px;margin-bottom:16px">
               <div style="font-size:11px;font-weight:600;color:${T.tu};text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Your solicitor / conveyancer</div>
