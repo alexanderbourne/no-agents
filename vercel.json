@@ -10,6 +10,7 @@
     { "source": "/leads", "destination": "/leads.html" },
     { "source": "/admin", "destination": "/admin.html" },
     { "source": "/portal", "destination": "/portal.html" },
-    { "source": "/offer/:path*", "destination": "/" }
+    { "source": "/offer/:path*", "destination": "/" },
+    { "source": "/contract/:path*", "destination": "/" }
   ]
 }

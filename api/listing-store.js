@@ -51,6 +51,15 @@
 //                        contractOfSale: { status: "pending"|"provided", fileUrl: string|null, providedAt: string|null },
 //                        form6: { status: "pending"|"signed", fileUrl: string|null, signedAt: string|null, signedByName: string|null }
 //                      }
+//     contract:       null | {
+//                        offerId, buyerName, buyerEmail, buyerPhone, amount, settlement,
+//                        finance, financeDays, building, buildingDays, conditions,
+//                        initialDeposit, balanceDeposit, coolingOff,
+//                        buyerAccessToken: string,
+//                        sellerSigned: null | { signedAt, signedByName },
+//                        buyerSigned:  null | { signedAt, signedByName },
+//                        populatedAt
+//                      }
 //   }
 
 const { KV_REST_API_URL, KV_REST_API_TOKEN, LISTING_API_SECRET } = process.env;
