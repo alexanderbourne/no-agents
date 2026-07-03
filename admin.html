@@ -503,7 +503,63 @@ function showListing(id) {
       <span class="lbl">Headline</span><span>${esc(l.headline || 'N/A')}</span>
     </div>
     ${l.description ? `<h3 style="margin-bottom:8px">Description</h3><p style="background:#f9f9f9;padding:12px;border-radius:8px;font-size:14px;white-space:pre-wrap">${esc(l.description)}</p>` : ''}
-    ${l.images && l.images.length ? `<h3 style="margin:16px 0 8px">Images</h3><div style="display:flex;gap:8px;flex-wrap:wrap">${l.images.map(img => `<img src="${esc(img)}" style="width:120px;height:90px;object-fit:cover;border-radius:8px">`).join('')}</div>` : ''}`;
+    ${l.images && l.images.length ? `<h3 style="margin:16px 0 8px">Images</h3><div style="display:flex;gap:8px;flex-wrap:wrap">${l.images.map(img => `<img src="${esc(img)}" style="width:120px;height:90px;object-fit:cover;border-radius:8px">`).join('')}</div>` : ''}
+    ${l.status === 'sold' ? `
+    <div style="margin-top:24px;padding:16px;background:#f0fdf4;border:1px solid #86efac;border-radius:12px">
+      <div style="font-weight:700;color:#166534;margin-bottom:8px">✅ Settled</div>
+      <div style="font-size:14px;color:#166534">Sale price: <strong>$${Number(l.salePrice||0).toLocaleString('en-AU')}</strong> &nbsp;·&nbsp; Success fee charged: <strong>$${Number(l.successFee||0).toLocaleString('en-AU')}</strong></div>
+      ${l.settledAt ? `<div style="font-size:12px;color:#4ade80;margin-top:4px">Settled ${new Date(l.settledAt).toLocaleDateString('en-AU')}</div>` : ''}
+    </div>` : `
+    <div style="margin-top:24px;padding:16px;background:#fff7ed;border:1px solid #fdba74;border-radius:12px" id="settle-panel-${l.id}">
+      <div style="font-weight:700;color:#9a3412;margin-bottom:12px">Confirm Settlement &amp; Charge Success Fee</div>
+      ${!l.stripePaymentMethodId && !l.stripeCustomerId ? `<p style="font-size:13px;color:#9a3412;margin:0 0 8px">⚠️ No saved card for this listing (listed before card-save was enabled). Collect the 0.5% fee manually.</p>` : ''}
+      <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+        <div>
+          <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Sale price (AUD)</label>
+          <input type="number" id="settle-price-${l.id}" min="1" step="1000" placeholder="e.g. 850000"
+            style="padding:8px 12px;border:1px solid #fdba74;border-radius:8px;font-size:14px;width:160px"
+            oninput="updateFeePreview('${l.id}')">
+        </div>
+        <div id="fee-preview-${l.id}" style="font-size:13px;color:#9a3412;padding-bottom:8px"></div>
+        <button onclick="confirmSettle('${l.id}')"
+          style="padding:9px 20px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px">
+          Charge &amp; Mark Sold
+        </button>
+      </div>
+    </div>`}`;
+}
+
+function updateFeePreview(id) {
+  const val = Number(document.getElementById('settle-price-' + id)?.value || 0);
+  const el = document.getElementById('fee-preview-' + id);
+  if (!el) return;
+  if (!val) { el.textContent = ''; return; }
+  const fee = Math.min(val * 0.005, 15000);
+  el.textContent = `Fee: $${fee.toLocaleString('en-AU', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+}
+
+async function confirmSettle(id) {
+  const priceInput = document.getElementById('settle-price-' + id);
+  const salePrice = Number(priceInput?.value);
+  if (!salePrice || salePrice <= 0) { alert('Enter a valid sale price first.'); return; }
+  const fee = Math.min(salePrice * 0.005, 15000);
+  if (!confirm(`Confirm settlement for listing ${id}?\nSale price: $${salePrice.toLocaleString('en-AU')}\nSuccess fee to charge: $${fee.toLocaleString('en-AU', {minimumFractionDigits:2})}\n\nThis will charge the seller's card immediately.`)) return;
+  const btn = document.querySelector(`#settle-panel-${id} button`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Charging…'; }
+  try {
+    const r = await apiFetch('/api/settle', { method: 'POST', body: JSON.stringify({ listingId: id, salePrice }) });
+    if (r?.ok) {
+      alert(`Settlement confirmed. Fee $${r.feeDisplay || fee} charged. Charge ID: ${r.chargeId}`);
+      await loadData();
+      renderTab();
+    } else {
+      alert('Error: ' + (r?.error || 'Unknown error'));
+      if (btn) { btn.disabled = false; btn.textContent = 'Charge & Mark Sold'; }
+    }
+  } catch(e) {
+    alert('Request failed: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Charge & Mark Sold'; }
+  }
 }
 
 // ── Helpers ──

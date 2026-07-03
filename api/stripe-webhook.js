@@ -49,6 +49,8 @@ export default async function handler(req, res) {
 
   const listing = {
     uniqueId,
+    stripeCustomerId:      session.customer || null,
+    stripePaymentMethodId: session.payment_method || null,
     address:      meta.address || '',
     ...addressParts,
     beds:         parseInt(meta.beds) || 0,

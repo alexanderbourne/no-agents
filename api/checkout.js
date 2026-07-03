@@ -59,6 +59,8 @@ export default async function handler(req, res) {
         quantity: 1,
       }],
       mode: 'payment',
+      // Save card for off-session success-fee charge on settlement confirmation
+      ...(isListingPurchase ? { payment_intent_data: { setup_future_usage: 'off_session' } } : {}),
       success_url: successUrl,
       cancel_url: `${baseUrl}/?payment=cancelled`,
       metadata: stripeMetadata,
