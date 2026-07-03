@@ -8,6 +8,8 @@
 //   POST /api/seller-portal?listingId=xxx&action=accept-offer   { offerId } — also populates the contract
 //   POST /api/seller-portal?listingId=xxx&action=counter-offer  { offerId, amount }
 //   POST /api/seller-portal?listingId=xxx&action=sign-contract  { signedByName }
+//   POST /api/seller-portal?listingId=xxx&action=update-details { deadline, priceView, conveyancer }
+//   POST /api/seller-portal?listingId=xxx&action=withdraw       { } — withdraws the listing
 //
 // Required env vars: KV_REST_API_URL, KV_REST_API_TOKEN, ADMIN_PASSWORD, RESEND_API_KEY (optional)
 
@@ -216,6 +218,26 @@ export default async function handler(req, res) {
       listing.contract.sellerSigned = { signedAt: new Date().toISOString(), signedByName: name, signatureImage };
       await kvSet(`listing:${listingId}`, listing);
       return res.status(200).json({ ok: true, contract: listing.contract });
+    }
+
+    if (action === 'update-details') {
+      const { deadline, priceView, conveyancer } = req.body || {};
+      if (deadline !== undefined) listing.deadline = deadline;
+      if (priceView !== undefined) listing.priceView = priceView;
+      if (conveyancer !== undefined) listing.conveyancer = conveyancer;
+      await kvSet(`listing:${listingId}`, listing);
+      return res.status(200).json({ ok: true, listing });
+    }
+
+    if (action === 'withdraw') {
+      listing.status = 'withdrawn';
+      listing.withdrawnAt = new Date().toISOString();
+      await kvSet(`listing:${listingId}`, listing);
+      const activeIds = safeParse(await kvGet('listings:active'));
+      if (Array.isArray(activeIds)) {
+        await kvSet('listings:active', activeIds.filter(id => id !== listingId));
+      }
+      return res.status(200).json({ ok: true, listing });
     }
 
     if (action === 'counter-offer') {

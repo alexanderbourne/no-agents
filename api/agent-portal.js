@@ -15,7 +15,7 @@ async function kvSet(key, value) {
   await fetch(`${KV_URL}/set/${encodeURIComponent(key)}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${KV_TOKEN}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ value: JSON.stringify(value) }),
+    body: JSON.stringify(value),
   });
 }
 
@@ -23,10 +23,18 @@ function makeAgentToken(id, email) {
   return crypto.createHmac('sha256', 'no-agents-agent-v1').update(`${id}:${email}`).digest('hex');
 }
 
+// Tolerant parse: handles an already-deserialized value (object/array), a
+// JSON-encoded string, or a legacy double-wrapped `{ value: "<json>" }` shape
+// from a since-fixed write-path bug.
 function safeParse(raw) {
-  if (!raw) return null;
-  let v = typeof raw === 'string' ? JSON.parse(raw) : raw;
-  if (typeof v === 'string') v = JSON.parse(v);
+  if (raw === null || raw === undefined) return null;
+  let v = raw;
+  for (let i = 0; i < 2 && typeof v === 'string'; i++) {
+    try { v = JSON.parse(v); } catch { return null; }
+  }
+  if (v && typeof v === 'object' && !Array.isArray(v) && typeof v.value === 'string') {
+    try { v = JSON.parse(v.value); } catch {}
+  }
   return v;
 }
 
@@ -116,7 +124,7 @@ export default async function handler(req, res) {
 
     const raw = await kvGet(`inspection-req:${requestId}`);
     if (!raw) return res.status(404).json({ error: 'Inspection request not found' });
-    const request = JSON.parse(raw);
+    const request = safeParse(raw);
 
     if (request.status !== 'open') {
       return res.status(409).json({ error: 'This inspection has already been claimed' });
@@ -146,7 +154,8 @@ export default async function handler(req, res) {
     await kvSet(`inspection:${inspId}`, inspection);
 
     const existingRaw = await kvGet('inspections:all');
-    const ids = existingRaw ? JSON.parse(existingRaw) : [];
+    const parsedIds = safeParse(existingRaw);
+    const ids = Array.isArray(parsedIds) ? parsedIds : [];
     ids.push(inspId);
     await kvSet('inspections:all', ids);
 

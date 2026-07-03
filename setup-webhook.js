@@ -11,7 +11,7 @@
 const TWILIO_ACCOUNT_SID = 'ACc4c971f5eeca4625a1c41e221f4b64a4';
 const TWILIO_AUTH_TOKEN  = '003b4601cbee402fad7ab3e4ff4f789a';
 const PHONE_NUMBER       = '+61485043210';
-const VOICE_URL          = 'https://no-agents.com.au/api/voice';
+const VOICE_URL          = 'https://www.no-agents.com.au/api/voice';
 const VERCEL_PROJECT_ID  = 'prj_HBZwB41JyWdJC8T7c94Gkvobk2yG';
 const VERCEL_TEAM_ID     = 'team_lA6dpia2wK9bZmXKgJ2bCHA2';
 

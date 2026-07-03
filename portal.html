@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Agent Portal — No Agents</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -114,6 +115,7 @@ async function doLogin() {
   } catch { errEl.textContent = 'Connection error. Try again.'; errEl.style.display = 'block'; }
 }
 
+document.getElementById('email').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 document.getElementById('phone').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
 function doLogout() {

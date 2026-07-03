@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
   "functions": {
     "api/**/*.js": {
       "memory": 512,
@@ -10,7 +12,23 @@
     { "source": "/leads", "destination": "/leads.html" },
     { "source": "/admin", "destination": "/admin.html" },
     { "source": "/portal", "destination": "/portal.html" },
+    { "source": "/sell", "destination": "/" },
+    { "source": "/buy", "destination": "/" },
+    { "source": "/fractional", "destination": "/" },
+    { "source": "/my-listing", "destination": "/" },
+    { "source": "/for-agents", "destination": "/" },
+    { "source": "/legal", "destination": "/" },
     { "source": "/offer/:path*", "destination": "/" },
     { "source": "/contract/:path*", "destination": "/" }
+  ],
+  "headers": [
+    {
+      "source": "/(admin|leads|portal)",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    },
+    {
+      "source": "/sitemap.xml",
+      "headers": [{ "key": "Content-Type", "value": "application/xml" }]
+    }
   ]
 }

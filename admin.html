@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — No Agents</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -169,8 +170,8 @@ async function loadAll() {
   data.inspections = Array.isArray(inspections) ? inspections : [];
   data.leads = (leads && leads.leads) ? leads.leads : [];
   try {
-    const lr = await fetch('/api/listing-store', { headers: { 'x-api-secret': token() } });
-    if (lr.ok) { const ld = await lr.json(); data.listings = ld.listings || []; }
+    const ld = await apiFetch('/api/listing-store');
+    if (ld) data.listings = ld.listings || [];
   } catch {}
 
   document.getElementById('cnt-agents').textContent = data.agents.length;

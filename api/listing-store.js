@@ -64,6 +64,8 @@
 //                      }
 //   }
 
+import { verifyAdminToken } from './admin-auth.js';
+
 const { KV_REST_API_URL, KV_REST_API_TOKEN, LISTING_API_SECRET } = process.env;
 
 export default async function handler(req, res) {
@@ -83,8 +85,10 @@ export default async function handler(req, res) {
     return res.status(200).json({ listing: null });
   }
 
-  // ── Auth ──
-  if (req.headers['x-api-secret'] !== LISTING_API_SECRET) {
+  // ── Auth ── webhook (x-api-secret) for internal calls, admin token for the admin UI
+  const isWebhook = LISTING_API_SECRET && req.headers['x-api-secret'] === LISTING_API_SECRET;
+  const isAdmin = verifyAdminToken(req.headers['x-admin-token']);
+  if (!isWebhook && !isAdmin) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 

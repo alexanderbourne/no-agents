@@ -4,6 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>no-agents — Sell your property. Keep the commission.</title>
+<meta name="description" content="Sell your home in Brisbane for a $798 flat fee — Domain.com.au listing, professional photography and 3D tour included. No commission, ever. Licensed QLD agency 4542501.">
+<link rel="canonical" href="https://www.no-agents.com.au/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="no-agents">
+<meta property="og:title" content="no-agents — Sell your property. Keep the commission.">
+<meta property="og:description" content="Sell your home for a $798 flat fee. Domain listing, photography and 3D tour included. No commission, ever.">
+<meta property="og:url" content="https://www.no-agents.com.au/">
+<meta property="og:image" content="https://www.no-agents.com.au/no-agents-hero.jpg">
+<meta property="og:locale" content="en_AU">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="no-agents — Sell your property. Keep the commission.">
+<meta name="twitter:description" content="Sell your home for a $798 flat fee. No commission, ever.">
+<meta name="twitter:image" content="https://www.no-agents.com.au/no-agents-hero.jpg">
+<meta name="geo.region" content="AU-QLD">
+<meta name="geo.placename" content="Brisbane">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"RealEstateAgent","@id":"https://www.no-agents.com.au/#agency","name":"No Agents","legalName":"No Agents Pty Ltd","url":"https://www.no-agents.com.au/","logo":"https://www.no-agents.com.au/no-agents-logo-agency.png","image":"https://www.no-agents.com.au/no-agents-hero.jpg","description":"Flat-fee real estate agency. Sell your property for $798 — Domain.com.au listing, photography and 3D tour included. No commission.","email":"office@no-agents.com.au","telephone":"+61485043210","areaServed":{"@type":"City","name":"Brisbane"},"address":{"@type":"PostalAddress","addressLocality":"Brisbane","addressRegion":"QLD","addressCountry":"AU"},"priceRange":"$798 flat fee","knowsAbout":["flat fee real estate","sell without an agent","no commission property sales"]},
+{"@type":"WebSite","@id":"https://www.no-agents.com.au/#website","url":"https://www.no-agents.com.au/","name":"no-agents","publisher":{"@id":"https://www.no-agents.com.au/#agency"}},
+{"@type":"Service","name":"Flat-fee property listing","provider":{"@id":"https://www.no-agents.com.au/#agency"},"serviceType":"Real estate sales","areaServed":"Brisbane QLD","offers":[{"@type":"Offer","name":"Complete Listing Package","price":"798","priceCurrency":"AUD","description":"Domain.com.au publication, professional photography, floor plans, 3D virtual tour, AI enquiry handling, open offer portal"},{"@type":"Offer","name":"Human Agent Visit","price":"99","priceCurrency":"AUD","description":"Licensed agent attends inspections, open homes and on-site access per visit"}]},
+{"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"How much does it cost to sell my house with no-agents?","acceptedAnswer":{"@type":"Answer","text":"One flat fee of $798 covers everything: listing creation, Domain.com.au publication, professional photography, floor plans and a 3D virtual tour. Optional licensed-agent visits for inspections are $99 each, or self-facilitate for free. No commission, ever."}},
+{"@type":"Question","name":"Is selling without an agent legal in Queensland?","acceptedAnswer":{"@type":"Answer","text":"Yes. No Agents Pty Ltd is a licensed Queensland real estate agency (licence 4542501), so your sale is handled through a licensed agency while you keep the commission."}},
+{"@type":"Question","name":"How much commission do I save selling a $720,000 house?","acceptedAnswer":{"@type":"Answer","text":"A traditional agent charging around 3% would cost about $21,600 plus marketing. With no-agents you pay $798 plus optional $99 inspection visits — a saving of roughly $20,000 or more."}},
+{"@type":"Question","name":"Will my property appear on the major property portals?","acceptedAnswer":{"@type":"Answer","text":"Your listing is published on Domain.com.au, which reached 8 million Australians in Q1 2026, with the portal fee included in the $798 package."}}
+]}
+]}
+</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231a1a1a'/><text x='16' y='22' font-size='14' text-anchor='middle' fill='%23e8d5b0' font-family='Georgia,serif' font-weight='700'>na</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script>
@@ -303,10 +331,12 @@ function Nav({v,go,gl}){
     <div style="max-width:1100px;margin:0 auto;padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between">
       <div onclick=${()=>go('home')} style="cursor:pointer;display:flex;align-items:center;gap:10px"><${Logo}/><span class="sf" style="font-size:17px;font-weight:600;color:${T.t};letter-spacing:-.3px">no-agents</span></div>
       <div class="hm" style="display:flex;gap:4px">${nav.map(([id,l])=>html`<button onclick=${()=>go(id)} style="padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:${v===id?T.k:'transparent'};color:${v===id?'#fff':T.tm};transition:all .15s;font-family:Inter,sans-serif">${l}</button>`)}</div>
+      <a href="tel:+61404349425" class="hm" style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:${T.t};text-decoration:none;padding:8px 10px">📞 0404 349 425</a>
       <button class="hm" style="${B('p','s')}" onclick=${()=>go('sell')}>List your property</button>
       <button onclick=${()=>setOpen(!open)} style="display:none;background:none;border:none;cursor:pointer;padding:8px;color:${T.t};font-size:22px" class="sm">${open?'✕':'☰'}</button>
     </div>
     ${open&&html`<div style="border-top:1px solid ${T.bd};background:${T.bg}">
+      <a href="tel:+61404349425" style="display:block;padding:16px 32px;font-size:15px;color:${T.t};font-weight:600;text-decoration:none;border-bottom:1px solid ${T.bd}">📞 Call 0404 349 425</a>
       ${nav.map(([id,l])=>html`<button onclick=${()=>{go(id);setOpen(false)}} style="display:block;width:100%;text-align:left;padding:16px 32px;background:${v===id?T.bw:'transparent'};border:none;border-bottom:1px solid ${T.bd};cursor:pointer;font-size:15px;color:${T.t};font-weight:500;font-family:Inter,sans-serif">${l}</button>`)}
       <div style="padding:20px"><button style="${B('p')};width:100%" onclick=${()=>{go('sell');setOpen(false)}}>List your property</button></div>
     </div>`}
@@ -314,14 +344,21 @@ function Nav({v,go,gl}){
 
 function Footer({go,gl}){
   return html`<footer style="border-top:1px solid ${T.bd};background:#fff;padding:40px 32px">
-    <div style="max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
+    <div style="max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid ${T.bd}">
       <div style="display:flex;align-items:center;gap:10px"><${Logo}/><span class="sf" style="font-size:15px;font-weight:500">no-agents.com.au</span></div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+        <a href="tel:+61404349425" style="font-size:13px;color:${T.t};font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px">📞 0404 349 425</a>
+        <a href="mailto:office@no-agents.com.au" style="font-size:13px;color:${T.t};font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px">✉️ office@no-agents.com.au</a>
+      </div>
+    </div>
+    <div style="max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
       <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
         <span style="font-size:13px;color:${T.tu}">© 2026 No Agents Pty Ltd</span>
         <span style="font-size:13px;color:${T.tu}">ABN: 18 642 813 438</span>
         <span style="font-size:13px;color:${T.tu}">Licence <strong style="color:${T.t}">4542501</strong> QLD</span>
       </div>
-      <div style="display:flex;gap:20px">
+      <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+        <a href="/sell-your-house" style="font-size:13px;color:${T.tu};font-weight:500;text-decoration:none">Suburbs we serve</a>
         ${['privacy','terms','complaints'].map(p=>html`<span onclick=${()=>{gl(p);go('legal')}} style="font-size:13px;color:${T.tu};cursor:pointer;font-weight:500;text-transform:capitalize">${p}</span>`)}
       </div>
     </div>
@@ -679,6 +716,46 @@ function Home({go}){
       </div>
     </section>
 
+    <section style="padding:56px 32px" class="mp">
+      <div style="max-width:1100px;margin:0 auto">
+        <div style="border-radius:16px;background:${T.bw};border:1px solid ${T.bdd};padding:28px 32px;display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between;margin-bottom:48px">
+          <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:center">
+            <div><div style="${LB}">Licensed agency</div><div style="font-size:15px;font-weight:600;color:${T.t}">Licence 4542501 (QLD)</div></div>
+            <div><div style="${LB}">Registered business</div><div style="font-size:15px;font-weight:600;color:${T.t}">No Agents Pty Ltd · ABN 18 642 813 438</div></div>
+            <div><div style="${LB}">Talk to a person</div><a href="tel:+61404349425" style="font-size:15px;font-weight:600;color:${T.t};text-decoration:none">📞 0404 349 425</a></div>
+          </div>
+          <div style="font-size:13px;color:${T.tm};max-width:300px;line-height:1.6">No chatbots pretending to be human, no call centre. A licensed Queensland agent is behind every listing and every $99 visit.</div>
+        </div>
+
+        <div style="text-align:center;margin-bottom:32px"><h2 class="sf" style="font-size:32px;font-weight:600;letter-spacing:-.5px;margin-bottom:10px">How the models compare</h2><p style="font-size:15px;color:${T.tm}">Same market, three ways to sell.</p></div>
+        <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;min-width:640px">
+          <thead><tr>
+            <th style="text-align:left;padding:12px 16px;font-size:12px;color:${T.tu};text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid ${T.bd}"></th>
+            <th style="text-align:left;padding:12px 16px;font-size:12px;color:${T.tu};text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid ${T.bd}">Traditional agent</th>
+            <th style="text-align:left;padding:12px 16px;font-size:12px;color:${T.tu};text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid ${T.bd}">Typical flat-fee site</th>
+            <th style="text-align:left;padding:12px 16px;font-size:12px;color:${T.al};text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid ${T.k};background:${T.k}">no-agents</th>
+          </tr></thead>
+          <tbody>
+            ${[
+              ['Cost on a $720k sale','~$21,600 (3%) + marketing','$500–$1,000 flat','$798 flat + $99 per visit'],
+              ['Portal listing (Domain/REA)','Included','Often a separate add-on','Included — Domain.com.au'],
+              ['Every buyer sees every offer','No — private negotiation','Rarely offered','Yes — live open offer board'],
+              ["On-site help when you need it","Included (that's the commission)",'Usually DIY only','Optional — licensed agent, $99/visit'],
+              ['Enquiry handling','Depends on the agent','Rare','AI-assisted, always on'],
+            ].map(([l,a,f,n])=>html`<tr>
+              <td style="padding:14px 16px;font-size:13px;color:${T.t};font-weight:500;border-bottom:1px solid ${T.bd}">${l}</td>
+              <td style="padding:14px 16px;font-size:13px;color:${T.tm};border-bottom:1px solid ${T.bd}">${a}</td>
+              <td style="padding:14px 16px;font-size:13px;color:${T.tm};border-bottom:1px solid ${T.bd}">${f}</td>
+              <td style="padding:14px 16px;font-size:13px;color:${T.t};font-weight:600;border-bottom:1px solid ${T.bd};background:${T.bw}">${n}</td>
+            </tr>`)}
+          </tbody>
+        </table>
+        </div>
+        <div style="font-size:11px;color:${T.tu};margin-top:10px">"Typical flat-fee site" reflects common industry packages as publicly advertised — confirm current pricing directly with any provider before comparing.</div>
+      </div>
+    </section>
+
     <section style="background:#fff;border-top:1px solid ${T.bd};border-bottom:1px solid ${T.bd};padding:64px 32px" class="mp">
       <div style="max-width:760px;margin:0 auto">
         <div>
@@ -729,6 +806,10 @@ function Sell(){
   const[errors,setErrors]=useState({});
   const[eoiSent,setEoiSent]=useState(false);
   const[eoiBusy,setEoiBusy]=useState(false);
+  const[suburbData,setSuburbData]=useState(null);
+  useEffect(()=>{fetch('/data/suburbs.json').then(r=>r.ok?r.json():null).then(d=>d&&setSuburbData(d)).catch(()=>{});},[]);
+  const matchedSuburb=suburbData&&form.address?suburbData.suburbs.find(s=>form.address.toLowerCase().includes(s.name.toLowerCase())):null;
+  const commPct=suburbData?.defaultCommissionPct||2.5;
   const outOfArea=form.addrState&&form.addrState!=='QLD';
   const submitEoi=async()=>{
     if(!form.sellerName.trim()||!form.sellerEmail.trim())return;
@@ -776,6 +857,19 @@ function Sell(){
         <div style="${fg}"><label style="${LB}">Property address</label>
           <input id="addr-inp" style="${IS}" value=${form.address} onInput=${e=>{up('address',e.target.value);up('addrState','');}} placeholder="Start typing your address..."/>
           </div>
+        ${matchedSuburb&&!outOfArea&&html`<div style="border-radius:14px;background:${T.k};padding:20px 24px;margin-bottom:20px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px">
+            <div>
+              <div style="font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Indicative value · ${matchedSuburb.name}</div>
+              <div class="sf" style="font-size:26px;font-weight:600;color:${T.al};letter-spacing:-.5px">$${Math.round(matchedSuburb.median*0.9).toLocaleString()} – $${Math.round(matchedSuburb.median*1.1).toLocaleString()}</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px">Based on the ${matchedSuburb.name} suburb median — not a formal appraisal.</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Est. saving vs a ${commPct}% agent</div>
+              <div class="sf" style="font-size:26px;font-weight:600;color:#fff;letter-spacing:-.5px">$${Math.round(matchedSuburb.median*commPct/100-798).toLocaleString()}</div>
+            </div>
+          </div>
+        </div>`}
         ${outOfArea&&html`<div style="border-radius:12px;background:#fde8e6;border:1px solid #f5c6c3;padding:18px 20px;margin-bottom:20px">
           ${!eoiSent?html`<div>
             <div style="font-weight:600;font-size:14px;color:${T.r};margin-bottom:4px">We only operate in Queensland right now</div>
@@ -851,6 +945,7 @@ function Sell(){
           <ul style="list-style:none;display:grid;gap:8px">${['Listing creation and professional copywriting','Domain.com.au publication — portal fee included','Professional photography (day shoot + floor plans)','3D virtual tour','AI-powered enquiry handling','Live open offer portal with real-time notifications','Full transaction roadmap to settlement'].map(i=>html`<li style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:rgba(255,255,255,.7)"><span style="color:${T.al};flex-shrink:0;margin-top:1px">✓</span>${i}</li>`)}</ul>
         </div>
         <div style="display:flex;gap:10px;background:${T.bg};border-radius:10px;padding:12px 14px;border:1px solid ${T.bd};align-items:flex-start"><span style="flex-shrink:0;font-size:16px">🔑</span><div><div style="font-weight:600;font-size:13px;margin-bottom:2px">Human Agent Visit — $99 per visit</div><div style="font-size:12px;color:${T.tu}">Pay as you go — only billed when you book one. Licensed agent attends for inspections, photography, B&P access. Or self-facilitate for free.</div></div></div>
+        <div style="display:flex;gap:10px;background:${T.bg};border-radius:10px;padding:12px 14px;border:1px solid ${T.bd};align-items:flex-start;margin-top:10px"><span style="flex-shrink:0;font-size:16px">📄</span><div><div style="font-weight:600;font-size:13px;margin-bottom:2px">Conveyancing — arranged separately</div><div style="font-size:12px;color:${T.tu}">We're finalising a referral partner so you'll be able to book conveyancing in a couple of clicks once an offer is accepted. Until then, use your own solicitor or conveyancer — <a href="mailto:office@no-agents.com.au" style="color:${T.t};font-weight:500">ask us for a recommendation</a>.</div></div></div>
       </div>`}
 
       ${step===4&&html`<div>
@@ -899,7 +994,7 @@ function Buy(){
   const[searching,setSearching]=useState(false);
   const[searchErr,setSearchErr]=useState('');
   const[foundListing,setFoundListing]=useState(null);
-  const lookupListing=async()=>{setSearchErr('');try{const r=await fetch('/api/listing-store?search='+encodeURIComponent(input.trim()));if(r.ok){const d=await r.json();if(d.listing){setFoundListing(d.listing);setUnlocked(true);}else{setSearchErr('No listing found for that address. Check the address and try again.');}}else{setSearchErr('Search failed. Try again.');}}catch{setSearchErr('Connection error. Try again.');}setSearching(false);};
+  const lookupListing=async()=>{setSearchErr('');try{const r=await fetch('/api/listing-store?search='+encodeURIComponent(input.trim()));if(r.ok){const d=await r.json();if(d.listing){const l=d.listing;setFoundListing({...l,photos:Array.isArray(l.images)&&l.images.length?l.images:[],priceGuide:Number(String(l.priceView||l.price||'').replace(/[^0-9.]/g,''))||0,views:l.views||0,enquiries:l.enquiries||0});setUnlocked(true);}else{setSearchErr('No listing found for that address. Check the address and try again.');}}else{setSearchErr('Search failed. Try again.');}}catch{setSearchErr('Connection error. Try again.');}setSearching(false);};
   const[offerSubmitting,setOfferSubmitting]=useState(false);
   const submitOffer=async()=>{
     setOfferSubmitting(true);
@@ -920,9 +1015,10 @@ function Buy(){
   const p=foundListing||DEMO;
   const verified=vs===4;
   const dL=Math.ceil((new Date(p.deadline)-new Date())/86400000);
-  const mMid=Math.round((p.rea.mid+p.dom.mid)/2);
-  const mLow=Math.round((p.rea.low+p.dom.low)/2);
-  const mHigh=Math.round((p.rea.high+p.dom.high)/2);
+  const hasValuations=Boolean(p.rea&&p.dom);
+  const mMid=hasValuations?Math.round((p.rea.mid+p.dom.mid)/2):0;
+  const mLow=hasValuations?Math.round((p.rea.low+p.dom.low)/2):0;
+  const mHigh=hasValuations?Math.round((p.rea.high+p.dom.high)/2):0;
   const sendCode=async()=>{setSending(true);setSmsErr(false);try{const r=await fetch('/api/send-sms-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:vf.phone})});const d=await r.json();if(r.ok&&d.token){setSmsToken({token:d.token,ts:d.ts});setVs(2);}else{setSmsErr(d.error||'Failed to send code. Try again.');}}catch{setSmsErr('Connection error. Try again.');}setSending(false);};
   const verifyCode=async()=>{setSmsErr(false);try{const r=await fetch('/api/verify-sms-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:vf.phone,code:smsIn,token:smsToken.token,ts:smsToken.ts})});if(r.ok){setVs(3);setSmsErr(false);}else{const d=await r.json();setSmsErr(d.error||'Incorrect code.');}}catch{setSmsErr('Connection error. Try again.');}};
   const slots=[{date:'Sat 31 May',times:['9:00am','10:00am','10:30am','11:00am']},{date:'Sun 1 Jun',times:['10:00am','11:00am','2:00pm','3:00pm']},{date:'Sat 7 Jun',times:['9:00am','10:00am','11:00am','2:00pm']}];
@@ -968,15 +1064,15 @@ function Buy(){
     </div>
     <div style="display:grid;grid-template-columns:1fr 340px;gap:24px" class="g1 buy-grid">
       <div>
-        <div style="position:relative;border-radius:16px;overflow:hidden;aspect-ratio:16/9;margin-bottom:12px">
-          <img src=${p.photos[photo]} alt="Property" style="width:100%;height:100%;object-fit:cover;display:block"/>
-          <div style="position:absolute;bottom:12px;left:12px;display:flex;gap:6px">${p.photos.map((_,i)=>html`<div onclick=${()=>setPhoto(i)} style="width:8px;height:8px;border-radius:50%;background:${i===photo?'#fff':'rgba(255,255,255,.5)'};cursor:pointer"></div>`)}</div>
-          <div style="position:absolute;bottom:12px;right:12px;display:flex;gap:8px">
+        <div style="position:relative;border-radius:16px;overflow:hidden;aspect-ratio:16/9;margin-bottom:12px;background:${T.bg}">
+          ${p.photos.length?html`<img src=${p.photos[photo]} alt="Property" style="width:100%;height:100%;object-fit:cover;display:block"/>`:html`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${T.tu};font-size:13px">Photos coming soon</div>`}
+          ${p.photos.length>1&&html`<div style="position:absolute;bottom:12px;left:12px;display:flex;gap:6px">${p.photos.map((_,i)=>html`<div onclick=${()=>setPhoto(i)} style="width:8px;height:8px;border-radius:50%;background:${i===photo?'#fff':'rgba(255,255,255,.5)'};cursor:pointer"></div>`)}</div>`}
+          ${p.photos.length>1&&html`<div style="position:absolute;bottom:12px;right:12px;display:flex;gap:8px">
             <button onclick=${()=>setPhoto(Math.max(0,photo-1))} style="width:32px;height:32px;border-radius:8px;background:rgba(0,0,0,.5);border:none;color:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">‹</button>
             <button onclick=${()=>setPhoto(Math.min(p.photos.length-1,photo+1))} style="width:32px;height:32px;border-radius:8px;background:rgba(0,0,0,.5);border:none;color:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">›</button>
-          </div>
+          </div>`}
         </div>
-        <div style="display:flex;gap:8px;margin-bottom:20px" class="thumb-row">${p.photos.map((src,i)=>html`<img src=${src} onclick=${()=>setPhoto(i)} style="width:72px;height:54px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid ${i===photo?T.k:T.bd};transition:border-color .15s"/>`)}</div>
+        ${p.photos.length>1&&html`<div style="display:flex;gap:8px;margin-bottom:20px" class="thumb-row">${p.photos.map((src,i)=>html`<img src=${src} onclick=${()=>setPhoto(i)} style="width:72px;height:54px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid ${i===photo?T.k:T.bd};transition:border-color .15s"/>`)}</div>`}
 
         <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid ${T.bd}" class="tab-row">
           ${['overview','offers','roadmap','book'].map(t=>html`<button onclick=${()=>setTab(t)} style="padding:10px 18px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:500;color:${tab===t?T.t:T.tu};border-bottom:2px solid ${tab===t?T.k:'transparent'};margin-bottom:-1px;transition:all .15s;font-family:Inter,sans-serif">${t==='book'?'Book inspection':t.charAt(0).toUpperCase()+t.slice(1)}</button>`)}
@@ -984,7 +1080,7 @@ function Buy(){
 
         ${tab==='overview'&&html`<div>
           <p style="font-size:15px;color:${T.tm};line-height:1.75;margin-bottom:24px">${p.description}</p>
-          <div style="border-radius:14px;border:1px solid ${T.bd};overflow:hidden">
+          ${hasValuations&&html`<div style="border-radius:14px;border:1px solid ${T.bd};overflow:hidden">
             <div style="padding:14px 20px;background:${T.bg};border-bottom:1px solid ${T.bd};display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
               <div style="font-size:12px;font-weight:600;color:${T.tu};text-transform:uppercase;letter-spacing:.05em">Price estimates — dual source</div>
               <span style="${P('w')};font-size:11px">Automated valuation · demo data</span>
@@ -999,7 +1095,7 @@ function Buy(){
                 </div>`)}
             </div>
             <div style="padding:10px 20px;background:${T.bg};border-top:1px solid ${T.bd};font-size:11px;color:${T.tu}">Reference valuations from Domain.com.au and Realestate.com.au. Click to verify. We list exclusively on Domain.</div>
-          </div>
+          </div>`}
         </div>`}
 
         ${tab==='offers'&&html`<div>
@@ -1239,6 +1335,11 @@ function SellerDash({go,token,listingId,onLogout}){
   const[csignImg,setCsignImg]=useState(null);
   const[csigning,setCsigning]=useState(false);
   const[conveyancer,setConveyancer]=useState({name:'',email:'',phone:''});
+  const[deadlineInput,setDeadlineInput]=useState('');
+  const[priceInput,setPriceInput]=useState('');
+  const[savingSettings,setSavingSettings]=useState(false);
+  const[settingsSaved,setSettingsSaved]=useState(false);
+  const[withdrawing,setWithdrawing]=useState(false);
   const[listingDesc,setListingDesc]=useState('');
   const[descLoading,setDescLoading]=useState(false);
   const[descSaved,setDescSaved]=useState(false);
@@ -1248,7 +1349,7 @@ function SellerDash({go,token,listingId,onLogout}){
     setLoading(true);setLoadErr('');
     fetch(`/api/seller-portal?listingId=${encodeURIComponent(listingId)}`,{headers:{'x-seller-token':token}})
       .then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||'Could not load your dashboard.');return d;})
-      .then(d=>{if(cancelled)return;setData(d);setInsp(d.inspections||[]);setEnquiries(d.enquiries||[]);})
+      .then(d=>{if(cancelled)return;setData(d);setInsp(d.inspections||[]);setEnquiries(d.enquiries||[]);setDeadlineInput(d.listing.deadline||'');setPriceInput(d.listing.priceView||d.listing.price||'');})
       .catch(e=>{if(!cancelled)setLoadErr(e.message);})
       .finally(()=>{if(!cancelled)setLoading(false);});
     return()=>{cancelled=true;};
@@ -1272,6 +1373,29 @@ function SellerDash({go,token,listingId,onLogout}){
       if(r.ok){const d=await r.json();setData(prev=>({...prev,photoShoot:d.photoShoot}));}
     }catch{}
     setPhotoBusy(false);
+  };
+  const saveSettings=async()=>{
+    setSavingSettings(true);setSettingsSaved(false);
+    try{
+      const r=await fetch(`/api/seller-portal?listingId=${encodeURIComponent(listingId)}&action=update-details`,{method:'POST',headers:{'Content-Type':'application/json','x-seller-token':token},body:JSON.stringify({deadline:deadlineInput,priceView:priceInput,conveyancer})});
+      if(r.ok){const d=await r.json();setData(prev=>({...prev,listing:d.listing}));setSettingsSaved(true);}
+    }catch{}
+    setSavingSettings(false);
+  };
+  const withdrawListing=async()=>{
+    if(!confirm('Withdraw this listing from Domain.com.au? Buyers will no longer be able to view or offer on it.'))return;
+    setWithdrawing(true);
+    try{
+      const r=await fetch(`/api/seller-portal?listingId=${encodeURIComponent(listingId)}&action=withdraw`,{method:'POST',headers:{'Content-Type':'application/json','x-seller-token':token},body:'{}'});
+      if(r.ok){const d=await r.json();setData(prev=>({...prev,listing:d.listing}));}
+    }catch{}
+    setWithdrawing(false);
+  };
+  const replyToEnquiry=(e)=>{
+    const subject=encodeURIComponent(`Re: your enquiry about ${data.listing.address}`);
+    const body=encodeURIComponent(`Hi ${e.name},\n\n`);
+    window.open(`mailto:${e.email}?subject=${subject}&body=${body}`,'_blank');
+    setEnquiries(prev=>prev.map(x=>x===e?{...x,replied:true}:x));
   };
 
   const signForm6=async()=>{
@@ -1431,7 +1555,7 @@ function SellerDash({go,token,listingId,onLogout}){
             <div style="font-size:13px;color:${T.tm};margin-bottom:4px">"${e.message}"</div>
             <div style="font-size:12px;color:${T.tu}">${e.email} · ${e.phone}</div>
           </div>
-          ${!e.replied&&html`<button style="${B('p','s')}">Reply</button>`}
+          ${!e.replied&&html`<button style="${B('p','s')}" onclick=${()=>replyToEnquiry(e)}>Reply</button>`}
         </div>
       </div>`)}
     </div>`}
@@ -1560,18 +1684,22 @@ function SellerDash({go,token,listingId,onLogout}){
       </div>
       <div style="${CD}">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-        <div><label style="${LB}">Offer deadline</label><input style="${IS}" type="date" value=${p.deadline||''}/></div>
-        <div><label style="${LB}">Price guide</label><input style="${IS}" value=${p.priceView||p.price||''}/></div>
+        <div><label style="${LB}">Offer deadline</label><input style="${IS}" type="date" value=${deadlineInput} onInput=${e=>{setDeadlineInput(e.target.value);setSettingsSaved(false);}}/></div>
+        <div><label style="${LB}">Price guide</label><input style="${IS}" value=${priceInput} onInput=${e=>{setPriceInput(e.target.value);setSettingsSaved(false);}}/></div>
       </div>
       <div style="margin-bottom:16px"><label style="${LB}">Your conveyancer</label>
-        <input style="${IS};margin-bottom:8px" value=${conveyancer.name} onInput=${e=>setConveyancer(c=>({...c,name:e.target.value}))} placeholder="Conveyancer or solicitor name"/>
+        <input style="${IS};margin-bottom:8px" value=${conveyancer.name} onInput=${e=>{setConveyancer(c=>({...c,name:e.target.value}));setSettingsSaved(false);}} placeholder="Conveyancer or solicitor name"/>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <input style="${IS}" type="email" value=${conveyancer.email} onInput=${e=>setConveyancer(c=>({...c,email:e.target.value}))} placeholder="Email address"/>
-          <input style="${IS}" type="tel" value=${conveyancer.phone} onInput=${e=>setConveyancer(c=>({...c,phone:e.target.value}))} placeholder="Phone number"/>
+          <input style="${IS}" type="email" value=${conveyancer.email} onInput=${e=>{setConveyancer(c=>({...c,email:e.target.value}));setSettingsSaved(false);}} placeholder="Email address"/>
+          <input style="${IS}" type="tel" value=${conveyancer.phone} onInput=${e=>{setConveyancer(c=>({...c,phone:e.target.value}));setSettingsSaved(false);}} placeholder="Phone number"/>
         </div>
         <div style="font-size:12px;color:${T.tu};margin-top:6px">Nominate your own conveyancer or solicitor. They'll be contacted when a contract is ready.</div>
       </div>
-      <div style="display:flex;gap:8px"><button style="${B('p','m')}">Save changes</button><button style="${B('o','m')}">Withdraw listing</button></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button style="${B('p','m')};opacity:${savingSettings?.6:1}" disabled=${savingSettings} onclick=${saveSettings}>${savingSettings?'Saving…':'Save changes'}</button>
+        <button style="${B('o','m')};opacity:${withdrawing||p.status==='withdrawn'?.6:1}" disabled=${withdrawing||p.status==='withdrawn'} onclick=${withdrawListing}>${p.status==='withdrawn'?'Withdrawn':withdrawing?'Withdrawing…':'Withdraw listing'}</button>
+        ${settingsSaved&&html`<span style="${P('g')};font-size:11px">✓ Saved</span>`}
+      </div>
       </div>
     </div>`}
   </div>`;}
@@ -1815,15 +1943,15 @@ function Fractional({go}){
   const spark=[{y:'2020',v:40,l:'$1.7M'},{y:'2021',v:52,l:'$1.9M'},{y:'2022',v:60,l:'$2.1M'},{y:'2023',v:72,l:'$2.2M'},{y:'2024',v:85,l:'$2.35M'},{y:'2025',v:100,l:'$2.7M'}];
 
   const faqs=[
-    ["How does fractional ownership work?","Every property is divided into 10,000 Slices. Each Slice represents an equal fractional interest in the property, held through a unit trust structure registered on the title. You receive proportional income and capital appreciation. Ownership is recorded on-chain via a smart contract."],
+    ["How does fractional ownership work?","Each property sits inside its own single-asset unit trust — a Managed Investment Scheme (MIS) registered with ASIC. Legal title to the land is held by a licensed custodian on trust for unit holders (that's what appears on the Queensland Titles Register). The trust is divided into 10,000 units — Slices — each representing 1/10,000 of the beneficial interest. You receive proportional income and capital growth as a unit holder. The trust's unit register is maintained on-chain via smart contract for a live, tamper-evident record of who holds what — but the on-chain register is not the land title; the Torrens register is."],
     ["What is a Slice?","One Slice = 1/10,000th of a property. The Slice Valuation is the latest independent property valuation divided by 10,000. When the property is revalued (every 6–12 months), your Slice valuation updates automatically — no new Slices are created. For example, if a property goes from $2.4M to $2.5M, each Slice goes from $240 to $250."],
     ["Is an owner-occupied property a different investment to a tenanted one?","No — every property pays yield plus capital growth, regardless of who lives there. A tenanted property pays market rent; an owner-occupied property pays an independently assessed market-rate occupancy fee. Both are distributed to Slice holders the same way and both carry the same capital growth on revaluation. Occupancy type is just a detail about who's living there, not a different return structure."],
     ["What if the owner occupies the property — how do investors earn income?","The owner pays a fair market occupancy fee to the trust each month, independently assessed. This is distributed to all Slice holders proportionally, exactly like rental income from a tenant. The owner effectively pays rent to the pool of investors (including themselves for their own Slices)."],
     ["What if the majority owner wants to sell the whole property?","No one can force a sale unilaterally. The smart contract requires a supermajority vote (75%+) to trigger a full property sale. If approved, all owners receive their proportional share of the proceeds. If you vote against and it passes, you are paid out at independent valuation — never below market value."],
-    ["How do I exit if the property doesn't sell?","You are never locked in. List your Slices on the secondary marketplace anytime — we facilitate buyer matching and handle settlement. Every 5 years, all Slice holders participate in a trust vote: continue, restructure, or liquidate. This gives every investor a structured exit window, even if no buyer appears on the marketplace."],
+    ["How do I exit if the property doesn't sell?","You can list your Slices on the secondary marketplace at any time, but liquidity is not guaranteed — a Slice only sells when another investor buys it. Every 5 years, all unit holders vote on a wind-up: continue, restructure, or liquidate. If a supermajority votes to liquidate, the trust must find a buyer for the property at independent valuation before proceeds are distributed. It's a structured wind-up right, not a promise of a guaranteed exit at a set price."],
     ["What are the fees?","Transaction fee: 0.5% on purchase and sale. Annual management fee: 0.5% for trust administration and smart contract maintenance. Owner occupancy assessments: independently valued, no markup. All fees disclosed upfront before purchase."],
     ["What is the minimum investment?","One Slice. Slice price varies by property — it's simply the property valuation divided by 10,000. Most investors start with 10–50 Slices."],
-    ["Is this regulated?","Yes. The trust structure operates under Australian law. All transactions comply with Queensland property legislation. Licensed conveyancers handle title registration. We are working toward an AFSL for the managed investment scheme."],
+    ["Is this regulated?","It will be. Each property trust is intended to operate as a registered Managed Investment Scheme under the Corporations Act 2001, with an external Responsible Entity (RE) holding an AFSL that authorises operating an MIS, dealing in interests in an MIS, and providing custodial services. A licensed custodian will hold legal title on the Queensland Titles Register. Retail offers will be made under a Product Disclosure Statement and Target Market Determination in line with ASIC's Design & Distribution Obligations. The on-chain unit register additionally requires authorisation as a Digital Asset Platform under the Corporations Amendment (Digital Assets Framework) Act 2025 (in force July 2026). None of this is live yet — this page is EOI-stage."],
     ["What happens if the property is negatively geared?","If property expenses (rates, insurance, maintenance, management) exceed rental or occupancy income in a given month, the shortfall is absorbed by a reserve fund established at listing. If the reserve is depleted, distributions pause until it recovers — investors are never asked to contribute additional capital. Properties are screened for positive cash flow before listing to minimise this risk."],
   ];
 
@@ -1834,12 +1962,21 @@ function Fractional({go}){
         <h1 class="sf mh1" style="font-size:40px;font-weight:700;color:#fff;line-height:1.2;margin-bottom:12px">Own a Slice of <span style="color:${T.a}">any property</span></h1>
         <p style="font-size:16px;color:#aaa;max-width:540px;margin:0 auto 32px;line-height:1.6">No Agents Fractional lets you buy Slices in residential property. Every property is divided into 10,000 Slices — earn monthly income and capital growth without buying the whole thing.</p>
         <div style="display:flex;justify-content:center;gap:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,.1);flex-wrap:wrap">
-          ${[['10,000','Slices per property'],['Value ÷ 10k','= Slice price'],['Monthly','Income distributed'],['Blockchain','Smart contract secured']].map(([v,l])=>html`<div><div style="font-size:24px;font-weight:700;color:#fff">${v}</div><div style="font-size:12px;color:#888;margin-top:2px">${l}</div></div>`)}
+          ${[['10,000','Units per property'],['Value ÷ 10k','= Slice price'],['Monthly','Income distributed'],['Unit trust','Held via licensed RE']].map(([v,l])=>html`<div><div style="font-size:24px;font-weight:700;color:#fff">${v}</div><div style="font-size:12px;color:#888;margin-top:2px">${l}</div></div>`)}
         </div>
       </div>
     </section>
 
-    <section style="padding:40px 32px 0" class="mp">
+    <section style="padding:20px 32px 0" class="mp">
+      <div style="max-width:1000px;margin:0 auto">
+        <div style="background:rgba(200,151,58,.08);border:1px solid rgba(200,151,58,.35);border-radius:12px;padding:16px 20px">
+          <div style="font-size:11px;font-weight:700;color:${T.al};letter-spacing:.06em;margin-bottom:6px">EOI STAGE · NOT YET A LIVE FINANCIAL PRODUCT</div>
+          <div style="font-size:13px;color:${T.tm};line-height:1.65">This page describes the intended structure of a <strong>registered Managed Investment Scheme (MIS)</strong> under the Corporations Act 2001. To operate live, No Agents will engage an external <strong>Responsible Entity holding an AFSL</strong>, appoint a <strong>custodian to hold legal title</strong> to each property, issue a <strong>Product Disclosure Statement (PDS)</strong> with a <strong>Target Market Determination</strong>, and — for the on-chain unit register — hold authorisations as a <strong>Digital Asset Platform</strong> under the Corporations Amendment (Digital Assets Framework) Act, in force from July 2026. No funds are being accepted. No Slice has been issued. This is expression-of-interest only.</div>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding:32px 32px 0" class="mp">
       <div style="max-width:1000px;margin:0 auto">
         <div style="text-align:center;margin-bottom:32px"><h2 class="sf" style="font-size:28px;font-weight:600;letter-spacing:-.5px;margin-bottom:12px">Yield + capital growth, on every property</h2><p style="font-size:15px;color:${T.tm};max-width:560px;margin:0 auto">Every property pays monthly income at market rate, whether it's tenanted or owner-occupied — plus capital growth as the property is revalued.</p></div>
         <div style="border-radius:16px;border:2px solid ${T.k};padding:28px;background:${T.k};margin-bottom:32px">
@@ -1909,8 +2046,8 @@ function Fractional({go}){
 
           <div style="${CD};margin-top:16px">
             <div style="font-size:13px;font-weight:600;margin-bottom:12px">Trust structure & governance</div>
-            <div style="font-size:13px;color:${T.tm};line-height:1.6;margin-bottom:12px">Each property is held by a separate <strong>No Agents Property Trust</strong>. Each Slice represents one unit in the trust — ownership recorded on a secure blockchain register and reflected on the property title. Smart contract governs distributions, voting and exits.</div>
-            ${[['Trust type','Unit trust — each Slice = 1 unit of 10,000'],['Voting rights','1 Slice = 1 vote · 75%+ supermajority for major decisions'],['Full sale','Supermajority vote required — minority owners paid at independent valuation'],['5-year trust vote','Every 5 years, all holders vote: continue, restructure, or liquidate. Ensures a structured exit window even if no secondary buyer appears.'],['Exit anytime','Sell Slices on the secondary marketplace at any time (0.5% transaction fee)']].map(([l,v])=>html`<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid ${T.bd};font-size:12px"><span style="color:${T.tu};min-width:110px;flex-shrink:0;font-weight:500">${l}</span><span style="color:${T.t};line-height:1.5">${v}</span></div>`)}
+            <div style="font-size:13px;color:${T.tm};line-height:1.6;margin-bottom:12px">Each property sits inside its own single-asset <strong>No Agents Property Trust</strong>, registered as a Managed Investment Scheme. A licensed <strong>custodian holds legal title</strong> on the Queensland Titles Register on behalf of unit holders. Each Slice is one unit of 10,000 in that trust. The <strong>unit register is maintained on-chain</strong> for a live, tamper-evident record of who holds what — the on-chain register is not the land title itself.</div>
+            ${[['Legal title','Held by a licensed custodian on the QLD Titles Register, on trust for unit holders'],['Trust type','Single-asset registered MIS unit trust — each Slice = 1 unit of 10,000'],['Responsible Entity','External RE holding AFSL authorisations to operate the scheme'],['Unit register','Maintained on-chain by smart contract — reflects who holds each unit'],['Voting rights','1 Slice = 1 vote · 75%+ supermajority for major decisions'],['Full sale','Supermajority vote required — dissenting holders paid at independent valuation'],['5-year wind-up vote','Every 5 years holders vote to continue, restructure or wind up. Wind-up still requires a buyer at independent valuation — it is a structured exit right, not a guaranteed cash-out.'],['Secondary market','Slices can be listed on the platform marketplace at any time (0.5% transaction fee). Liquidity depends on buyer demand and is not guaranteed.']].map(([l,v])=>html`<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid ${T.bd};font-size:12px"><span style="color:${T.tu};min-width:110px;flex-shrink:0;font-weight:500">${l}</span><span style="color:${T.t};line-height:1.5">${v}</span></div>`)}
           </div>
         </div>
 
@@ -1952,7 +2089,7 @@ function Fractional({go}){
 
             <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:${T.bg};border-radius:8px;margin-bottom:8px">
               <div style="width:32px;height:32px;background:${T.k};border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0">BLC</div>
-              <div style="font-size:12px;color:${T.tm};line-height:1.4"><strong style="color:${T.t}">Blockchain secured</strong> — ownership minted on-chain. Immutable record of every Slice.</div>
+              <div style="font-size:12px;color:${T.tm};line-height:1.4"><strong style="color:${T.t}">On-chain unit register</strong> — every Slice is a unit in the trust; the register of who holds each unit is maintained on-chain. Legal title to the land sits with the custodian on the Torrens register.</div>
             </div>
             <div style="font-size:10px;color:${T.tu};line-height:1.5;margin-top:12px">General information only. Not financial advice. Read the PDS before investing. Past performance does not indicate future returns. Capital is at risk.</div>
           </div>
@@ -2036,39 +2173,60 @@ function Fractional({go}){
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px" class="g1">
           <div style="${CD}">
             <h3 class="sf" style="font-size:18px;font-weight:600;margin-bottom:16px">The process</h3>
-            <ul style="list-style:none;display:grid;gap:10px">${['Decide what percentage to sell (e.g. 10% = 1,000 Slices)','We set up a unit trust structure for the property','A conveyancer registers the trust on the title','We list the Slices on our platform','Investors purchase Slices — you receive funds','If owner-occupied, you pay fair market rent to the trust monthly — independently assessed and distributed to investors','Buy back Slices later on the marketplace if you choose'].map((s,i)=>html`<li style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:${T.tm}"><span style="width:22px;height:22px;border-radius:50%;background:${T.k};color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</span>${s}</li>`)}</ul>
+            <ul style="list-style:none;display:grid;gap:10px">${['Decide what percentage to sell (e.g. 34% = 3,400 Slices) and get an independent valuation','We form a single-asset unit trust and appoint the licensed Responsible Entity and custodian','If you have a mortgage, it is discharged or refinanced against the trust — lender consent required up front','Your property transfers to the trust’s custodian on the QLD Titles Register at valuation. You take back units equal to the share you’re keeping (e.g. 6,600 units for the 66% you retain)','If you continue living there, you sign a residential lease with the trust and pay an independently assessed market rent each month','Investor Slices are offered under a PDS. Cash from each Slice sold to an investor is released to you as the vendor for the portion being sold','You can bid on Slices listed on the secondary marketplace (first-option right) to lift your holding again over time'].map((s,i)=>html`<li style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:${T.tm}"><span style="width:22px;height:22px;border-radius:50%;background:${T.k};color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</span>${s}</li>`)}</ul>
           </div>
           <div style="${CD}">
             <h3 class="sf" style="font-size:18px;font-weight:600;margin-bottom:16px">Why this works</h3>
-            <ul style="list-style:none;display:grid;gap:10px">${['You hold the bulk of ownership — lower risk for everyone','Stay in your home — no need to sell and move out','Investors get a real asset backed by property','Trust structure provides full legal protection','75%+ vote required for any full sale — you retain control','Occupancy fee gives investors a return even when you live there'].map(s=>html`<li style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:${T.tm}"><span style="color:${T.g};flex-shrink:0">✓</span>${s}</li>`)}</ul>
+            <ul style="list-style:none;display:grid;gap:10px">${['You keep the majority of the units — lower risk for you and for investors','You continue living in the property under a residential lease from the trust','Investors get units in a registered MIS holding a real, valued property','External Responsible Entity and licensed custodian sit between you and investors — nobody transacts directly with anybody','75%+ vote required for any full sale — no single holder can force a wind-up','Market-rate occupancy fee funds distributions to investors regardless of who lives there'].map(s=>html`<li style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:${T.tm}"><span style="color:${T.g};flex-shrink:0">✓</span>${s}</li>`)}</ul>
           </div>
         </div>
 
-        <div style="${CD};margin-bottom:32px">
+        <div style="${CD};margin-bottom:20px">
           <h3 class="sf" style="font-size:18px;font-weight:600;margin-bottom:16px">How a sale actually works</h3>
           <div style="display:grid;gap:16px">
             <div style="display:flex;gap:12px;align-items:flex-start">
               <span style="width:24px;height:24px;border-radius:50%;background:${T.k};color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">1</span>
-              <div><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">You hold the full property until each Slice sells</div><div style="font-size:13px;color:${T.tm};line-height:1.6">Say you list 10% (1,000 Slices) for sale. You remain the owner of those Slices — and the full property — right up until an investor actually buys them. We don't buy your equity off you up front and carry it ourselves. We never hold the mortgage, rates, insurance or any other carrying cost on your behalf — those stay with you, the title owner, throughout.</div></div>
+              <div><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">Property transfers into the trust up front, at independent valuation</div><div style="font-size:13px;color:${T.tm};line-height:1.6">A registered MIS can only issue units in a property the trust actually owns (or has a binding, funded contract to acquire). So step one is: the property is transferred from you to the trust's licensed custodian on the QLD Titles Register, at an independent valuation. You do <em>not</em> stay on title while Slices trickle out — the transfer happens once, at the start, and stamp duty is triggered at that point.</div></div>
             </div>
             <div style="display:flex;gap:12px;align-items:flex-start">
               <span style="width:24px;height:24px;border-radius:50%;background:${T.k};color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">2</span>
-              <div><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">Funds are batched and paid out once a month</div><div style="font-size:13px;color:${T.tm};line-height:1.6">As investors buy Slices through the month, their funds sit with the trust rather than being paid to you Slice-by-Slice. At end of month we settle the whole batch in one distribution — e.g. $10,000 of Slices sold in the month is paid to you at EOM. Those Slices only activate (start counting toward investor ownership and income rights) once that distribution clears.</div></div>
+              <div><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">You take back units for the share you're keeping</div><div style="font-size:13px;color:${T.tm};line-height:1.6">If you're selling 34% of a $2.4M home, you keep the other 66% as 6,600 units in the trust. Those units are legally the same instrument as the Slices investors will buy — you're a unit holder alongside them from day one, not a co-owner on title.</div></div>
             </div>
             <div style="display:flex;gap:12px;align-items:flex-start">
               <span style="width:24px;height:24px;border-radius:50%;background:${T.k};color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">3</span>
-              <div><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">Why we batch it this way</div><div style="font-size:13px;color:${T.tm};line-height:1.6">Income and capital growth are split strictly in proportion to how the property is divided at that point in time. Settling in one EOM batch — rather than activating each Slice the instant it's bought — keeps the ownership register and that month's distribution calculation in sync, so nobody's share of rent or revaluation gets miscounted mid-month.</div></div>
+              <div><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">You receive cash as investor Slices are subscribed</div><div style="font-size:13px;color:${T.tm};line-height:1.6">The remaining 3,400 Slices are offered to investors under a PDS. As each investor's subscription clears, the corresponding cash — net of platform and RE fees, and any stamp-duty holdback — is released to you as vendor. There's no "we hold your equity for you" model: the trust doesn't have its own capital to advance, so payment to you is funded by investor subscriptions actually settling.</div></div>
             </div>
             <div style="display:flex;gap:12px;align-items:flex-start">
               <span style="width:24px;height:24px;border-radius:50%;background:${T.k};color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">4</span>
-              <div><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">Every Slice is owned by someone, always</div><div style="font-size:13px;color:${T.tm};line-height:1.6">All 10,000 Slices are accounted for at all times — the ones you haven't sold yet are still yours, recorded on the register the same as a sold Slice is recorded to its buyer. There's no unallocated or unowned portion of the property at any point.</div></div>
+              <div><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">If it doesn't fully sell, unsold Slices stay with you</div><div style="font-size:13px;color:${T.tm};line-height:1.6">Every unit is always held by someone. Slices that aren't taken up by investors sit in your unit holding — you effectively haven't liquidated that portion. You can re-offer them later, or hold them and keep collecting distributions on them like any other unit holder.</div></div>
             </div>
             <div style="display:flex;gap:12px;align-items:flex-start">
               <span style="width:24px;height:24px;border-radius:50%;background:${T.k};color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">5</span>
-              <div><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">Buying back your Slices</div><div style="font-size:13px;color:${T.tm};line-height:1.6">You don't get special voting power to force a buyout — every Slice carries equal rights. But you do get first option: if a holder lists their Slices on the secondary marketplace, you're offered the chance to buy them back before anyone else, at the listed price. If you want to buy back 100% in one go, you can table a full buyout offer at the 5-year trust vote, where holders vote on it at an independently assessed valuation, same as any other major decision.</div></div>
+              <div><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">Buying units back later</div><div style="font-size:13px;color:${T.tm};line-height:1.6">You don't get super-voting rights — every unit carries equal rights. What you do get is a right of first refusal: if another holder lists Slices on the secondary marketplace, you're offered them first at the listed price. To buy the whole thing back in one go, you can table a full-buyout resolution at the 5-year wind-up vote; it passes only with a 75%+ supermajority, at independent valuation.</div></div>
             </div>
           </div>
-          <div style="margin-top:16px;padding:12px 14px;background:${T.bw};border:1px solid ${T.bdd};border-radius:8px;font-size:12px;color:${T.tm};line-height:1.6"><strong style="color:${T.ad}">Regulatory note:</strong> pooling investor funds into a trust like this is likely to fall under Australia's managed investment scheme rules (Corporations Act 2001). We are not yet licensed to operate this as a live financial product — this page describes the EOI-stage concept only, pending an Australian Financial Services Licence and full legal structuring before any real funds are accepted.</div>
+        </div>
+
+        <div style="${CD};margin-bottom:20px;background:${T.bw};border:1px solid ${T.bdd}">
+          <h3 class="sf" style="font-size:18px;font-weight:600;margin-bottom:12px">What actually changes on title</h3>
+          <div style="font-size:13px;color:${T.tm};line-height:1.7;margin-bottom:12px">This is the piece most homeowners don't intuit. When you fractionalise, you are not adding investors alongside you on the title — you're transferring the whole property into a trust and taking back units.</div>
+          ${[['Registered proprietor','Changes from you personally to the licensed custodian for the trust (holding on trust for unit holders).'],['Your legal interest','Changes from freehold ownership to units in the registered MIS. You have unit holder rights, not land owner rights.'],['If you continue living there','You become a residential tenant of the trust. Occupancy is governed by a lease under the QLD Residential Tenancies and Rooming Accommodation Act 2008 — bond, condition report, notices, minimum housing standards, RTA jurisdiction all apply.'],['Land title register','Sole source of truth for legal ownership of the land — QLD Torrens register.'],['On-chain register','Tracks who holds each unit in the trust. It is a unit register, not a substitute for the land title.']].map(([l,v])=>html`<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid ${T.bdd};font-size:12px"><span style="color:${T.ad};min-width:150px;flex-shrink:0;font-weight:600">${l}</span><span style="color:${T.tm};line-height:1.5">${v}</span></div>`)}
+        </div>
+
+        <div style="${CD};margin-bottom:20px">
+          <h3 class="sf" style="font-size:18px;font-weight:600;margin-bottom:12px">Costs and risks specific to owner-occupiers</h3>
+          <div style="display:grid;gap:12px">
+            <div style="padding:12px 14px;background:${T.bg};border-radius:8px"><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">Stamp duty on the transfer into the trust</div><div style="font-size:12px;color:${T.tm};line-height:1.6">Transferring the property into the trust is a dutiable transaction in Queensland. On a $2.4M home this is roughly $120k of transfer duty at current rates. Partial-interest structures may reduce this — it is a specialist question and needs a QLD revenue lawyer before you commit.</div></div>
+            <div style="padding:12px 14px;background:${T.bg};border-radius:8px"><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">Loss of the main residence CGT exemption on the sold portion</div><div style="font-size:12px;color:${T.tm};line-height:1.6">The share you sell to investors loses the main residence exemption from the moment of transfer. The share you retain can still be eligible while you occupy — but the rules are messy because you no longer hold legal title. Get personal tax advice.</div></div>
+            <div style="padding:12px 14px;background:${T.bg};border-radius:8px"><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">Existing mortgage must be discharged or refinanced</div><div style="font-size:12px;color:${T.tm};line-height:1.6">Standard home loans require the borrower to remain on title. Your mortgage will need to be paid out or refinanced into a product held against the trust — a niche lending category with worse LVRs than a normal owner-occupier loan. Lender consent is required before transfer.</div></div>
+            <div style="padding:12px 14px;background:${T.bg};border-radius:8px"><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">You are now a tenant in what used to be your home</div><div style="font-size:12px;color:${T.tm};line-height:1.6">Your right to keep living there is a residential lease from the trust. The occupancy fee is rent, paid from your post-tax income. Non-payment can lead to notices to leave under QLD residential tenancy law. If the property is wound up under the 5-year vote, your tenancy may end.</div></div>
+            <div style="padding:12px 14px;background:${T.bg};border-radius:8px"><div style="font-size:13px;font-weight:600;color:${T.t};margin-bottom:3px">Liquidity is not guaranteed</div><div style="font-size:12px;color:${T.tm};line-height:1.6">Slices only convert to cash when someone else buys them or when the property is sold. If investor demand is soft, unsold Slices simply stay in your holding — you haven't freed up that equity.</div></div>
+          </div>
+        </div>
+
+        <div style="${CD};margin-bottom:32px;background:${T.bw};border:1px solid ${T.bdd}">
+          <div style="font-size:13px;font-weight:700;color:${T.al};letter-spacing:.04em;margin-bottom:8px;text-transform:uppercase">Regulatory reality</div>
+          <div style="font-size:13px;color:${T.tm};line-height:1.7">A pooled trust in which retail investors buy units to receive a share of income and capital growth is a <strong>Managed Investment Scheme</strong> under Chapter 5C of the Corporations Act 2001. With any retail offering it must be <strong>registered with ASIC</strong>, operated by a <strong>Responsible Entity holding an AFSL</strong> with the right authorisations (operate an MIS, deal in interests in an MIS, provide custodial services, provide financial product advice), governed by a compliant trust deed and compliance plan, and offered under a <strong>Product Disclosure Statement and Target Market Determination</strong> under the Design & Distribution Obligations. The on-chain unit register additionally brings the platform inside the <strong>Digital Asset Framework</strong> (Corporations Amendment Act 2025, in force July 2026) — a licensed Digital Asset Platform authorisation applies on top of the AFSL. No Slice will be issued and no funds accepted until the RE, custodian, PDS/TMD, trust deed, on-chain register terms and DAP authorisations are all in place. This page is EOI-stage only. Not financial advice.</div>
         </div>
 
         ${!sellerSent?html`<div style="${CD};max-width:600px;margin:0 auto">
@@ -2078,7 +2236,7 @@ function Fractional({go}){
           <div style="margin-bottom:14px"><label style="${LB}">Percentage you'd consider selling</label><select style="${IS}" value=${sellerForm.percent} onChange=${e=>sUp('percent',e.target.value)}>${['5','10','15','20','25','30'].map(p=>html`<option value=${p}>${p}%</option>`)}</select></div>
           <div style="margin-bottom:14px"><label style="${LB}">Will you continue living there?</label>
             <div style="display:flex;gap:8px">${[['tenanted','No — property is tenanted'],['occupied','Yes — I live here']].map(([v,l])=>html`<button onclick=${()=>sUp('occupancy',v)} style="${B(sellerForm.occupancy===v?'p':'o')};flex:1;font-size:13px">${l}</button>`)}</div>
-            ${sellerForm.occupancy==='occupied'&&html`<div style="font-size:12px;color:${T.tm};margin-top:8px;line-height:1.5;padding:10px 12px;background:${T.bw};border-radius:8px;border:1px solid ${T.bdd}">As an owner-occupier, you'll pay a fair market occupancy fee to the trust each month (independently assessed). This is distributed to your investors and ensures they earn a return while you continue living in the property.</div>`}
+            ${sellerForm.occupancy==='occupied'&&html`<div style="font-size:12px;color:${T.tm};margin-top:8px;line-height:1.5;padding:10px 12px;background:${T.bw};border-radius:8px;border:1px solid ${T.bdd}">As a continuing occupant, you'll sign a residential lease with the trust and pay an independently assessed market rent each month. That rent is distributed to unit holders pro-rata (including yourself for the units you retain). See "Costs and risks specific to owner-occupiers" above — stamp duty, CGT and mortgage refinance apply.</div>`}
           </div>
           <button style="${B('p','l')};width:100%;opacity:${sellerForm.name&&sellerForm.email&&sellerForm.phone&&sellerForm.address?1:.5}" onclick=${()=>sellerForm.name&&sellerForm.email&&sellerForm.phone&&sellerForm.address&&setSellerSent(true)} disabled=${!(sellerForm.name&&sellerForm.email&&sellerForm.phone&&sellerForm.address)}>Submit expression of interest →</button>
         </div>`:html`<div style="${CD};max-width:600px;margin:0 auto;text-align:center;padding:40px"><div style="font-size:40px;margin-bottom:12px">✅</div><h3 class="sf" style="font-size:22px;font-weight:600;margin-bottom:8px">Expression of interest received</h3><p style="font-size:14px;color:${T.tm}">We'll be in touch within 2 business days at <strong>${sellerForm.email}</strong>.</p></div>`}
@@ -2170,6 +2328,28 @@ function ContractSign(){
   </div>`;
 }
 
+// ── SEO routes: real URLs per view ─────────────────────────────
+const ROUTES={home:'/',sell:'/sell',buy:'/buy',fractional:'/fractional',dash:'/my-listing',agents:'/for-agents',legal:'/legal'};
+const ROUTE_META={
+  home:{t:'no-agents — Sell your property. Keep the commission.',d:'Sell your home in Brisbane for a $798 flat fee — Domain.com.au listing, photography and 3D tour included. No commission, ever.'},
+  sell:{t:'List your property for $798 flat — no commission | no-agents',d:'List your Brisbane property in about 10 minutes. $798 covers Domain.com.au publication, professional photography and a 3D virtual tour. No commission.'},
+  buy:{t:'Buy a no-agents property — transparent open offers | no-agents',d:'Search no-agents listings and make offers on a transparent open offer board. Every verified offer visible to every buyer. No gazumping, no blind bidding.'},
+  fractional:{t:'Fractional property ownership — own a Slice | no-agents',d:'Register interest in No Agents Fractional: buy Slices in residential property, earn monthly income and capital growth. Expression of interest now open.'},
+  dash:{t:'My listing — seller dashboard | no-agents',d:'Manage your no-agents listing: enquiries, inspection bookings and live offers in one dashboard.'},
+  agents:{t:'Earn $70 per inspection — for licensed QLD agents | no-agents',d:'Licensed Queensland agents: pick up buyer inspections around Brisbane at $70 per confirmed inspection, paid weekly. Join the panel in 2 minutes.'},
+  legal:{t:'Legal | no-agents',d:'Privacy policy, terms of service and complaints handling for No Agents Pty Ltd.'}
+};
+const pathToView=p=>{const clean=(p||'/').replace(/\/+$/,'')||'/';for(const[v,r]of Object.entries(ROUTES))if(r===clean)return v;return null;};
+const applyMeta=v=>{
+  const m=ROUTE_META[v]||ROUTE_META.home;
+  document.title=m.t;
+  const md=document.querySelector('meta[name="description"]');if(md)md.setAttribute('content',m.d);
+  const cl=document.querySelector('link[rel="canonical"]');if(cl)cl.setAttribute('href','https://www.no-agents.com.au'+(ROUTES[v]&&ROUTES[v]!=='/'?ROUTES[v]:'/'));
+  const ogt=document.querySelector('meta[property="og:title"]');if(ogt)ogt.setAttribute('content',m.t);
+  const ogd=document.querySelector('meta[property="og:description"]');if(ogd)ogd.setAttribute('content',m.d);
+  const ogu=document.querySelector('meta[property="og:url"]');if(ogu)ogu.setAttribute('content','https://www.no-agents.com.au'+(ROUTES[v]&&ROUTES[v]!=='/'?ROUTES[v]:'/'));
+};
+
 function App(){
   const initView=()=>{
     if(window.location.hash==='#agentmanagement')return 'admin';
@@ -2177,12 +2357,23 @@ function App(){
     if(window.location.pathname.startsWith('/offer/'))return 'buy';
     const params=new URLSearchParams(window.location.search);
     if(params.get('payment')==='success'&&params.get('listingId')&&params.get('session_id'))return 'checkout-redirect';
-    return 'home';
+    return pathToView(window.location.pathname)||'home';
   };
   const[view,setView]=useState(initView());
   const[legalPage,setLegalPage]=useState('privacy');
-  const go=v=>{setView(v);window.scrollTo(0,0);};
+  const go=v=>{
+    setView(v);window.scrollTo(0,0);
+    if(ROUTES[v]&&window.location.pathname!==ROUTES[v]){try{window.history.pushState({v},'',ROUTES[v]);}catch{}}
+    applyMeta(v);
+  };
   const gl=p=>setLegalPage(p);
+
+  useEffect(()=>{
+    applyMeta(view);
+    const onPop=()=>{const v=pathToView(window.location.pathname);if(v){setView(v);applyMeta(v);window.scrollTo(0,0);}};
+    window.addEventListener('popstate',onPop);
+    return()=>window.removeEventListener('popstate',onPop);
+  },[]);
 
   useEffect(()=>{
     if(view!=='checkout-redirect')return;

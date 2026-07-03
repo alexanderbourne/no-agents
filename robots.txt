@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /leads
+Disallow: /portal
+Disallow: /api/
+Disallow: /contract/
+
+Sitemap: https://www.no-agents.com.au/sitemap.xml
