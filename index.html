@@ -501,6 +501,8 @@ Sellers may instead choose the Assisted Sale tier at the time of listing. Assist
 
 3. Human Agent Visit — $99 per visit
 A licensed Queensland real estate agent will attend on-site for any requirement including buyer inspections, open homes, building and pest access, photography or staging access. Each visit is charged at a flat fee of $99 (excl. GST), billed after the confirmed visit. Sellers may alternatively self-facilitate inspections at no cost. A minimum of 24 hours' notice is required for cancellation of a booked agent visit.
+— If you choose to have a licensed agent attend on-site visits, you will be shown these terms and asked to expressly consent before payment. By consenting, you authorise us to securely save your card details with our payment processor (Stripe) and to charge $99 off-session after each confirmed visit. This applies regardless of your listing tier — choosing Self-Managed only exempts you from the success fee described in section 2A, not from this per-visit charge if you select agent-assisted visits. If you never opt into agent-assisted visits, no card is saved for this purpose.
+— We will notify you before any such charge is made and provide a receipt by email. You may switch to self-facilitated inspections at any time by contacting office@no-agents.com.au; no further visit charges apply once you have switched.
 
 4. Seller Obligations
 Sellers warrant that:
@@ -821,7 +823,7 @@ function Home({go}){
 function Sell(){
   const[step,setStep]=useState(1);
   const[paying,setPaying]=useState(false);
-  const[form,setForm]=useState({address:'',addrState:'',type:'Apartment',beds:2,baths:1,cars:1,floor:'',description:'',price:'',deadline:'',tenanted:'no',inspection:'agent',tenantName:'',tenantEmail:'',tenantPhone:'',tenantAddress:'',availableDays:[],availableTimes:[],sellerName:'',sellerEmail:'',sellerPhone:'',listingStartDate:'',tier:'flat',assistedConsent:false});
+  const[form,setForm]=useState({address:'',addrState:'',type:'Apartment',beds:2,baths:1,cars:1,floor:'',description:'',price:'',deadline:'',tenanted:'no',inspection:'agent',tenantName:'',tenantEmail:'',tenantPhone:'',tenantAddress:'',availableDays:[],availableTimes:[],sellerName:'',sellerEmail:'',sellerPhone:'',listingStartDate:'',tier:'flat',cardSaveConsent:false});
   const up=(k,v)=>setForm(f=>({...f,[k]:v}));
   const[errors,setErrors]=useState({});
   const[eoiSent,setEoiSent]=useState(false);
@@ -840,7 +842,7 @@ function Sell(){
     }catch{}
     setEoiBusy(false);
   };
-  const validate=s=>{const e={};if(s===1){if(!form.address.trim())e.address='Property address required';else if(outOfArea)e.address='We only operate in Queensland currently';if(!form.sellerName.trim())e.name='Full name required';if(!form.sellerEmail.trim())e.email='Email required';else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.sellerEmail))e.email='Valid email required';if(!form.sellerPhone.trim())e.phone='Mobile required';}if(s===2){if(!form.availableDays.length)e.days='Select at least one available day';if(!form.availableTimes.length)e.times='Select at least one available time';}if(s===3){if(form.tier==='assisted'&&!form.assistedConsent)e.consent='Please confirm you understand and agree to the success fee terms to continue with Assisted Sale';}setErrors(e);return!Object.keys(e).length;};
+  const validate=s=>{const e={};if(s===1){if(!form.address.trim())e.address='Property address required';else if(outOfArea)e.address='We only operate in Queensland currently';if(!form.sellerName.trim())e.name='Full name required';if(!form.sellerEmail.trim())e.email='Email required';else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.sellerEmail))e.email='Valid email required';if(!form.sellerPhone.trim())e.phone='Mobile required';}if(s===2){if(!form.availableDays.length)e.days='Select at least one available day';if(!form.availableTimes.length)e.times='Select at least one available time';}if(s===3){if((form.tier==='assisted'||form.inspection==='agent')&&!form.cardSaveConsent)e.consent='Please confirm you agree to the card-save terms below to continue';}setErrors(e);return!Object.keys(e).length;};
   const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   const times=['8:00am','9:00am','10:00am','11:00am','12:00pm','2:00pm','3:00pm','4:00pm','5:00pm'];
   const fg='margin-bottom:20px';
@@ -976,10 +978,10 @@ function Sell(){
           <div style="font-weight:600;font-size:13px;margin-bottom:8px">Included in every package</div>
           <ul style="list-style:none;display:grid;gap:6px">${['Listing creation and professional copywriting','Domain.com.au publication — portal fee included','Professional photography (day shoot + floor plans)','3D virtual tour','AI-powered enquiry handling','Live open offer portal with real-time notifications','Full transaction roadmap to settlement'].map(i=>html`<li style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:${T.tm}"><span style="color:${T.k};flex-shrink:0;margin-top:1px">✓</span>${i}</li>`)}</ul>
         </div>
-        ${form.tier==='assisted'&&html`<div style="border-radius:12px;background:${T.bw};border:1px solid ${T.bdd};padding:16px 18px;margin-bottom:16px">
+        ${(form.tier==='assisted'||form.inspection==='agent')&&html`<div style="border-radius:12px;background:${T.bw};border:1px solid ${T.bdd};padding:16px 18px;margin-bottom:16px">
           <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer">
-            <input type="checkbox" checked=${form.assistedConsent} onChange=${e=>up('assistedConsent',e.target.checked)} style="margin-top:3px;flex-shrink:0;width:16px;height:16px"/>
-            <span style="font-size:12px;color:${T.tm};line-height:1.6">I understand that with Assisted Sale, No Agents will save my card details at checkout and charge a success fee of 0.5% of the sale price (capped at $15,000 AUD) only once my property settles. No charge will be made unless and until my property sells — see <a href="/terms" style="color:${T.t};font-weight:500">Terms of Service, section 2A</a>.</span>
+            <input type="checkbox" checked=${form.cardSaveConsent} onChange=${e=>up('cardSaveConsent',e.target.checked)} style="margin-top:3px;flex-shrink:0;width:16px;height:16px"/>
+            <span style="font-size:12px;color:${T.tm};line-height:1.6">${(()=>{const parts=[];if(form.tier==='assisted')parts.push('a success fee of 0.5% of the sale price (capped at $15,000 AUD), charged only once my property settles');if(form.inspection==='agent')parts.push('$99 for each confirmed human agent visit, charged after the visit');return `I understand No Agents will save my card details at checkout to charge ${parts.join(' and ')}.`;})()} See <a href="/terms" style="color:${T.t};font-weight:500">Terms of Service${form.tier==='assisted'?', section 2A':''}</a>.</span>
           </label>
         </div>`}
         <div style="display:flex;gap:10px;background:${T.bg};border-radius:10px;padding:12px 14px;border:1px solid ${T.bd};align-items:flex-start"><span style="flex-shrink:0;font-size:16px">🔑</span><div><div style="font-weight:600;font-size:13px;margin-bottom:2px">Human Agent Visit — $99 per visit</div><div style="font-size:12px;color:${T.tu}">Pay as you go — only billed when you book one. Licensed agent attends for inspections, photography, B&P access. Or self-facilitate for free.</div></div></div>
@@ -993,14 +995,14 @@ function Sell(){
         <div style="display:flex;gap:10px;background:${T.bw};border-radius:10px;padding:12px 14px;border:1px solid ${T.bdd};align-items:flex-start;margin-bottom:20px"><span style="flex-shrink:0;font-size:16px">🔐</span><div style="font-size:12px;color:${T.tm};line-height:1.6">We'll text a one-time code to <strong style="color:${T.t}">${form.sellerPhone||'your mobile'}</strong> each time you sign in to your seller dashboard at "My listing" — no password to remember.</div></div>
         <div style="border-radius:14px;background:${T.bg};border:1px solid ${T.bd};padding:20px;margin-bottom:20px">
           <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px"><span style="color:${T.tm}">Complete Listing Package (incl. Domain, photography, 3D tour)</span><span style="font-weight:500">$798.00</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:13px;color:${T.tu};margin-bottom:4px"><span>Human agent visits — billed after each</span><span>$99 per visit</span></div>
+          ${form.inspection==='agent'&&html`<div style="display:flex;justify-content:space-between;font-size:13px;color:${T.tu};margin-bottom:4px"><span>Human agent visits — billed after each</span><span>$99 per visit</span></div>`}
           ${form.tier==='assisted'&&html`<div style="display:flex;justify-content:space-between;font-size:13px;color:${T.tu};margin-bottom:4px"><span>Success fee — charged only on settlement</span><span>0.5%, capped $15,000</span></div>`}
           ${form.tenanted==='yes'&&html`<div style="display:flex;justify-content:space-between;font-size:13px;color:${T.tu}"><span>Entry notices</span><span>Auto-generated, included</span></div>`}
           <div style="height:1px;background:${T.bd};margin:12px 0"></div>
           <div style="display:flex;justify-content:space-between;font-weight:600;font-size:15px"><span>Due now</span><span>$798.00</span></div>
         </div>
         <button style="${B('p','l')};width:100%;opacity:${paying?0.7:1}" onclick=${async()=>{setPaying(true);await doStripe({...form,tier:form.tier});setPaying(false);}} disabled=${paying}>${paying?'Redirecting to payment…':'Pay $798 and list →'}</button>
-        <div style="text-align:center;font-size:12px;color:${T.tu};margin-top:10px">Secured by Stripe${form.tier==='assisted'?' · your card will be saved for the success-fee charge at settlement':''}</div>
+        <div style="text-align:center;font-size:12px;color:${T.tu};margin-top:10px">${(()=>{const parts=[];if(form.tier==='assisted')parts.push('the success-fee charge at settlement');if(form.inspection==='agent')parts.push('agent-visit charges as they occur');return `Secured by Stripe${parts.length?' · your card will be saved for '+parts.join(' and '):''}`;})()}</div>
       </div>`}
 
       ${Object.keys(errors).length>0&&html`<div style="background:#fde8e6;border-radius:10px;padding:12px 16px;font-size:13px;color:${T.r};border:1px solid #f5c6c3;margin-top:16px">${Object.values(errors).join(' · ')}</div>`}
@@ -1028,6 +1030,7 @@ function Buy(){
   const[selD,setSelD]=useState(null);
   const[selT,setSelT]=useState(null);
   const[booked,setBooked]=useState(false);
+  const[bookMode,setBookMode]=useState('agent');
   const[offerDone,setOfferDone]=useState(false);
   const[offer,setOffer]=useState({amount:'',settlement:60,finance:false,financeDays:'14',financeDaysCustom:'',building:false,buildingDays:'14',buildingDaysCustom:'',conditions:'',initialDeposit:'2000',balanceDeposit:'5',coolingOff:false,solicitorCompany:'',solicitorContact:'',solicitorEmail:'',solicitorPhone:''});
   const[showSugg,setShowSugg]=useState(false);
@@ -1203,10 +1206,10 @@ function Buy(){
             <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;padding:10px 14px;background:#d4ede1;border-radius:10px"><span style="color:${T.g}">✓</span><span style="font-size:13px;font-weight:500;color:${T.g}">Identity verified — ${vf.name}</span></div>
             ${!showSlots?html`<div><h3 class="sf" style="font-size:18px;font-weight:600;margin-bottom:8px">Book an inspection</h3><p style="font-size:14px;color:${T.tm};margin-bottom:16px;line-height:1.6">Select a time and someone will be there to show you through — either the owner or a licensed agent.</p><button style="${B('p','m')}" onclick=${()=>setShowSlots(true)}>Choose a time →</button></div>`:html`<div>
               ${slots.map(slot=>html`<div style="margin-bottom:16px"><div style="font-size:13px;font-weight:600;margin-bottom:8px">${slot.date}</div><div style="display:flex;gap:8px;flex-wrap:wrap">${slot.times.map(t=>html`<button onclick=${()=>{setSelD(slot.date);setSelT(t)}} style="padding:8px 14px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid ${selD===slot.date&&selT===t?T.k:T.bd};background:${selD===slot.date&&selT===t?T.k:'transparent'};color:${selD===slot.date&&selT===t?'#fff':T.t};transition:all .15s;font-family:Inter,sans-serif">${t}</button>`)}</div></div>`)}
-              ${selT&&html`<button style="${B('p','m')};width:100%" onclick=${async()=>{try{await fetch('/api/inspections?type=request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:p.address||p.listingAddress||'Unknown',date:selD,time:selT,buyerName:vf.name||''})})}catch{}setBooked(true);}}>Confirm ${selD} at ${selT} →</button>`}
+              ${selT&&html`<button style="${B('p','m')};width:100%" onclick=${async()=>{let mode='agent';try{const r=await fetch('/api/inspections?type=request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:p.address||p.listingAddress||'Unknown',date:selD,time:selT,buyerName:vf.name||''})});const j=await r.json().catch(()=>null);if(j?.mode)mode=j.mode;}catch{}setBookMode(mode);setBooked(true);}}>Confirm ${selD} at ${selT} →</button>`}
             </div>`}
           </div>`}
-          ${booked&&html`<div style="${CD};text-align:center;padding:40px"><div style="font-size:40px;margin-bottom:12px">✅</div><h3 class="sf" style="font-size:22px;font-weight:600;margin-bottom:8px">Inspection confirmed</h3><p style="font-size:14px;color:${T.tm};line-height:1.6">Someone will be there to show you through — either the owner or a licensed agent. You'll receive a confirmation email shortly.</p></div>`}
+          ${booked&&html`<div style="${CD};text-align:center;padding:40px"><div style="font-size:40px;margin-bottom:12px">✅</div><h3 class="sf" style="font-size:22px;font-weight:600;margin-bottom:8px">Inspection requested</h3><p style="font-size:14px;color:${T.tm};line-height:1.6">${bookMode==='self'?"The owner has been notified directly and will be in touch to arrange access.":'A licensed agent will confirm and show you through.'} You'll receive a confirmation email shortly.</p></div>`}
         </div>`}
       </div>
 
@@ -1648,7 +1651,7 @@ function SellerDash({go,token,listingId,onLogout}){
             <div>
               <div style="font-weight:600;font-size:14px;margin-bottom:2px">${d.name}</div>
               <div style="font-size:12px;color:${T.tu}">
-                ${d.kind==='contract'?(d.status==='executed'?`Signed by both — ${d.contract.sellerSigned.signedByName} & ${d.contract.buyerSigned.signedByName} — passed to your conveyancer to finalise`:d.status==='awaiting_buyer'?`Sent to ${d.contract.buyerName} to sign first`:`${d.contract.buyerName} has signed — your signature is required`):
+                ${d.kind==='contract'?(d.status==='executed'?`Signed by both — ${d.contract.sellerSigned.signedByName} & ${d.contract.buyerSigned.signedByName}${p.conveyancingHandoff?.notified?` — ${p.conveyancer?.name||'your conveyancer'} notified ${new Date(p.conveyancingHandoff.notifiedAt).toLocaleDateString('en-AU')}`:' — add your conveyancer in Settings so we can notify them automatically'}`:d.status==='awaiting_buyer'?`Sent to ${d.contract.buyerName} to sign first`:`${d.contract.buyerName} has signed — your signature is required`):
                   d.kind==='agent'?'Auto-generated as soon as you accept an offer':
                   d.kind==='sign'?(d.status==='signed'?`Signed by ${d.signedByName} on ${new Date(d.signedAt).toLocaleDateString('en-AU')}`:'Your signature is required'):
                   docFiles[d.id]?docFiles[d.id].name:
@@ -1658,7 +1661,7 @@ function SellerDash({go,token,listingId,onLogout}){
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
-            ${d.kind==='contract'?(d.status==='executed'?html`<span style="${P('g')};font-size:11px">✓ With conveyancer</span>`:d.status==='awaiting_buyer'?html`<span style="${P('u')};font-size:11px">Awaiting buyer</span>`:html`<button style="${B('p','s')}" onclick=${()=>{setCsignName(p.sellerName||'');setCsignAgree(false);setCsignImg(null);setContractM(true);}}>Review & sign →</button>`):
+            ${d.kind==='contract'?(d.status==='executed'?(p.conveyancingHandoff?.notified?html`<span style="${P('g')};font-size:11px">✓ Conveyancer notified</span>`:html`<span style="${P('w')};font-size:11px">No conveyancer set</span>`):d.status==='awaiting_buyer'?html`<span style="${P('u')};font-size:11px">Awaiting buyer</span>`:html`<button style="${B('p','s')}" onclick=${()=>{setCsignName(p.sellerName||'');setCsignAgree(false);setCsignImg(null);setContractM(true);}}>Review & sign →</button>`):
               d.kind==='agent'?(d.status==='provided'?html`<span style="${P('g')};font-size:11px">✓ Provided</span>`:html`<span style="${P('w')};font-size:11px">Awaiting</span>`):
               d.kind==='sign'?(d.status==='signed'?html`<span style="${P('g')};font-size:11px">✓ Signed</span>`:html`<button style="${B('p','s')}" onclick=${()=>{setSignName(p.sellerName||'');setSignAgree(false);setSignImg(null);setForm6M(true);}}>Review & sign →</button>`):
               docFiles[d.id]?html`<span style="${P('g')};font-size:11px">✓ Uploaded</span>`:d.kind==='seller'?html`<label style="${B('o','s')};cursor:pointer"><input type="file" accept=".pdf,.doc,.docx,image/*" style="display:none" onChange=${e=>{if(e.target.files[0])setDocFiles(f=>({...f,[d.id]:e.target.files[0]}))}}/>Upload →</label>`:html`<span style="${P('w')};font-size:11px">Awaiting</span>`}

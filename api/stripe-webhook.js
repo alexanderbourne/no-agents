@@ -58,6 +58,7 @@ export default async function handler(req, res) {
   const listing = {
     uniqueId,
     tier:                  meta.tier === 'assisted' ? 'assisted' : 'flat',
+    inspectionMode:        meta.inspection === 'agent' ? 'agent' : 'self',
     stripeCustomerId:      session.customer || null,
     stripePaymentMethodId: session.payment_method || null,
     address:      meta.address || '',

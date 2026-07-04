@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { chargeInspectionVisit } from './inspection-billing.js';
 
 const { KV_REST_API_URL: KV_URL, KV_REST_API_TOKEN: KV_TOKEN } = process.env;
 
@@ -137,6 +138,7 @@ export default async function handler(req, res) {
     await kvSet(`inspection-req:${requestId}`, request);
 
     const inspId = `insp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const billing = await chargeInspectionVisit({ address: request.address, inspectionId: inspId });
     const inspection = {
       id: inspId,
       agentId: agent.id,
@@ -149,6 +151,10 @@ export default async function handler(req, res) {
       status: 'confirmed',
       commissionOwed: 70,
       commissionPaid: false,
+      sellerFee: 99,
+      sellerFeeCharged: billing.charged,
+      sellerFeeChargeId: billing.chargeId || null,
+      sellerFeeSkipReason: billing.charged ? null : billing.reason,
       recordedAt: new Date().toISOString(),
     };
     await kvSet(`inspection:${inspId}`, inspection);

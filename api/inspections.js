@@ -13,6 +13,8 @@
 //   ADMIN_PASSWORD                       — verified via admin-auth.js
 
 import { verifyAdminToken } from './admin-auth.js';
+import { chargeInspectionVisit, findListingByAddress } from './inspection-billing.js';
+import { notifyAdmin } from './notify-admin.js';
 
 // ── KV helpers ───────────────────────────────────────────────────────────────
 
@@ -62,6 +64,43 @@ export default async function handler(req, res) {
     if (type === 'request') {
       const { address, date, time, buyerName, notes } = req.body || {};
       if (!address || !date) return res.status(400).json({ error: 'address and date are required' });
+
+      // Only listings that opted into agent-assisted visits may generate an
+      // agent-claimable (paid, $70 commission) request. Self-facilitate
+      // listings — and listings we can't find, or that predate the
+      // inspectionMode field — default to the safe "not agent" path so a
+      // buyer booking never turns into an unearned agent payout.
+      const listing = await findListingByAddress(address);
+      if (!listing || listing.inspectionMode !== 'agent') {
+        if (listing?.sellerEmail && process.env.RESEND_API_KEY) {
+          try {
+            await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                from: 'No Agents <office@no-agents.com.au>',
+                to: [listing.sellerEmail],
+                subject: `Inspection request — ${address}`,
+                html: `<div style="font-family:sans-serif;max-width:500px;">
+                  <h2 style="color:#1a1a1a;margin-bottom:16px">A buyer wants to inspect your property</h2>
+                  <table style="border-collapse:collapse;width:100%;">
+                    <tr><td style="padding:8px 12px;color:#666;width:100px">Date</td><td style="padding:8px 12px;font-weight:600">${date}</td></tr>
+                    <tr style="background:#f9f9f9"><td style="padding:8px 12px;color:#666">Time</td><td style="padding:8px 12px">${time || 'TBC'}</td></tr>
+                    ${buyerName ? `<tr><td style="padding:8px 12px;color:#666">Buyer</td><td style="padding:8px 12px">${buyerName}</td></tr>` : ''}
+                  </table>
+                  <p style="margin-top:20px">You've chosen to self-facilitate inspections for this listing, so reach out directly to arrange access.</p>
+                </div>`,
+              }),
+            }).catch(e => console.error('Seller notification error:', e));
+          } catch (e) { console.error('Seller email lookup error:', e); }
+        }
+        await notifyAdmin({
+          subject: `Inspection request (self-facilitate) — ${address}`,
+          html: `<p><strong>${(buyerName || 'A buyer').trim()}</strong> requested an inspection at <strong>${address}</strong> on ${date}${time ? ` at ${time}` : ''}.</p>
+<p>This listing is self-facilitate${listing ? '' : ' (listing not found)'}, so no agent-claimable request was created. ${listing?.sellerEmail ? `Seller (${listing.sellerEmail}) was emailed directly.` : 'No seller email on file — follow up manually.'}</p>`,
+        });
+        return res.status(200).json({ ok: true, mode: 'self' });
+      }
 
       const id = `req-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
       const request = { id, address, date, time: time || '', buyerName: (buyerName || '').trim(), notes: (notes || '').trim(), status: 'open', createdAt: new Date().toISOString() };
@@ -114,7 +153,7 @@ export default async function handler(req, res) {
         } catch (e) { console.error('Agent email lookup error:', e); }
       }
 
-      return res.status(200).json({ ok: true, id, request });
+      return res.status(200).json({ ok: true, mode: 'agent', id, request });
     }
 
     // POST — record a confirmed inspection (from Dash)
@@ -125,6 +164,7 @@ export default async function handler(req, res) {
     }
 
     const id = `insp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const billing = await chargeInspectionVisit({ listingId, address: listingAddress, inspectionId: id });
     const inspection = {
       id,
       agentId:         agentId || null,
@@ -138,6 +178,10 @@ export default async function handler(req, res) {
       status:          'confirmed',
       commissionOwed:  70,
       commissionPaid:  false,
+      sellerFee:       99,
+      sellerFeeCharged: billing.charged,
+      sellerFeeChargeId: billing.chargeId || null,
+      sellerFeeSkipReason: billing.charged ? null : billing.reason,
       recordedAt:      new Date().toISOString(),
     };
 
