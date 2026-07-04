@@ -7,6 +7,8 @@
 //
 // Required env vars: KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY (optional)
 
+import { notifyConveyancer } from './conveyancing-handoff.js';
+
 const { KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY } = process.env;
 
 async function kvGet(key) {
@@ -60,25 +62,27 @@ async function notifySellerTurn(listing) {
 }
 
 async function notifyBothExecuted(listing) {
-  if (!RESEND_API_KEY) return;
   const recipients = [listing.sellerEmail, listing.contract.buyerEmail].filter(Boolean);
-  if (!recipients.length) return;
-  try {
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from: 'No Agents <office@no-agents.com.au>',
-        to: recipients,
-        subject: `Heads of Agreement signed by both parties — ${listing.address}`,
-        html: `<div style="font-family:sans-serif;max-width:500px;">
-          <h2>Heads of Agreement signed by both parties</h2>
-          <p>The agreed terms for <strong>${listing.address}</strong> have now been signed by both the seller and the buyer.</p>
-          <p>This is being passed to the seller's conveyancer, who will prepare the formal Contract of Sale and be in touch to finalise it.</p>
-        </div>`,
-      }),
-    });
-  } catch (e) { console.error('contract executed notify error:', e.message); }
+  if (RESEND_API_KEY && recipients.length) {
+    try {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: 'No Agents <office@no-agents.com.au>',
+          to: recipients,
+          subject: `Heads of Agreement signed by both parties — ${listing.address}`,
+          html: `<div style="font-family:sans-serif;max-width:500px;">
+            <h2>Heads of Agreement signed by both parties</h2>
+            <p>The agreed terms for <strong>${listing.address}</strong> have now been signed by both the seller and the buyer.</p>
+            <p>${listing.conveyancer?.email ? `This has been passed to ${listing.conveyancer.name || 'your nominated conveyancer'}, who will prepare the formal Contract of Sale and be in touch to finalise it.` : "Engage your conveyancer or solicitor to prepare the formal Contract of Sale — nominate one in your dashboard Settings tab so we can notify them automatically next time."}</p>
+          </div>`,
+        }),
+      });
+    } catch (e) { console.error('contract executed notify error:', e.message); }
+  }
+
+  return { conveyancerNotified: await notifyConveyancer(listing) };
 }
 
 export default async function handler(req, res) {
@@ -107,11 +111,17 @@ export default async function handler(req, res) {
     if (!signatureImage) return res.status(400).json({ error: 'signatureImage required' });
 
     listing.contract.buyerSigned = { signedAt: new Date().toISOString(), signedByName: name, signatureImage };
-    await kvSet(`listing:${listingId}`, listing);
 
     if (listing.contract.sellerSigned) {
-      await notifyBothExecuted(listing);
+      const { conveyancerNotified } = await notifyBothExecuted(listing);
+      listing.conveyancingHandoff = {
+        notified: conveyancerNotified,
+        notifiedAt: new Date().toISOString(),
+        sentTo: conveyancerNotified ? (listing.conveyancer?.email || null) : null,
+      };
+      await kvSet(`listing:${listingId}`, listing);
     } else {
+      await kvSet(`listing:${listingId}`, listing);
       await notifySellerTurn(listing);
     }
 

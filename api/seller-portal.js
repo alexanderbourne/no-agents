@@ -16,6 +16,7 @@
 import { verifySellerToken } from './seller-auth.js';
 import { randomBytes } from 'crypto';
 import { notifyAdmin } from './notify-admin.js';
+import { notifyConveyancer } from './conveyancing-handoff.js';
 
 const { KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY } = process.env;
 
@@ -230,10 +231,37 @@ export default async function handler(req, res) {
       if (!name) return res.status(400).json({ error: 'signedByName required' });
       if (!signatureImage) return res.status(400).json({ error: 'signatureImage required' });
       listing.contract.sellerSigned = { signedAt: new Date().toISOString(), signedByName: name, signatureImage };
+
+      if (listing.contract.buyerEmail && RESEND_API_KEY) {
+        try {
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              from: 'No Agents <office@no-agents.com.au>',
+              to: [listing.contract.buyerEmail],
+              subject: `Signed by both parties — ${listing.address}`,
+              html: `<div style="font-family:sans-serif;max-width:500px;">
+                <h2>Heads of Agreement signed by both parties</h2>
+                <p>The agreed terms for <strong>${listing.address}</strong> at $${(listing.contract.amount || 0).toLocaleString()} have now been signed by both you and the seller.</p>
+                <p>${listing.conveyancer?.email ? `This has been passed to ${listing.conveyancer.name || "the seller's nominated conveyancer"}, who will prepare the formal Contract of Sale and be in touch to finalise it.` : "The seller's conveyancer or solicitor will be in touch to prepare the formal Contract of Sale."}</p>
+              </div>`,
+            }),
+          });
+        } catch (e) { console.error('buyer both-signed notify error:', e.message); }
+      }
+
+      const conveyancerNotified = await notifyConveyancer(listing);
+      listing.conveyancingHandoff = {
+        notified: conveyancerNotified,
+        notifiedAt: new Date().toISOString(),
+        sentTo: conveyancerNotified ? (listing.conveyancer?.email || null) : null,
+      };
+
       await kvSet(`listing:${listingId}`, listing);
       await notifyAdmin({
         subject: `Contract fully signed — ${listing.address}`,
-        html: `<p>Both parties have signed the Heads of Agreement for <strong>${listing.address}, ${listing.suburb}</strong> at $${(listing.contract.amount || 0).toLocaleString()}. Hand off to conveyancer for the formal Contract of Sale, then track to settlement.</p>`,
+        html: `<p>Both parties have signed the Heads of Agreement for <strong>${listing.address}, ${listing.suburb}</strong> at $${(listing.contract.amount || 0).toLocaleString()}. ${conveyancerNotified ? `Conveyancer (${listing.conveyancer?.name || listing.conveyancer?.email}) notified automatically.` : 'No conveyancer nominated yet — follow up with the seller to get one entered in Settings, or hand off manually.'}</p>`,
       });
       return res.status(200).json({ ok: true, contract: listing.contract });
     }
