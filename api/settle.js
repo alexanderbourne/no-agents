@@ -40,6 +40,11 @@ export default async function handler(req, res) {
   const listing = safeParse(raw);
   if (!listing) return res.status(404).json({ error: 'Listing not found' });
   if (listing.status === 'sold') return res.status(409).json({ error: 'Listing already marked sold' });
+  if (listing.tier !== 'assisted') {
+    return res.status(422).json({
+      error: 'This listing is on the Self-Managed ($798 flat) tier and never consented to a success fee. No charge can be made. Mark it sold from the seller dashboard instead — do not attempt to bill this seller.',
+    });
+  }
 
   const salePriceNum   = Number(salePrice);
   const feeCents       = Math.min(Math.round(salePriceNum * FEE_RATE * 100), FEE_CAP);

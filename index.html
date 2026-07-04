@@ -296,9 +296,9 @@ async function doStripe(meta={}){
     if(res.ok){const{sessionId}=await res.json();if(sessionId){await stripe.redirectToCheckout({sessionId});return;}}
     const e=await res.json().catch(()=>({}));
     const msg=e.error||'';
-    if(msg.includes('not configured'))alert('Payments are being set up. Please contact office@no-agents.com.au or call 0404 349 425 to list your property.');
-    else alert('Payment error: '+(msg||'Something went wrong')+'. Contact office@no-agents.com.au or call 0404 349 425.');
-  }catch(e){alert('Payments are being set up. Please contact office@no-agents.com.au or call 0404 349 425 to list your property.');}
+    if(msg.includes('not configured'))alert('Payments are being set up. Please contact office@no-agents.com.au or call 0485 043 210 to list your property.');
+    else alert('Payment error: '+(msg||'Something went wrong')+'. Contact office@no-agents.com.au or call 0485 043 210.');
+  }catch(e){alert('Payments are being set up. Please contact office@no-agents.com.au or call 0485 043 210 to list your property.');}
 }
 
 function Logo(){return html`<div style="width:36px;height:36px;border-radius:9px;background:${T.k};display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="sf" style="color:${T.al};font-size:14px;font-weight:700;letter-spacing:-.5px;line-height:1">na</span></div>`;}
@@ -343,12 +343,12 @@ function Nav({v,go,gl}){
     <div style="max-width:1100px;margin:0 auto;padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between">
       <div onclick=${()=>go('home')} style="cursor:pointer;display:flex;align-items:center;gap:10px"><${Logo}/><span class="sf" style="font-size:17px;font-weight:600;color:${T.t};letter-spacing:-.3px">no-agents</span></div>
       <div class="hm" style="display:flex;gap:4px">${nav.map(([id,l])=>html`<button onclick=${()=>go(id)} style="padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:${v===id?T.k:'transparent'};color:${v===id?'#fff':T.tm};transition:all .15s;font-family:Inter,sans-serif">${l}</button>`)}</div>
-      <a href="tel:+61404349425" class="hm" style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:${T.t};text-decoration:none;padding:8px 10px">📞 0404 349 425</a>
+      <a href="tel:+61485043210" class="hm" style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:${T.t};text-decoration:none;padding:8px 10px">📞 0485 043 210</a>
       <button class="hm" style="${B('p','s')}" onclick=${()=>go('sell')}>List your property</button>
       <button onclick=${()=>setOpen(!open)} style="display:none;background:none;border:none;cursor:pointer;padding:8px;color:${T.t};font-size:22px" class="sm">${open?'✕':'☰'}</button>
     </div>
     ${open&&html`<div style="border-top:1px solid ${T.bd};background:${T.bg}">
-      <a href="tel:+61404349425" style="display:block;padding:16px 32px;font-size:15px;color:${T.t};font-weight:600;text-decoration:none;border-bottom:1px solid ${T.bd}">📞 Call 0404 349 425</a>
+      <a href="tel:+61485043210" style="display:block;padding:16px 32px;font-size:15px;color:${T.t};font-weight:600;text-decoration:none;border-bottom:1px solid ${T.bd}">📞 Call 0485 043 210</a>
       ${nav.map(([id,l])=>html`<button onclick=${()=>{go(id);setOpen(false)}} style="display:block;width:100%;text-align:left;padding:16px 32px;background:${v===id?T.bw:'transparent'};border:none;border-bottom:1px solid ${T.bd};cursor:pointer;font-size:15px;color:${T.t};font-weight:500;font-family:Inter,sans-serif">${l}</button>`)}
       <div style="padding:20px"><button style="${B('p')};width:100%" onclick=${()=>{go('sell');setOpen(false)}}>List your property</button></div>
     </div>`}
@@ -359,7 +359,7 @@ function Footer({go,gl}){
     <div style="max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid ${T.bd}">
       <div style="display:flex;align-items:center;gap:10px"><${Logo}/><span class="sf" style="font-size:15px;font-weight:500">no-agents.com.au</span></div>
       <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
-        <a href="tel:+61404349425" style="font-size:13px;color:${T.t};font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px">📞 0404 349 425</a>
+        <a href="tel:+61485043210" style="font-size:13px;color:${T.t};font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px">📞 0485 043 210</a>
         <a href="mailto:office@no-agents.com.au" style="font-size:13px;color:${T.t};font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px">✉️ office@no-agents.com.au</a>
       </div>
     </div>
@@ -390,7 +390,7 @@ We may collect the following personal information:
 — Full legal name, email address, phone number and residential address
 — Property details including address, type, price guide and listing preferences
 — Identity verification documents (driver's licence or passport) for buyer verification
-— Payment information processed securely via Stripe (we do not store card details)
+— Payment information processed securely via Stripe. We do not store your card details ourselves. For sellers who opt into the Assisted Sale tier, Stripe securely retains a tokenised reference to your payment method on our behalf, with your express consent, so that the success fee can be charged once your property settles. Self-Managed tier sellers never have a payment method retained for future charges.
 — Tenant details where a listed property is tenanted (name, email, phone, postal address)
 — Device information, IP address, browser type and usage analytics
 — Communications including enquiries, offer submissions and inspection bookings
@@ -465,7 +465,7 @@ We may update this policy from time to time. Material changes will be communicat
 
 12. Contact
 Privacy Officer: office@no-agents.com.au
-Phone: 0404 349 425
+Phone: 0485 043 210
 Post: No Agents Pty Ltd, Brisbane QLD 4000`},
     terms:{title:'Terms of Service',body:`Last updated: 29 June 2026
 
@@ -489,7 +489,15 @@ The Complete Listing Package is a one-time flat fee of $798 (excl. GST) and incl
 — AI-powered enquiry handling
 — Live open offer portal with real-time buyer notifications
 — Full transaction roadmap from listing to settlement
-No commission is charged at any stage. The $798 fee is the total cost of the listing package. Conveyancing is arranged separately through your own conveyancer or solicitor.
+No commission is charged at any stage. The $798 fee is the total cost of the Self-Managed listing package. Conveyancing is arranged separately through your own conveyancer or solicitor.
+
+2A. Assisted Sale — Success Fee (opt-in only)
+Sellers may instead choose the Assisted Sale tier at the time of listing. Assisted Sale includes everything in the Complete Listing Package, plus assistance from us with negotiation and paperwork through to settlement, for the same $798 upfront fee plus a success fee.
+— The success fee is 0.5% of the final sale price, capped at a maximum of $15,000 (AUD), and is charged only if and when your property settles.
+— Assisted Sale is entirely opt-in. Sellers on the Self-Managed tier are never charged a success fee under any circumstances, and never have a card saved for this purpose.
+— If you choose Assisted Sale, you will be shown the fee terms and asked to expressly consent before payment. By consenting, you authorise us to securely save your card details with our payment processor (Stripe) and to charge the success fee, off-session, once we have confirmed your property has settled and you have provided the sale price.
+— We will notify you before any such charge is made and provide a receipt by email.
+— You may switch from Assisted Sale to Self-Managed at any time before settlement by contacting office@no-agents.com.au; no success fee applies once you have switched.
 
 3. Human Agent Visit — $99 per visit
 A licensed Queensland real estate agent will attend on-site for any requirement including buyer inspections, open homes, building and pest access, photography or staging access. Each visit is charged at a flat fee of $99 (excl. GST), billed after the confirmed visit. Sellers may alternatively self-facilitate inspections at no cost. A minimum of 24 hours' notice is required for cancellation of a booked agent visit.
@@ -514,7 +522,7 @@ Buyers must:
 All verified offers are displayed in real time and are visible to all verified buyers. This transparency is designed to encourage genuine best offers through competitive tension. Offers submitted through the Platform are expressions of interest only and are not legally binding. A legally binding contract of sale requires execution of a formal contract prepared by a licensed conveyancer or solicitor.
 
 7. Conveyancing
-Upon acceptance of an offer, conveyancing is coordinated through our conveyancing partner. Sellers and buyers may also engage their own independent conveyancer or solicitor. Conveyancing fees are separate from the $798 listing fee and are payable directly to the conveyancer.
+We do not currently have a signed conveyancing referral partner. Sellers and buyers must engage their own independent conveyancer or solicitor to complete the transaction. We are working on a referral arrangement and will update these terms and notify users once one is in place. Conveyancing fees are separate from the $798 listing fee and are payable directly to the conveyancer.
 
 8. Intellectual Property
 All content, design, code and functionality of the Platform is owned by No Agents Pty Ltd. Sellers grant us a non-exclusive licence to use property photos, descriptions and details for the purpose of marketing and advertising the listing.
@@ -544,14 +552,14 @@ No Agents Pty Ltd
 ABN: 18 642 813 438
 Queensland Real Estate Licence: 4542501
 Email: office@no-agents.com.au
-Phone: 0404 349 425`},
+Phone: 0485 043 210`},
     complaints:{title:'Complaints Policy',body:`Last updated: 29 June 2026
 
 No Agents Pty Ltd (ABN 18 642 813 438, Queensland Real Estate Licence 4542501) is committed to resolving complaints fairly, promptly and transparently.
 
 1. How to Lodge a Complaint
 Email: office@no-agents.com.au
-Phone: 0404 349 425
+Phone: 0485 043 210
 Post: No Agents Pty Ltd, Brisbane QLD 4000
 
 Please include your name, contact details, the nature of your complaint and any supporting documentation.
@@ -734,7 +742,7 @@ function Home({go}){
           <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:center">
             <div><div style="${LB}">Licensed agency</div><div style="font-size:15px;font-weight:600;color:${T.t}">Licence 4542501 (QLD)</div></div>
             <div><div style="${LB}">Registered business</div><div style="font-size:15px;font-weight:600;color:${T.t}">No Agents Pty Ltd · ABN 18 642 813 438</div></div>
-            <div><div style="${LB}">Talk to a person</div><a href="tel:+61404349425" style="font-size:15px;font-weight:600;color:${T.t};text-decoration:none">📞 0404 349 425</a></div>
+            <div><div style="${LB}">Talk to a person</div><a href="tel:+61485043210" style="font-size:15px;font-weight:600;color:${T.t};text-decoration:none">📞 0485 043 210</a></div>
           </div>
           <div style="font-size:13px;color:${T.tm};max-width:300px;line-height:1.6">No chatbots pretending to be human, no call centre. A licensed Queensland agent is behind every listing and every $99 visit.</div>
         </div>
@@ -813,7 +821,7 @@ function Home({go}){
 function Sell(){
   const[step,setStep]=useState(1);
   const[paying,setPaying]=useState(false);
-  const[form,setForm]=useState({address:'',addrState:'',type:'Apartment',beds:2,baths:1,cars:1,floor:'',description:'',price:'',deadline:'',tenanted:'no',inspection:'agent',tenantName:'',tenantEmail:'',tenantPhone:'',tenantAddress:'',availableDays:[],availableTimes:[],sellerName:'',sellerEmail:'',sellerPhone:'',listingStartDate:''});
+  const[form,setForm]=useState({address:'',addrState:'',type:'Apartment',beds:2,baths:1,cars:1,floor:'',description:'',price:'',deadline:'',tenanted:'no',inspection:'agent',tenantName:'',tenantEmail:'',tenantPhone:'',tenantAddress:'',availableDays:[],availableTimes:[],sellerName:'',sellerEmail:'',sellerPhone:'',listingStartDate:'',tier:'flat',assistedConsent:false});
   const up=(k,v)=>setForm(f=>({...f,[k]:v}));
   const[errors,setErrors]=useState({});
   const[eoiSent,setEoiSent]=useState(false);
@@ -832,7 +840,7 @@ function Sell(){
     }catch{}
     setEoiBusy(false);
   };
-  const validate=s=>{const e={};if(s===1){if(!form.address.trim())e.address='Property address required';else if(outOfArea)e.address='We only operate in Queensland currently';if(!form.sellerName.trim())e.name='Full name required';if(!form.sellerEmail.trim())e.email='Email required';else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.sellerEmail))e.email='Valid email required';if(!form.sellerPhone.trim())e.phone='Mobile required';}if(s===2){if(!form.availableDays.length)e.days='Select at least one available day';if(!form.availableTimes.length)e.times='Select at least one available time';}setErrors(e);return!Object.keys(e).length;};
+  const validate=s=>{const e={};if(s===1){if(!form.address.trim())e.address='Property address required';else if(outOfArea)e.address='We only operate in Queensland currently';if(!form.sellerName.trim())e.name='Full name required';if(!form.sellerEmail.trim())e.email='Email required';else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.sellerEmail))e.email='Valid email required';if(!form.sellerPhone.trim())e.phone='Mobile required';}if(s===2){if(!form.availableDays.length)e.days='Select at least one available day';if(!form.availableTimes.length)e.times='Select at least one available time';}if(s===3){if(form.tier==='assisted'&&!form.assistedConsent)e.consent='Please confirm you understand and agree to the success fee terms to continue with Assisted Sale';}setErrors(e);return!Object.keys(e).length;};
   const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   const times=['8:00am','9:00am','10:00am','11:00am','12:00pm','2:00pm','3:00pm','4:00pm','5:00pm'];
   const fg='margin-bottom:20px';
@@ -945,34 +953,54 @@ function Sell(){
 
       ${step===3&&html`<div>
         <h3 class="sf" style="font-size:20px;font-weight:600;margin-bottom:8px">Your package</h3>
-        <p style="font-size:14px;color:${T.tm};margin-bottom:20px">One flat fee — everything included. No commission, no hidden costs.</p>
-        <div style="border-radius:14px;border:2px solid ${T.k};padding:24px;margin-bottom:16px;background:${T.k}">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
-            <div>
-              <div class="sf" style="font-size:28px;font-weight:600;letter-spacing:-1px;color:${T.al}">$798</div>
-              <div style="font-weight:600;font-size:14px;color:#fff">Complete Listing Package</div>
+        <p style="font-size:14px;color:${T.tm};margin-bottom:20px">Choose how you'd like to sell. Both options carry the same $798 listing fee — there's never a commission.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+          <div onclick=${()=>up('tier','flat')} style="border-radius:14px;border:2px solid ${form.tier==='flat'?T.k:T.bd};padding:20px;cursor:pointer;background:${form.tier==='flat'?T.k:T.bg};transition:all .15s">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+              <div class="sf" style="font-size:24px;font-weight:600;letter-spacing:-.5px;color:${form.tier==='flat'?T.al:T.t}">$798</div>
+              <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${form.tier==='flat'?T.al:T.bd};background:${form.tier==='flat'?T.al:'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">${form.tier==='flat'&&html`<span style="color:${T.k};font-size:11px;font-weight:700">✓</span>`}</div>
             </div>
-            <div style="width:22px;height:22px;border-radius:50%;border:2px solid ${T.al};background:${T.al};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:4px"><span style="color:${T.k};font-size:12px;font-weight:700">✓</span></div>
+            <div style="font-weight:600;font-size:14px;color:${form.tier==='flat'?'#fff':T.t};margin-bottom:4px">Self-Managed</div>
+            <div style="font-size:12px;color:${form.tier==='flat'?'rgba(255,255,255,.6)':T.tu};line-height:1.5">Flat $798, nothing else. You handle negotiation and offer acceptance yourself using the open offer portal.</div>
           </div>
-          <ul style="list-style:none;display:grid;gap:8px">${['Listing creation and professional copywriting','Domain.com.au publication — portal fee included','Professional photography (day shoot + floor plans)','3D virtual tour','AI-powered enquiry handling','Live open offer portal with real-time notifications','Full transaction roadmap to settlement'].map(i=>html`<li style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:rgba(255,255,255,.7)"><span style="color:${T.al};flex-shrink:0;margin-top:1px">✓</span>${i}</li>`)}</ul>
+          <div onclick=${()=>up('tier','assisted')} style="border-radius:14px;border:2px solid ${form.tier==='assisted'?T.k:T.bd};padding:20px;cursor:pointer;background:${form.tier==='assisted'?T.k:T.bg};transition:all .15s">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+              <div class="sf" style="font-size:24px;font-weight:600;letter-spacing:-.5px;color:${form.tier==='assisted'?T.al:T.t}">$798<span style="font-size:14px;font-weight:500">+0.5%</span></div>
+              <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${form.tier==='assisted'?T.al:T.bd};background:${form.tier==='assisted'?T.al:'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">${form.tier==='assisted'&&html`<span style="color:${T.k};font-size:11px;font-weight:700">✓</span>`}</div>
+            </div>
+            <div style="font-weight:600;font-size:14px;color:${form.tier==='assisted'?'#fff':T.t};margin-bottom:4px">Assisted Sale</div>
+            <div style="font-size:12px;color:${form.tier==='assisted'?'rgba(255,255,255,.6)':T.tu};line-height:1.5">$798 upfront, plus a 0.5% success fee (capped at $15,000) charged only when your property settles. We help with negotiation and paperwork.</div>
+          </div>
         </div>
+        <div style="border-radius:12px;background:${T.bg};border:1px solid ${T.bd};padding:16px 18px;margin-bottom:16px">
+          <div style="font-weight:600;font-size:13px;margin-bottom:8px">Included in every package</div>
+          <ul style="list-style:none;display:grid;gap:6px">${['Listing creation and professional copywriting','Domain.com.au publication — portal fee included','Professional photography (day shoot + floor plans)','3D virtual tour','AI-powered enquiry handling','Live open offer portal with real-time notifications','Full transaction roadmap to settlement'].map(i=>html`<li style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:${T.tm}"><span style="color:${T.k};flex-shrink:0;margin-top:1px">✓</span>${i}</li>`)}</ul>
+        </div>
+        ${form.tier==='assisted'&&html`<div style="border-radius:12px;background:${T.bw};border:1px solid ${T.bdd};padding:16px 18px;margin-bottom:16px">
+          <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer">
+            <input type="checkbox" checked=${form.assistedConsent} onChange=${e=>up('assistedConsent',e.target.checked)} style="margin-top:3px;flex-shrink:0;width:16px;height:16px"/>
+            <span style="font-size:12px;color:${T.tm};line-height:1.6">I understand that with Assisted Sale, No Agents will save my card details at checkout and charge a success fee of 0.5% of the sale price (capped at $15,000 AUD) only once my property settles. No charge will be made unless and until my property sells — see <a href="/terms" style="color:${T.t};font-weight:500">Terms of Service, section 2A</a>.</span>
+          </label>
+        </div>`}
         <div style="display:flex;gap:10px;background:${T.bg};border-radius:10px;padding:12px 14px;border:1px solid ${T.bd};align-items:flex-start"><span style="flex-shrink:0;font-size:16px">🔑</span><div><div style="font-weight:600;font-size:13px;margin-bottom:2px">Human Agent Visit — $99 per visit</div><div style="font-size:12px;color:${T.tu}">Pay as you go — only billed when you book one. Licensed agent attends for inspections, photography, B&P access. Or self-facilitate for free.</div></div></div>
         <div style="display:flex;gap:10px;background:${T.bg};border-radius:10px;padding:12px 14px;border:1px solid ${T.bd};align-items:flex-start;margin-top:10px"><span style="flex-shrink:0;font-size:16px">📄</span><div><div style="font-weight:600;font-size:13px;margin-bottom:2px">Conveyancing — arranged separately</div><div style="font-size:12px;color:${T.tu}">We're finalising a referral partner so you'll be able to book conveyancing in a couple of clicks once an offer is accepted. Until then, use your own solicitor or conveyancer — <a href="mailto:office@no-agents.com.au" style="color:${T.t};font-weight:500">ask us for a recommendation</a>.</div></div></div>
+        <div style="display:flex;gap:10px;background:${T.bg};border-radius:10px;padding:12px 14px;border:1px solid ${T.bd};align-items:flex-start;margin-top:10px"><span style="flex-shrink:0;font-size:16px">🏦</span><div><div style="font-weight:600;font-size:13px;margin-bottom:2px">Buyer finance — coming soon</div><div style="font-size:12px;color:${T.tu}">We're setting up a mortgage broker referral so buyers can get pre-approved without leaving the listing. Not available yet — buyers should arrange their own finance in the meantime.</div></div></div>
       </div>`}
 
       ${step===4&&html`<div>
         <h3 class="sf" style="font-size:20px;font-weight:600;margin-bottom:20px">Review your listing</h3>
-        <div style="margin-bottom:20px">${[['Address',form.address||'Not entered'],['Property',`${form.beds}bd · ${form.baths}ba · ${form.type}${form.floor?` · Level ${form.floor}`:''}`],['Price guide',form.price?`$${parseInt(form.price).toLocaleString()}`:'Not set'],['Tenanted',form.tenanted==='yes'?`Yes — ${form.tenantName||'details provided'}`:'No'],['On-site visits',form.inspection==='agent'?'Human agent ($99 per visit)':'Self-facilitated (free)'],['Available days',form.availableDays.length>0?form.availableDays.join(', '):'Not set'],['Seller dashboard login',form.sellerPhone||'Not set']].map(([k,v])=>html`<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid ${T.bd};gap:16px;flex-wrap:wrap"><span style="font-size:13px;color:${T.tu};font-weight:500">${k}</span><span style="font-size:13px;color:${T.t};text-align:right">${v}</span></div>`)}</div>
+        <div style="margin-bottom:20px">${[['Address',form.address||'Not entered'],['Property',`${form.beds}bd · ${form.baths}ba · ${form.type}${form.floor?` · Level ${form.floor}`:''}`],['Price guide',form.price?`$${parseInt(form.price).toLocaleString()}`:'Not set'],['Package',form.tier==='assisted'?'Assisted Sale ($798 + 0.5% success fee, capped $15,000)':'Self-Managed ($798 flat)'],['Tenanted',form.tenanted==='yes'?`Yes — ${form.tenantName||'details provided'}`:'No'],['On-site visits',form.inspection==='agent'?'Human agent ($99 per visit)':'Self-facilitated (free)'],['Available days',form.availableDays.length>0?form.availableDays.join(', '):'Not set'],['Seller dashboard login',form.sellerPhone||'Not set']].map(([k,v])=>html`<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid ${T.bd};gap:16px;flex-wrap:wrap"><span style="font-size:13px;color:${T.tu};font-weight:500">${k}</span><span style="font-size:13px;color:${T.t};text-align:right">${v}</span></div>`)}</div>
         <div style="display:flex;gap:10px;background:${T.bw};border-radius:10px;padding:12px 14px;border:1px solid ${T.bdd};align-items:flex-start;margin-bottom:20px"><span style="flex-shrink:0;font-size:16px">🔐</span><div style="font-size:12px;color:${T.tm};line-height:1.6">We'll text a one-time code to <strong style="color:${T.t}">${form.sellerPhone||'your mobile'}</strong> each time you sign in to your seller dashboard at "My listing" — no password to remember.</div></div>
         <div style="border-radius:14px;background:${T.bg};border:1px solid ${T.bd};padding:20px;margin-bottom:20px">
           <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px"><span style="color:${T.tm}">Complete Listing Package (incl. Domain, photography, 3D tour)</span><span style="font-weight:500">$798.00</span></div>
           <div style="display:flex;justify-content:space-between;font-size:13px;color:${T.tu};margin-bottom:4px"><span>Human agent visits — billed after each</span><span>$99 per visit</span></div>
+          ${form.tier==='assisted'&&html`<div style="display:flex;justify-content:space-between;font-size:13px;color:${T.tu};margin-bottom:4px"><span>Success fee — charged only on settlement</span><span>0.5%, capped $15,000</span></div>`}
           ${form.tenanted==='yes'&&html`<div style="display:flex;justify-content:space-between;font-size:13px;color:${T.tu}"><span>Entry notices</span><span>Auto-generated, included</span></div>`}
           <div style="height:1px;background:${T.bd};margin:12px 0"></div>
           <div style="display:flex;justify-content:space-between;font-weight:600;font-size:15px"><span>Due now</span><span>$798.00</span></div>
         </div>
-        <button style="${B('p','l')};width:100%;opacity:${paying?0.7:1}" onclick=${async()=>{setPaying(true);await doStripe(form);setPaying(false);}} disabled=${paying}>${paying?'Redirecting to payment…':'Pay $798 and list →'}</button>
-        <div style="text-align:center;font-size:12px;color:${T.tu};margin-top:10px">Secured by Stripe</div>
+        <button style="${B('p','l')};width:100%;opacity:${paying?0.7:1}" onclick=${async()=>{setPaying(true);await doStripe({...form,tier:form.tier});setPaying(false);}} disabled=${paying}>${paying?'Redirecting to payment…':'Pay $798 and list →'}</button>
+        <div style="text-align:center;font-size:12px;color:${T.tu};margin-top:10px">Secured by Stripe${form.tier==='assisted'?' · your card will be saved for the success-fee charge at settlement':''}</div>
       </div>`}
 
       ${Object.keys(errors).length>0&&html`<div style="background:#fde8e6;border-radius:10px;padding:12px 16px;font-size:13px;color:${T.r};border:1px solid #f5c6c3;margin-top:16px">${Object.values(errors).join(' · ')}</div>`}

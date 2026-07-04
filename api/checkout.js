@@ -41,6 +41,7 @@ export default async function handler(req, res) {
   // listing ID so the success redirect can take the seller straight to their
   // dashboard once the webhook creates it.
   const isListingPurchase = Boolean(stripeMetadata.sellerPhone && stripeMetadata.address);
+  const isAssistedTier = stripeMetadata.tier === 'assisted';
   if (isListingPurchase) {
     stripeMetadata.listingId = generateListingId('NA');
   }
@@ -66,8 +67,10 @@ export default async function handler(req, res) {
         quantity: 1,
       }],
       mode: 'payment',
-      // Save card for off-session success-fee charge on settlement confirmation
-      ...(isListingPurchase ? { payment_intent_data: { setup_future_usage: 'off_session' } } : {}),
+      // Only save the card for a later off-session charge when the seller explicitly
+      // chose and consented to the Assisted Sale success-fee tier at listing time.
+      // Self-Managed ($798 flat) sellers never have a card saved for future charges.
+      ...(isListingPurchase && isAssistedTier ? { payment_intent_data: { setup_future_usage: 'off_session' } } : {}),
       success_url: successUrl,
       cancel_url: `${baseUrl}/?payment=cancelled`,
       metadata: stripeMetadata,

@@ -507,12 +507,13 @@ function showListing(id) {
     ${l.status === 'sold' ? `
     <div style="margin-top:24px;padding:16px;background:#f0fdf4;border:1px solid #86efac;border-radius:12px">
       <div style="font-weight:700;color:#166534;margin-bottom:8px">✅ Settled</div>
-      <div style="font-size:14px;color:#166534">Sale price: <strong>$${Number(l.salePrice||0).toLocaleString('en-AU')}</strong> &nbsp;·&nbsp; Success fee charged: <strong>$${Number(l.successFee||0).toLocaleString('en-AU')}</strong></div>
+      <div style="font-size:14px;color:#166534">Sale price: <strong>$${Number(l.salePrice||0).toLocaleString('en-AU')}</strong>${l.tier === 'assisted' ? ` &nbsp;·&nbsp; Success fee charged: <strong>$${Number(l.successFee||0).toLocaleString('en-AU')}</strong>` : ' &nbsp;·&nbsp; Self-Managed — no fee'}</div>
       ${l.settledAt ? `<div style="font-size:12px;color:#4ade80;margin-top:4px">Settled ${new Date(l.settledAt).toLocaleDateString('en-AU')}</div>` : ''}
-    </div>` : `
+    </div>` : l.tier === 'assisted' ? `
     <div style="margin-top:24px;padding:16px;background:#fff7ed;border:1px solid #fdba74;border-radius:12px" id="settle-panel-${l.id}">
-      <div style="font-weight:700;color:#9a3412;margin-bottom:12px">Confirm Settlement &amp; Charge Success Fee</div>
-      ${!l.stripePaymentMethodId && !l.stripeCustomerId ? `<p style="font-size:13px;color:#9a3412;margin:0 0 8px">⚠️ No saved card for this listing (listed before card-save was enabled). Collect the 0.5% fee manually.</p>` : ''}
+      <div style="font-weight:700;color:#9a3412;margin-bottom:4px">Confirm Settlement &amp; Charge Success Fee</div>
+      <div style="font-size:12px;color:#9a3412;margin-bottom:12px">Assisted Sale — this seller consented to a 0.5% fee (capped $15,000) at listing time.</div>
+      ${!l.stripePaymentMethodId && !l.stripeCustomerId ? `<p style="font-size:13px;color:#9a3412;margin:0 0 8px">⚠️ No saved card for this listing. Collect the 0.5% fee manually.</p>` : ''}
       <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
         <div>
           <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Sale price (AUD)</label>
@@ -524,6 +525,21 @@ function showListing(id) {
         <button onclick="confirmSettle('${l.id}')"
           style="padding:9px 20px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px">
           Charge &amp; Mark Sold
+        </button>
+      </div>
+    </div>` : `
+    <div style="margin-top:24px;padding:16px;background:#f5f0e8;border:1px solid #d0c8b8;border-radius:12px" id="settle-panel-${l.id}">
+      <div style="font-weight:700;color:#4a4540;margin-bottom:4px">Mark as Sold</div>
+      <div style="font-size:12px;color:#8a8078;margin-bottom:12px">Self-Managed listing — no success fee applies. This seller never consented to one, so no card will be charged.</div>
+      <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+        <div>
+          <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Sale price (AUD) <span style="font-weight:400">— optional, for your records</span></label>
+          <input type="number" id="noFee-price-${l.id}" min="1" step="1000" placeholder="e.g. 850000"
+            style="padding:8px 12px;border:1px solid #d0c8b8;border-radius:8px;font-size:14px;width:160px">
+        </div>
+        <button onclick="markSoldNoFee('${l.id}')"
+          style="padding:9px 20px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px">
+          Mark Sold
         </button>
       </div>
     </div>`}`;
@@ -559,6 +575,32 @@ async function confirmSettle(id) {
   } catch(e) {
     alert('Request failed: ' + e.message);
     if (btn) { btn.disabled = false; btn.textContent = 'Charge & Mark Sold'; }
+  }
+}
+
+async function markSoldNoFee(id) {
+  const priceInput = document.getElementById('noFee-price-' + id);
+  const salePrice = Number(priceInput?.value) || null;
+  const listing = (data.listings || []).find(x => x.id === id);
+  if (!listing) { alert('Could not find this listing locally — refresh and try again.'); return; }
+  if (!confirm(`Mark listing ${id} as sold?\nSelf-Managed — no success fee will be charged.`)) return;
+  const btn = document.querySelector(`#settle-panel-${id} button`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const r = await apiFetch('/api/listing-store', {
+      method: 'POST',
+      body: JSON.stringify({ ...listing, status: 'sold', salePrice, settledAt: new Date().toISOString() }),
+    });
+    if (r?.success !== false) {
+      await loadData();
+      renderTab();
+    } else {
+      alert('Error: ' + (r?.error || 'Unknown error'));
+      if (btn) { btn.disabled = false; btn.textContent = 'Mark Sold'; }
+    }
+  } catch (e) {
+    alert('Request failed: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Mark Sold'; }
   }
 }
 
