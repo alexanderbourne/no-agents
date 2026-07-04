@@ -4,6 +4,7 @@
 
 import * as ftp from 'basic-ftp';
 import { Readable } from 'stream';
+import { notifyAdmin } from './notify-admin.js';
 
 // ── REAXML Generator ────────────────────────────────────────────────────────
 function generateREAXML(listing) {
@@ -179,6 +180,14 @@ export default async function handler(req, res) {
   );
 
   const allOk = results.every(r => r.success);
+  if (!allOk) {
+    await notifyAdmin({
+      subject: `Listing FTP push failed — ${listing.uniqueId}`,
+      html: `<p>Pushing <strong>${listing.address}</strong> to a portal failed.</p>
+<ul>${results.map(r => `<li>${r.portal}: ${r.success ? '✅ ok' : '❌ ' + r.error}</li>`).join('')}</ul>`,
+      isError: true,
+    });
+  }
   return res.status(allOk ? 200 : 207).json({
     success: allOk,
     results,

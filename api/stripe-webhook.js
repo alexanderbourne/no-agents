@@ -4,6 +4,7 @@
 
 import Stripe from 'stripe';
 import { parseAddress, generateListingId } from './listing-utils.js';
+import { notifyAdmin } from './notify-admin.js';
 
 export const config = {
   api: { bodyParser: false },
@@ -32,6 +33,13 @@ export default async function handler(req, res) {
     event = stripe.webhooks.constructEvent(rawBody, sig, secret);
   } catch (err) {
     console.error('Webhook signature failed:', err.message);
+    await notifyAdmin({
+      subject: 'Stripe webhook signature verification failed',
+      html: `<p>A request to <code>/api/stripe-webhook</code> failed signature verification.</p>
+<p><strong>Error:</strong> ${err.message}</p>
+<p>This usually means <code>STRIPE_WEBHOOK_SECRET</code> is wrong/stale, or someone is hitting the endpoint directly. Check the Stripe Dashboard → Developers → Webhooks for delivery attempts.</p>`,
+      isError: true,
+    });
     return res.status(400).json({ error: `Webhook Error: ${err.message}` });
   }
 
@@ -113,6 +121,21 @@ export default async function handler(req, res) {
     const result = await publishRes.json();
     console.log('Publish result:', JSON.stringify(result));
 
+    const notConfigured = result?.note?.includes('no FTP credentials configured');
+    const publishFailed = result?.success === false;
+
+    // Stage 1 alert: a seller just paid — this IS the onboarding event.
+    await notifyAdmin({
+      subject: `New seller onboarded — ${listing.address || uniqueId} ($798)`,
+      html: `<p><strong>${listing.sellerName || 'A seller'}</strong> (${listing.sellerEmail || 'no email'}, ${listing.sellerPhone || 'no phone'}) just paid for the Complete Listing Package.</p>
+<p><strong>Property:</strong> ${listing.address}, ${listing.suburb}<br/>
+<strong>Listing ID:</strong> ${uniqueId}<br/>
+<strong>Stripe session:</strong> ${session.id}<br/>
+<strong>Stripe customer:</strong> ${session.customer || 'n/a'}</p>
+<p><strong>Publish to Domain.com.au:</strong> ${publishFailed ? '❌ FAILED — ' + (result.results?.map(r=>r.error).filter(Boolean).join('; ') || 'see logs') : notConfigured ? '⚠️ NOT SENT — FTP credentials not configured, listing is NOT actually live despite the seller being told it is' : '✅ pushed'}</p>`,
+      isError: publishFailed || notConfigured,
+    });
+
     if (listing.sellerEmail && process.env.RESEND_API_KEY) {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -144,6 +167,13 @@ export default async function handler(req, res) {
     return res.status(200).json({ received: true, uniqueId, publishResult: result });
   } catch (err) {
     console.error('Publish error:', err.message);
+    await notifyAdmin({
+      subject: `Onboarding pipeline error — ${listing.address || uniqueId}`,
+      html: `<p>Payment succeeded (Stripe session ${session.id}) but the KV-store/publish step threw an error.</p>
+<p><strong>Error:</strong> ${err.message}</p>
+<p>Seller ${listing.sellerName || ''} (${listing.sellerEmail || 'no email'}) may not have a working listing — check manually.</p>`,
+      isError: true,
+    });
     return res.status(200).json({ received: true, error: err.message });
   }
 }

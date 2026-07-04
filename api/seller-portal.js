@@ -15,6 +15,7 @@
 
 import { verifySellerToken } from './seller-auth.js';
 import { randomBytes } from 'crypto';
+import { notifyAdmin } from './notify-admin.js';
 
 const { KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY } = process.env;
 
@@ -128,6 +129,10 @@ export default async function handler(req, res) {
     if (action === 'photoshoot') {
       listing.photoShoot = { status: 'requested', date: null, notes: '', requestedAt: new Date().toISOString() };
       await kvSet(`listing:${listingId}`, listing);
+      await notifyAdmin({
+        subject: `Photo shoot requested — ${listing.address}`,
+        html: `<p>${listing.sellerName || 'Seller'} (${listing.sellerPhone || 'no phone'}) requested a photo shoot for <strong>${listing.address}, ${listing.suburb}</strong>. Book it in.</p>`,
+      });
       return res.status(200).json({ ok: true, photoShoot: listing.photoShoot });
     }
 
@@ -148,6 +153,10 @@ export default async function handler(req, res) {
         signatureImage,
       };
       await kvSet(`listing:${listingId}`, listing);
+      await notifyAdmin({
+        subject: `Form 6 signed — ${listing.address}`,
+        html: `<p>${name} signed the Form 6 (agency agreement) for <strong>${listing.address}, ${listing.suburb}</strong>.</p>`,
+      });
       return res.status(200).json({ ok: true, form6: listing.documents.form6 });
     }
 
@@ -205,6 +214,11 @@ export default async function handler(req, res) {
         } catch (e) { console.error('contract notify error:', e.message); }
       }
 
+      await notifyAdmin({
+        subject: `Offer accepted — $${offer.amount.toLocaleString()} on ${listing.address}`,
+        html: `<p>${listing.sellerName || 'Seller'} accepted <strong>${offer.buyer}</strong>'s offer of <strong>$${offer.amount.toLocaleString()}</strong> on ${listing.address}, ${listing.suburb}. Heads of Agreement sent to buyer to sign first.</p>`,
+      });
+
       return res.status(200).json({ ok: true, offers, contract: listing.contract });
     }
 
@@ -217,6 +231,10 @@ export default async function handler(req, res) {
       if (!signatureImage) return res.status(400).json({ error: 'signatureImage required' });
       listing.contract.sellerSigned = { signedAt: new Date().toISOString(), signedByName: name, signatureImage };
       await kvSet(`listing:${listingId}`, listing);
+      await notifyAdmin({
+        subject: `Contract fully signed — ${listing.address}`,
+        html: `<p>Both parties have signed the Heads of Agreement for <strong>${listing.address}, ${listing.suburb}</strong> at $${(listing.contract.amount || 0).toLocaleString()}. Hand off to conveyancer for the formal Contract of Sale, then track to settlement.</p>`,
+      });
       return res.status(200).json({ ok: true, contract: listing.contract });
     }
 
@@ -237,6 +255,11 @@ export default async function handler(req, res) {
       if (Array.isArray(activeIds)) {
         await kvSet('listings:active', activeIds.filter(id => id !== listingId));
       }
+      await notifyAdmin({
+        subject: `Listing withdrawn — ${listing.address}`,
+        html: `<p>${listing.sellerName || 'Seller'} withdrew <strong>${listing.address}, ${listing.suburb}</strong> from the market.</p>`,
+        isError: true,
+      });
       return res.status(200).json({ ok: true, listing });
     }
 

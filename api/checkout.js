@@ -6,6 +6,7 @@
 
 import Stripe from 'stripe';
 import { generateListingId } from './listing-utils.js';
+import { notifyAdmin } from './notify-admin.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -20,6 +21,12 @@ export default async function handler(req, res) {
 
   if (!process.env.STRIPE_SECRET_KEY) {
     console.error('STRIPE_SECRET_KEY env var not set');
+    await notifyAdmin({
+      subject: 'Stripe is DOWN — STRIPE_SECRET_KEY missing',
+      html: `<p>A visitor tried to pay and checkout is completely broken: <code>STRIPE_SECRET_KEY</code> is not set in this environment.</p>
+<p>No one can pay you until this is fixed. Check Vercel → Settings → Environment Variables.</p>`,
+      isError: true,
+    });
     return res.status(500).json({ error: 'Payment not configured — contact office@no-agents.com.au' });
   }
 
@@ -70,6 +77,13 @@ export default async function handler(req, res) {
     return res.status(200).json({ sessionId: session.id });
   } catch (err) {
     console.error('Stripe checkout error:', err.message);
+    await notifyAdmin({
+      subject: 'Stripe checkout session creation failed',
+      html: `<p>A buyer/seller could not start checkout — this blocks new revenue.</p>
+<p><strong>Product:</strong> ${productName || 'unknown'} · <strong>Amount:</strong> ${amount || 'unknown'}</p>
+<p><strong>Error:</strong> ${err.message}</p>`,
+      isError: true,
+    });
     return res.status(500).json({ error: err.message });
   }
 }

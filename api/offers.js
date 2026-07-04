@@ -7,6 +7,8 @@
 //
 // Required env vars: KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY (optional, seller notify)
 
+import { notifyAdmin } from './notify-admin.js';
+
 const { KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY } = process.env;
 
 async function kvGet(key) {
@@ -103,6 +105,13 @@ export default async function handler(req, res) {
       });
     } catch (e) { console.error('offers notify error:', e.message); }
   }
+
+  await notifyAdmin({
+    subject: `New offer — $${offer.amount.toLocaleString()} on ${listing.address}`,
+    html: `<p><strong>${offer.buyer}</strong> (${offer.buyerEmail || 'no email'}, ${offer.buyerPhone || 'no phone'}) offered <strong>$${offer.amount.toLocaleString()}</strong> on ${listing.address}, ${listing.suburb}.</p>
+<p>Settlement: ${offer.settlement} days · Finance: ${offer.finance ? `yes (${offer.financeDays || '?'} days)` : 'no'} · Building/pest: ${offer.building ? `yes (${offer.buildingDays || '?'} days)` : 'no'}</p>
+<p>Seller: ${listing.sellerName || 'n/a'} (${listing.sellerEmail || 'n/a'})</p>`,
+  });
 
   return res.status(200).json({ ok: true, offer });
 }
