@@ -8,7 +8,18 @@
       "mcp__Claude_in_Chrome__find",
       "mcp__claude-in-chrome__tabs_context_mcp",
       "mcp__claude-in-chrome__javascript_tool",
-      "mcp__claude-in-chrome__form_input"
+      "mcp__claude-in-chrome__form_input",
+      "mcp__claude-in-chrome__navigate",
+      "mcp__claude-in-chrome__find",
+      "mcp__claude-in-chrome__get_page_text",
+      "mcp__claude-in-chrome__computer",
+      "mcp__c57879c6-285d-4739-b6f7-bcfbf0004314__list_projects",
+      "mcp__c57879c6-285d-4739-b6f7-bcfbf0004314__list_deployments",
+      "mcp__c57879c6-285d-4739-b6f7-bcfbf0004314__deploy_to_vercel",
+      "mcp__c57879c6-285d-4739-b6f7-bcfbf0004314__get_project",
+      "mcp__c57879c6-285d-4739-b6f7-bcfbf0004314__list_teams",
+      "Bash(node -e ' *)",
+      "Bash(git stash *)"
     ]
   }
 }
