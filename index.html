@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--SEO_META_START-->
 <title>no-agents — Sell your property. Keep the commission.</title>
 <meta name="description" content="Sell your home in Brisbane for a $798 flat fee — Domain.com.au listing, professional photography and 3D tour included. No commission, ever. Licensed QLD agency 4542501.">
 <link rel="canonical" href="https://www.no-agents.com.au/">
@@ -17,6 +18,7 @@
 <meta name="twitter:title" content="no-agents — Sell your property. Keep the commission.">
 <meta name="twitter:description" content="Sell your home for a $798 flat fee. No commission, ever.">
 <meta name="twitter:image" content="https://www.no-agents.com.au/no-agents-hero.jpg">
+<!--SEO_META_END-->
 <meta name="geo.region" content="AU-QLD">
 <meta name="geo.placename" content="Brisbane">
 <script type="application/ld+json">
@@ -236,7 +238,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 <!-- ── End no-agents Analytics ──────────────────────────────── -->
 </head>
 <body>
-<div id="app"><div style="max-width:760px;margin:0 auto;padding:88px 32px 72px;text-align:center;font-family:Inter,Arial,sans-serif">
+<div id="app"><!--STATIC_CONTENT_START--><div style="max-width:760px;margin:0 auto;padding:88px 32px 72px;text-align:center;font-family:Inter,Arial,sans-serif">
   <p style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#8a8078">Brisbane · Licensed Agency · Lic. 4542501</p>
   <h1 style="font-size:42px;font-weight:600;line-height:1.15;color:#1a1a1a;margin:16px 0">Sell your property. Keep the commission.</h1>
   <p style="font-size:17px;color:#4a4540;line-height:1.75;max-width:520px;margin:0 auto 28px">$798 flat fee covers everything — listing on Domain.com.au, professional photography, a 3D tour, enquiries and inspections. No commission, ever.</p>
@@ -248,7 +250,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
     <li><strong>Accept your best offer.</strong> Every verified offer appears live on your dashboard. Full transparency drives genuine best offers.</li>
   </ol>
   <p style="margin-top:40px;font-size:14px;color:#8a8078">Selling in Brisbane? See suburb-specific commission savings at <a href="/sell-your-house" style="color:#a07828">no-agents.com.au/sell-your-house</a>.</p>
-</div></div>
+</div><!--STATIC_CONTENT_END--></div>
 <script type="module">
 import{html,render,useState,useEffect,useRef}from'https://unpkg.com/htm/preact/standalone.module.js';
 
@@ -1383,6 +1385,7 @@ function SellerDash({go,token,listingId,onLogout}){
   const[savingSettings,setSavingSettings]=useState(false);
   const[settingsSaved,setSettingsSaved]=useState(false);
   const[withdrawing,setWithdrawing]=useState(false);
+  const[milestoneBusy,setMilestoneBusy]=useState('');
   const[listingDesc,setListingDesc]=useState('');
   const[descLoading,setDescLoading]=useState(false);
   const[descSaved,setDescSaved]=useState(false);
@@ -1461,6 +1464,15 @@ function SellerDash({go,token,listingId,onLogout}){
     setCsigning(false);
   };
 
+  const toggleMilestone=async(key,done)=>{
+    setMilestoneBusy(key);
+    try{
+      const r=await fetch(`/api/seller-portal?listingId=${encodeURIComponent(listingId)}&action=milestone`,{method:'POST',headers:{'Content-Type':'application/json','x-seller-token':token},body:JSON.stringify({key,done})});
+      if(r.ok){const d=await r.json();setData(prev=>({...prev,listing:{...prev.listing,milestones:d.milestones}}));}
+    }catch{}
+    setMilestoneBusy('');
+  };
+
   if(loading)return html`<div style="max-width:1100px;margin:0 auto;padding:120px 32px;text-align:center" class="mp"><div style="font-size:14px;color:${T.tm}">Loading your dashboard…</div></div>`;
   if(loadErr)return html`<div style="max-width:480px;margin:0 auto;padding:120px 32px;text-align:center" class="mp">
     <div style="font-size:14px;color:${T.tm};margin-bottom:16px">${loadErr}</div>
@@ -1475,6 +1487,34 @@ function SellerDash({go,token,listingId,onLogout}){
   const contract=data.contract||null;
   // Buyer signs first, then seller. Until the buyer has signed, the seller has nothing to do yet.
   const contractStatus=contract?(contract.sellerSigned&&contract.buyerSigned?'executed':contract.buyerSigned?'sign_required':'awaiting_buyer'):null;
+  // Past "Agreed", there's no automatic signal for when B&P/finance conditions
+  // clear, the deposit lands, or keys change hands — nobody's system tells us
+  // that. Once the contract is fully executed we know the *defined* windows
+  // from the contract terms (finance/B&P/settlement days) and can estimate
+  // due dates, but actual completion of those steps is seller-confirmed via
+  // a manual tick. Settlement is the exception — that's confirmed for real
+  // when the office charges the success fee (see api/settle.js).
+  const milestones=p.milestones||{};
+  const contractExecuted=contractStatus==='executed';
+  const executedAt=contractExecuted?(new Date(contract.sellerSigned.signedAt)>new Date(contract.buyerSigned.signedAt)?contract.sellerSigned.signedAt:contract.buyerSigned.signedAt):null;
+  const addDays=(iso,days)=>{const d=new Date(iso);d.setDate(d.getDate()+Number(days||0));return d;};
+  const fmtDue=(iso,days)=>iso&&days?addDays(iso,days).toLocaleDateString('en-AU',{day:'numeric',month:'short'}):null;
+  const bpNeeded=contractExecuted&&contract.building;
+  const financeNeeded=contractExecuted&&contract.finance;
+  const bpDone=!bpNeeded||milestones.bp?.done;
+  const financeDone=!financeNeeded||milestones.finance?.done;
+  const conditionsDone=contractExecuted&&bpDone&&financeDone;
+  const depositDone=contractExecuted&&milestones.deposit?.done;
+  const settlementDone=p.status==='sold';
+  const possessionDone=settlementDone&&milestones.possession?.done;
+  // Single "front" index, same convention as before: everything before it is
+  // done (checkmarked), the front itself is "active" (in progress), anything
+  // after is pending — never lets a later stage show done while an earlier
+  // one doesn't.
+  const frontIdx=!accepted?(offers.length?3:insp.length?2:enquiries.length?1:0)
+    :!contractExecuted?4:!conditionsDone?5:!depositDone?6:!settlementDone?7:!possessionDone?8:9;
+  const stageDone=STAGES.map((_,i)=>i<frontIdx);
+  const activeStageIdx=frontIdx<STAGES.length?frontIdx:-1;
   const docs=[
     contract
       ?{id:'contract',name:'Heads of Agreement',kind:'contract',status:contractStatus,contract}
@@ -1534,7 +1574,7 @@ function SellerDash({go,token,listingId,onLogout}){
     <div style="${CD};margin-bottom:20px;overflow-x:auto">
       <div style="font-size:12px;font-weight:600;color:${T.tu};text-transform:uppercase;letter-spacing:.05em;margin-bottom:16px">Transaction progress</div>
       <div style="display:flex;align-items:center;min-width:600px">
-        ${STAGES.map((stage,i)=>{const stageIdx=accepted?4:offers.length?3:insp.length?2:enquiries.length?1:0;const done=i<stageIdx,active=i===stageIdx;return html`<div style="display:flex;align-items:center;flex:0 0 auto">
+        ${STAGES.map((stage,i)=>{const done=stageDone[i],active=i===activeStageIdx;return html`<div style="display:flex;align-items:center;flex:0 0 auto">
           <div style="display:flex;flex-direction:column;align-items:center;width:72px">
             <div style="width:32px;height:32px;border-radius:50%;border:2px solid ${done||active?T.k:T.bd};background:${done?T.k:active?T.bw:'transparent'};display:flex;align-items:center;justify-content:center;margin-bottom:6px">
               ${done?html`<span style="color:#fff;font-size:12px">✓</span>`:html`<div style="width:8px;height:8px;border-radius:50%;background:${active?T.k:T.bd}"></div>`}
@@ -1544,6 +1584,39 @@ function SellerDash({go,token,listingId,onLogout}){
           ${i<STAGES.length-1&&html`<div style="width:16px;height:2px;background:${done?T.k:T.bd};flex-shrink:0;margin-bottom:18px"></div>`}
         </div>`;})}
       </div>
+
+      ${contractExecuted&&activeStageIdx===5&&html`<div style="margin-top:20px;padding-top:16px;border-top:1px solid ${T.bd}">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px">Subject-to conditions</div>
+        <div style="display:grid;gap:8px">
+          ${contract.building&&html`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:10px;background:${T.bg}">
+            <div><div style="font-size:13px;font-weight:500">Building &amp; pest cleared</div><div style="font-size:11px;color:${T.tu}">${contract.buildingDays}-day condition${fmtDue(executedAt,contract.buildingDays)?` — due ~${fmtDue(executedAt,contract.buildingDays)}`:''}</div></div>
+            ${milestones.bp?.done?html`<span style="${P('g')}">✓ Cleared</span>`:html`<button style="${B('o','s')}" disabled=${milestoneBusy==='bp'} onclick=${()=>toggleMilestone('bp',true)}>Mark cleared</button>`}
+          </div>`}
+          ${contract.finance&&html`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:10px;background:${T.bg}">
+            <div><div style="font-size:13px;font-weight:500">Finance approved</div><div style="font-size:11px;color:${T.tu}">${contract.financeDays}-day condition${fmtDue(executedAt,contract.financeDays)?` — due ~${fmtDue(executedAt,contract.financeDays)}`:''}</div></div>
+            ${milestones.finance?.done?html`<span style="${P('g')}">✓ Approved</span>`:html`<button style="${B('o','s')}" disabled=${milestoneBusy==='finance'} onclick=${()=>toggleMilestone('finance',true)}>Mark approved</button>`}
+          </div>`}
+          ${!contract.building&&!contract.finance&&html`<div style="font-size:12px;color:${T.tu}">No B&P or finance conditions on this contract — nothing to clear.</div>`}
+        </div>
+      </div>`}
+
+      ${contractExecuted&&activeStageIdx===6&&html`<div style="margin-top:20px;padding-top:16px;border-top:1px solid ${T.bd}">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:10px;background:${T.bg}">
+          <div><div style="font-size:13px;font-weight:600">Deposit received</div><div style="font-size:11px;color:${T.tu}">Typically due within a few business days of signing. Your conveyancer holds it in trust.</div></div>
+          <button style="${B('o','s')}" disabled=${milestoneBusy==='deposit'} onclick=${()=>toggleMilestone('deposit',true)}>Mark received</button>
+        </div>
+      </div>`}
+
+      ${contractExecuted&&activeStageIdx===7&&html`<div style="margin-top:20px;padding-top:16px;border-top:1px solid ${T.bd}">
+        <div style="font-size:12px;color:${T.tu}">Estimated settlement: ${fmtDue(executedAt,contract.settlement)||`${contract.settlement} days from signing`}. This step is confirmed by our office once settlement funds have cleared — no action needed from you here.</div>
+      </div>`}
+
+      ${settlementDone&&activeStageIdx===8&&html`<div style="margin-top:20px;padding-top:16px;border-top:1px solid ${T.bd}">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:10px;background:${T.bg}">
+          <div><div style="font-size:13px;font-weight:600">Possession / keys handed over</div><div style="font-size:11px;color:${T.tu}">Usually the same day as settlement, unless you've agreed a leaseback with the buyer.</div></div>
+          <button style="${B('o','s')}" disabled=${milestoneBusy==='possession'} onclick=${()=>toggleMilestone('possession',true)}>Mark handed over</button>
+        </div>
+      </div>`}
     </div>
 
     <div style="display:flex;gap:4px;border-bottom:1px solid ${T.bd};margin-bottom:20px" class="tab-row">
@@ -1851,6 +1924,7 @@ function Admin(){
   const[tab,setTab]=useState('applications');
   const[agents,setAgents]=useState([]);
   const[inspections,setInspections]=useState([]);
+  const[eois,setEois]=useState([]);
   const[loading,setLoading]=useState(false);
   const[loginErr,setLoginErr]=useState('');
   const[actionMsg,setActionMsg]=useState('');
@@ -1866,9 +1940,10 @@ function Admin(){
 
   const loadAll=async t=>{
     setLoading(true);
-    try{const[ar,ir]=await Promise.all([fetch('/api/agents',{headers:{'x-admin-token':t}}),fetch('/api/inspections',{headers:{'x-admin-token':t}})]);
+    try{const[ar,ir,er]=await Promise.all([fetch('/api/agents',{headers:{'x-admin-token':t}}),fetch('/api/inspections',{headers:{'x-admin-token':t}}),fetch('/api/eoi-list',{headers:{'x-admin-token':t}})]);
     if(ar.ok)setAgents(await ar.json());
-    if(ir.ok)setInspections(await ir.json());}
+    if(ir.ok)setInspections(await ir.json());
+    if(er.ok)setEois((await er.json()).eois||[]);}
     catch(e){}
     setLoading(false);
   };
@@ -1908,13 +1983,13 @@ function Admin(){
     </div>
 
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px" class="g1">
-      ${[{l:'Pending applications',v:pending.length,a:pending.length>0},{l:'Approved agents',v:approved.length},{l:'Commission owed',v:'$'+totalOwed,a:totalOwed>0},{l:'Commission paid',v:'$'+totalPaid}].map(s=>html`<div style="${CD};text-align:center;padding:16px 12px"><div class="sf" style="font-size:${typeof s.v==='number'?24:20}px;font-weight:600;color:${s.a?T.a:T.t};letter-spacing:-.3px">${s.v}</div><div style="font-size:11px;color:${T.tu};font-weight:500;margin-top:4px;text-transform:uppercase;letter-spacing:.04em">${s.l}</div></div>`)}
+      ${[{l:'Pending applications',v:pending.length,a:pending.length>0},{l:'Approved agents',v:approved.length},{l:'Commission owed',v:'$'+totalOwed,a:totalOwed>0},{l:'Commission paid',v:'$'+totalPaid},{l:'EOIs received',v:eois.length}].map(s=>html`<div style="${CD};text-align:center;padding:16px 12px"><div class="sf" style="font-size:${typeof s.v==='number'?24:20}px;font-weight:600;color:${s.a?T.a:T.t};letter-spacing:-.3px">${s.v}</div><div style="font-size:11px;color:${T.tu};font-weight:500;margin-top:4px;text-transform:uppercase;letter-spacing:.04em">${s.l}</div></div>`)}
     </div>
 
     ${actionMsg&&html`<div style="background:#d4ede1;border-radius:10px;padding:10px 16px;font-size:13px;color:${T.g};margin-bottom:16px;font-weight:500">${actionMsg}</div>`}
 
     <div style="display:flex;gap:4px;border-bottom:1px solid ${T.bd};margin-bottom:20px">
-      ${['applications','inspections'].map(t=>html`<button onclick=${()=>setTab(t)} style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:500;color:${tab===t?T.t:T.tu};border-bottom:2px solid ${tab===t?T.k:'transparent'};margin-bottom:-1px;transition:all .15s;font-family:Inter,sans-serif;text-transform:capitalize">${t}</button>`)}
+      ${['applications','inspections','eois'].map(t=>html`<button onclick=${()=>setTab(t)} style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:500;color:${tab===t?T.t:T.tu};border-bottom:2px solid ${tab===t?T.k:'transparent'};margin-bottom:-1px;transition:all .15s;font-family:Inter,sans-serif;text-transform:capitalize">${t==='eois'?'EOIs':t}</button>`)}
     </div>
 
     ${tab==='applications'&&html`<div>
@@ -1956,11 +2031,51 @@ function Admin(){
         </div>
       </div>`)}
     </div>`}
+
+    ${tab==='eois'&&html`<div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:13px;color:${T.tu}">Expressions of interest from the out-of-area seller form and the Fractional waitlist.</div>
+        <button style="${B('o','s')}" disabled=${!eois.length} onclick=${()=>{
+          const cols=['createdAt','source','name','email','phone','interest','address','state','message'];
+          const csv=[cols.join(',')].concat(eois.map(e=>cols.map(c=>`"${String(e[c]||'').replace(/"/g,'""')}"`).join(','))).join('\n');
+          const blob=new Blob([csv],{type:'text/csv'});
+          const a=document.createElement('a');
+          a.href=URL.createObjectURL(blob);
+          a.download=`eois-${new Date().toISOString().slice(0,10)}.csv`;
+          a.click();
+        }}>⬇ Export CSV</button>
+      </div>
+      ${eois.length===0&&html`<div style="text-align:center;padding:40px;color:${T.tu};font-size:14px">${loading?'Loading…':'No expressions of interest yet.'}</div>`}
+      ${eois.map(e=>html`<div style="${CD};margin-bottom:10px">
+        <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+          <div style="flex:1">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap">
+              <span style="font-weight:600;font-size:15px">${e.name}</span>
+              <span style="${P(e.source==='fractional'?'a':'w')};font-size:11px">${e.source==='fractional'?'Fractional':'Out of area'}</span>
+            </div>
+            <div style="font-size:13px;color:${T.tu};margin-bottom:3px">${e.email}${e.phone?' · '+e.phone:''}</div>
+            ${e.source==='fractional'?html`<div style="font-size:13px;color:${T.tu};margin-bottom:3px">Interested as: <strong style="color:${T.t}">${e.interest||'—'}</strong></div>`:html`<div style="font-size:13px;color:${T.tu};margin-bottom:3px">${e.address||'—'}${e.state?' · '+e.state:''}</div>`}
+            ${e.message&&html`<div style="font-size:12px;color:${T.tm};font-style:italic;margin-top:4px">"${e.message}"</div>`}
+            <div style="font-size:11px;color:${T.tu};margin-top:6px">${new Date(e.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}</div>
+          </div>
+        </div>
+      </div>`)}
+    </div>`}
   </div>`;}
 
 function Fractional({go}){
   const[eoiForm,setEoiForm]=useState({name:'',email:'',phone:'',interest:'buyer',message:''});
   const[eoiSent,setEoiSent]=useState(false);
+  const[eoiBusy,setEoiBusy]=useState(false);
+  const submitFracEoi=async()=>{
+    if(!eoiForm.name.trim()||!eoiForm.email.trim())return;
+    setEoiBusy(true);
+    try{
+      await fetch('/api/eoi',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:'fractional',name:eoiForm.name,email:eoiForm.email,phone:eoiForm.phone,interest:eoiForm.interest,message:eoiForm.message})});
+      setEoiSent(true);
+    }catch{}
+    setEoiBusy(false);
+  };
   const[sellerForm,setSellerForm]=useState({name:'',email:'',phone:'',address:'',percent:'10',occupancy:'tenanted',message:''});
   const[sellerSent,setSellerSent]=useState(false);
   const[faq,setFaq]=useState(null);
@@ -2300,7 +2415,7 @@ function Fractional({go}){
         ${!eoiSent?html`<div style="text-align:left">
           ${[['Full name','name','text','Jane Smith'],['Email','email','email','jane@email.com'],['Mobile','phone','tel','04XX XXX XXX']].map(([l,k,t,ph])=>html`<div style="margin-bottom:14px"><label style="${LB};color:rgba(255,255,255,.5)">${l}</label><input style="${IS}" type=${t} value=${eoiForm[k]} onInput=${e=>eUp(k,e.target.value)} placeholder=${ph}/></div>`)}
           <div style="margin-bottom:14px"><label style="${LB};color:rgba(255,255,255,.5)">I'm interested as a</label><select style="${IS}" value=${eoiForm.interest} onChange=${e=>eUp('interest',e.target.value)}><option value="buyer">Investor</option><option value="seller">Homeowner (sell a stake)</option><option value="both">Both</option></select></div>
-          <button style="${B('a','l')};width:100%;margin-top:8px;opacity:${eoiForm.name&&eoiForm.email?1:.5}" onclick=${()=>eoiForm.name&&eoiForm.email&&setEoiSent(true)} disabled=${!(eoiForm.name&&eoiForm.email)}>Register →</button>
+          <button style="${B('a','l')};width:100%;margin-top:8px;opacity:${eoiForm.name&&eoiForm.email&&!eoiBusy?1:.5}" onclick=${submitFracEoi} disabled=${eoiBusy||!(eoiForm.name&&eoiForm.email)}>${eoiBusy?'Sending…':'Register →'}</button>
         </div>`:html`<div style="padding:20px"><div style="font-size:40px;margin-bottom:12px">✅</div><h3 class="sf" style="font-size:22px;font-weight:600;color:#fff;margin-bottom:8px">You're on the list</h3><p style="font-size:14px;color:rgba(255,255,255,.6)">We'll notify you at <strong style="color:#fff">${eoiForm.email}</strong> when fractional ownership launches.</p></div>`}
       </div>
     </section>
