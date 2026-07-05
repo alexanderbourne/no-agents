@@ -8,8 +8,9 @@
 // Required env vars: KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY (optional, seller notify)
 
 import { notifyAdmin } from './notify-admin.js';
+import { notifySeller } from './notify-seller.js';
 
-const { KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY } = process.env;
+const { KV_REST_API_URL, KV_REST_API_TOKEN } = process.env;
 
 async function kvGet(key) {
   if (!KV_REST_API_URL || !KV_REST_API_TOKEN) return null;
@@ -87,24 +88,16 @@ export default async function handler(req, res) {
   list.push(offer);
   await kvSet(`offers:${listingId}`, list);
 
-  if (listing.sellerEmail && RESEND_API_KEY) {
-    try {
-      await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from: 'No Agents <office@no-agents.com.au>',
-          to: [listing.sellerEmail],
-          subject: `New offer on ${listing.address} — $${offer.amount.toLocaleString()}`,
-          html: `<div style="font-family:sans-serif;max-width:500px;">
-            <h2>New offer received</h2>
-            <p><strong>$${offer.amount.toLocaleString()}</strong> from ${offer.buyer}, ${offer.settlement}-day settlement.</p>
-            <p>Log in to your seller dashboard at no-agents.com.au to review and respond.</p>
-          </div>`,
-        }),
-      });
-    } catch (e) { console.error('offers notify error:', e.message); }
-  }
+  await notifySeller({
+    listing,
+    subject: `New offer on ${listing.address} — $${offer.amount.toLocaleString()}`,
+    html: `<div style="font-family:sans-serif;max-width:500px;">
+      <h2>New offer received</h2>
+      <p><strong>$${offer.amount.toLocaleString()}</strong> from ${offer.buyer}, ${offer.settlement}-day settlement.</p>
+      <p>Log in to your seller dashboard at no-agents.com.au to review and respond.</p>
+    </div>`,
+    sms: `No Agents: New offer of $${offer.amount.toLocaleString()} from ${offer.buyer} on ${listing.address}. Log in to your dashboard to respond.`,
+  });
 
   await notifyAdmin({
     subject: `New offer — $${offer.amount.toLocaleString()} on ${listing.address}`,

@@ -17,6 +17,7 @@ import { verifySellerToken } from './seller-auth.js';
 import { randomBytes } from 'crypto';
 import { notifyAdmin } from './notify-admin.js';
 import { notifyConveyancer } from './conveyancing-handoff.js';
+import { notifySeller } from './notify-seller.js';
 
 const { KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY } = process.env;
 
@@ -220,6 +221,17 @@ export default async function handler(req, res) {
         html: `<p>${listing.sellerName || 'Seller'} accepted <strong>${offer.buyer}</strong>'s offer of <strong>$${offer.amount.toLocaleString()}</strong> on ${listing.address}, ${listing.suburb}. Heads of Agreement sent to buyer to sign first.</p>`,
       });
 
+      await notifySeller({
+        listing,
+        subject: `Offer accepted — ${listing.address}`,
+        html: `<div style="font-family:sans-serif;max-width:500px;">
+          <h2>You accepted an offer</h2>
+          <p>You accepted <strong>${offer.buyer}</strong>'s offer of <strong>$${offer.amount.toLocaleString()}</strong>, ${offer.settlement}-day settlement, on <strong>${listing.address}</strong>.</p>
+          <p>The Heads of Agreement has been sent to ${offer.buyer} to sign first — you'll be notified once it's your turn.</p>
+        </div>`,
+        sms: `No Agents: You accepted ${offer.buyer}'s offer of $${offer.amount.toLocaleString()} on ${listing.address}. Heads of Agreement sent to them to sign first.`,
+      });
+
       return res.status(200).json({ ok: true, offers, contract: listing.contract });
     }
 
@@ -251,6 +263,17 @@ export default async function handler(req, res) {
         } catch (e) { console.error('buyer both-signed notify error:', e.message); }
       }
 
+      await notifySeller({
+        listing,
+        subject: `Signed by both parties — ${listing.address}`,
+        html: `<div style="font-family:sans-serif;max-width:500px;">
+          <h2>Heads of Agreement signed by both parties</h2>
+          <p>The agreed terms for <strong>${listing.address}</strong> at $${(listing.contract.amount || 0).toLocaleString()} have now been signed by both you and the buyer.</p>
+          <p>${listing.conveyancer?.email ? `This has been passed to ${listing.conveyancer.name || 'your nominated conveyancer'}, who will prepare the formal Contract of Sale and be in touch to finalise it.` : 'Engage your conveyancer or solicitor to prepare the formal Contract of Sale — nominate one in your dashboard Settings tab so we can notify them automatically next time.'}</p>
+        </div>`,
+        sms: `No Agents: Heads of Agreement for ${listing.address} signed by both parties.${listing.conveyancer?.email ? '' : ' Nominate a conveyancer in your dashboard Settings.'}`,
+      });
+
       const conveyancerNotified = await notifyConveyancer(listing);
       listing.conveyancingHandoff = {
         notified: conveyancerNotified,
@@ -264,6 +287,31 @@ export default async function handler(req, res) {
         html: `<p>Both parties have signed the Heads of Agreement for <strong>${listing.address}, ${listing.suburb}</strong> at $${(listing.contract.amount || 0).toLocaleString()}. ${conveyancerNotified ? `Conveyancer (${listing.conveyancer?.name || listing.conveyancer?.email}) notified automatically.` : 'No conveyancer nominated yet — follow up with the seller to get one entered in Settings, or hand off manually.'}</p>`,
       });
       return res.status(200).json({ ok: true, contract: listing.contract });
+    }
+
+    // POST ?action=milestone — seller manually confirms a post-contract step
+    // (B&P cleared, finance approved, deposit received, possession handed
+    // over) that nothing in the system can detect automatically. Settlement
+    // itself is NOT here — that's confirmed for real via /api/settle.
+    if (action === 'milestone') {
+      const { key, done } = req.body || {};
+      const allowed = ['bp', 'finance', 'deposit', 'possession'];
+      if (!allowed.includes(key)) return res.status(400).json({ error: `key must be one of: ${allowed.join(', ')}` });
+      if (['bp', 'finance', 'deposit'].includes(key) && !(listing.contract?.sellerSigned && listing.contract?.buyerSigned)) {
+        return res.status(409).json({ error: 'Contract must be fully executed before this milestone can be marked.' });
+      }
+      if (key === 'possession' && listing.status !== 'sold') {
+        return res.status(409).json({ error: 'Settlement must be confirmed before possession can be marked.' });
+      }
+      listing.milestones = listing.milestones || {};
+      listing.milestones[key] = { done: Boolean(done), doneAt: done ? new Date().toISOString() : null };
+      await kvSet(`listing:${listingId}`, listing);
+      const labels = { bp: 'Building & pest cleared', finance: 'Finance approved', deposit: 'Deposit received', possession: 'Possession / keys handed over' };
+      await notifyAdmin({
+        subject: `${labels[key]} — ${listing.address}`,
+        html: `<p>${listing.sellerName || 'Seller'} marked "${labels[key]}" as ${done ? 'complete' : 'incomplete'} for <strong>${listing.address}, ${listing.suburb}</strong>.</p>`,
+      });
+      return res.status(200).json({ ok: true, milestones: listing.milestones });
     }
 
     if (action === 'update-details') {

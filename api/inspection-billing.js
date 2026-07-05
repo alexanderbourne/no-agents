@@ -53,16 +53,17 @@ export async function findListingByAddress(address) {
 // Resolves the listing by listingId (preferred) or address, and — if it opted
 // into agent-assisted visits and has a saved card — charges the $99 visit fee.
 export async function chargeInspectionVisit({ listingId, address, inspectionId }) {
-  if (!KV_REST_API_URL || !KV_REST_API_TOKEN || !STRIPE_SECRET_KEY) {
-    return { charged: false, reason: 'not_configured' };
+  if (!KV_REST_API_URL || !KV_REST_API_TOKEN) {
+    return { charged: false, reason: 'not_configured', listing: null };
   }
 
   const listing = listingId
     ? safeParse(await kvGet(`listing:${listingId}`))
     : await findListingByAddress(address);
 
-  if (!listing) return { charged: false, reason: 'listing_not_found' };
-  if (listing.inspectionMode !== 'agent') return { charged: false, reason: 'not_agent_mode' };
+  if (!listing) return { charged: false, reason: 'listing_not_found', listing: null };
+  if (listing.inspectionMode !== 'agent') return { charged: false, reason: 'not_agent_mode', listing };
+  if (!STRIPE_SECRET_KEY) return { charged: false, reason: 'not_configured', listing };
 
   const stripe = new Stripe(STRIPE_SECRET_KEY);
   const customerId = listing.stripeCustomerId || null;
@@ -81,7 +82,7 @@ export async function chargeInspectionVisit({ listingId, address, inspectionId }
     }
   }
 
-  if (!paymentMethodId) return { charged: false, reason: 'no_saved_card' };
+  if (!paymentMethodId) return { charged: false, reason: 'no_saved_card', listing };
 
   try {
     const charge = await stripe.paymentIntents.create({
@@ -94,7 +95,7 @@ export async function chargeInspectionVisit({ listingId, address, inspectionId }
       description: `No Agents human agent visit — ${listing.address}`,
       metadata: { listingId: listing.id || listingId || '', address: listing.address || '', inspectionId: inspectionId || '' },
     });
-    return { charged: true, chargeId: charge.id, listingId: listing.id || listingId || null };
+    return { charged: true, chargeId: charge.id, listingId: listing.id || listingId || null, listing };
   } catch (err) {
     console.error('chargeInspectionVisit failed:', err.message);
     await notifyAdmin({
@@ -104,6 +105,6 @@ export async function chargeInspectionVisit({ listingId, address, inspectionId }
 <p>Collect the $99 manually from ${listing.sellerName || 'the seller'} (${listing.sellerEmail || listing.sellerPhone || 'no contact on file'}).</p>`,
       isError: true,
     });
-    return { charged: false, reason: err.message };
+    return { charged: false, reason: err.message, listing };
   }
 }

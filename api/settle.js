@@ -10,6 +10,7 @@
 
 import Stripe from 'stripe';
 import { verifyAdminToken } from './admin-auth.js';
+import { notifySeller } from './notify-seller.js';
 
 const { KV_REST_API_URL, KV_REST_API_TOKEN, STRIPE_SECRET_KEY, RESEND_API_KEY } = process.env;
 
@@ -109,21 +110,21 @@ export default async function handler(req, res) {
   };
   await kvSet(`listing:${listingId}`, JSON.stringify(settled));
 
-  // Emails
-  if (RESEND_API_KEY) {
-    const salePriceDisplay = salePriceNum.toLocaleString('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
-    if (listing.sellerEmail) {
-      await sendEmail(listing.sellerEmail,
-        `Settlement confirmed — ${listing.address}`,
-        `<p>Hi ${listing.sellerName || 'there'},</p>
+  // Notifications
+  const salePriceDisplay = salePriceNum.toLocaleString('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
+  await notifySeller({
+    listing,
+    subject: `Settlement confirmed — ${listing.address}`,
+    html: `<p>Hi ${listing.sellerName || 'there'},</p>
 <p>Congratulations — your property at <strong>${listing.address}, ${listing.suburb}</strong> has settled.</p>
 <p><strong>Sale price:</strong> ${salePriceDisplay}<br/>
 <strong>No Agents success fee (0.5%):</strong> ${feeDisplay}<br/>
 <strong>Stripe charge ID:</strong> ${charge.id}</p>
 <p>Thank you for selling with No Agents. We've saved you the bulk of a traditional commission.</p>
-<p>— Alexander Bourne<br/>No Agents Pty Ltd · Licence 4542501 (QLD)</p>`
-      );
-    }
+<p>— Alexander Bourne<br/>No Agents Pty Ltd · Licence 4542501 (QLD)</p>`,
+    sms: `No Agents: Congratulations — ${listing.address} has settled at ${salePriceDisplay}. Success fee charged: ${feeDisplay}. Thanks for selling with us!`,
+  });
+  if (RESEND_API_KEY) {
     await sendEmail('alexander@no-agents.com.au',
       `✅ Settlement charged — ${listing.address}`,
       `<p>Settlement confirmed for <strong>${listing.address}, ${listing.suburb}</strong>.</p>

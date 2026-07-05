@@ -102,7 +102,6 @@
     { "name": "Belmont", "slug": "belmont", "median": 1200000, "region": "east", "near": ["carindale", "tingalpa", "gumdale"] },
     { "name": "Gumdale", "slug": "gumdale", "median": 1600000, "region": "east acreage", "near": ["belmont", "wakerley", "tingalpa"] },
     { "name": "Wakerley", "slug": "wakerley", "median": 1250000, "region": "east", "near": ["gumdale", "manly-west", "belmont"] },
-    { "name": "Murarrie", "slug": "murarrie", "median": 1000000, "region": "east riverside", "near": ["cannon-hill", "tingalpa", "morningside"] },
-    { "name": "Kangaroo Point South", "slug": "kangaroo-point-south", "median": 1400000, "region": "inner-east riverside", "near": ["kangaroo-point", "east-brisbane", "woolloongabba"] }
+    { "name": "Murarrie", "slug": "murarrie", "median": 1000000, "region": "east riverside", "near": ["cannon-hill", "tingalpa", "morningside"] }
   ]
 }

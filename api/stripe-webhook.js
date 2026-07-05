@@ -5,6 +5,7 @@
 import Stripe from 'stripe';
 import { parseAddress, generateListingId } from './listing-utils.js';
 import { notifyAdmin } from './notify-admin.js';
+import { notifySeller } from './notify-seller.js';
 
 export const config = {
   api: { bodyParser: false },
@@ -138,18 +139,10 @@ export default async function handler(req, res) {
       isError: publishFailed || notConfigured,
     });
 
-    if (listing.sellerEmail && process.env.RESEND_API_KEY) {
-      await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'no-agents.com.au <office@no-agents.com.au>',
-          to: [listing.sellerEmail],
-          subject: `Your listing is going live — ${listing.address}`,
-          html: `<p>Hi ${listing.sellerName || 'there'},</p>
+    await notifySeller({
+      listing,
+      subject: `Your listing is going live — ${listing.address}`,
+      html: `<p>Hi ${listing.sellerName || 'there'},</p>
 <p>Your payment of $798 has been received. Your Complete Listing Package is being set up now.</p>
 <p><strong>Property:</strong> ${listing.address}<br/>
 <strong>Listing ID:</strong> ${uniqueId}<br/>
@@ -162,9 +155,8 @@ export default async function handler(req, res) {
 </ol>
 <p>Questions? Reply to this email or call 0485 043 210.</p>
 <p>— Alexander Bourne<br/>No Agents Pty Ltd · Licence 4542501 (QLD)</p>`,
-        }),
-      });
-    }
+      sms: `No Agents: Payment received — your listing at ${listing.address} is going live today. Check your dashboard for enquiries, inspections and offers.`,
+    });
 
     return res.status(200).json({ received: true, uniqueId, publishResult: result });
   } catch (err) {

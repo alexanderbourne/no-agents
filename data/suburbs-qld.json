@@ -1,0 +1,125 @@
+{
+  "_note": "QLD locality register for programmatic suburb pages. Medians are INDICATIVE per-region defaults for savings illustrations only; per-suburb overrides live in data/suburbs.json. Greater Brisbane names verified against Wikipedia's List of Brisbane suburbs; regional lists curated. Served dynamically by api/suburb-page.js.",
+  "regions": {
+    "brisbane-inner": {
+      "label": "inner Brisbane",
+      "median": 1400000,
+      "suburbs": ["Brisbane City", "East Brisbane", "Fortitude Valley", "Herston", "Highgate Hill", "Kangaroo Point", "Kelvin Grove", "New Farm", "Newstead", "Paddington", "Petrie Terrace", "Red Hill", "South Brisbane", "Spring Hill", "Teneriffe", "West End", "Woolloongabba"]
+    },
+    "brisbane-north": {
+      "label": "Brisbane's northside",
+      "median": 1050000,
+      "suburbs": ["Albion", "Alderley", "Ascot", "Aspley", "Bald Hills", "Banyo", "Boondall", "Bracken Ridge", "Bridgeman Downs", "Brighton", "Carseldine", "Chermside", "Chermside West", "Clayfield", "Deagon", "Eagle Farm", "Everton Park", "Ferny Grove", "Fitzgibbon", "Gaythorne", "Geebung", "Gordon Park", "Grange", "Hamilton", "Hendra", "Kalinga", "Kedron", "Keperra", "Lutwyche", "McDowall", "Mitchelton", "Newmarket", "Northgate", "Nudgee", "Nudgee Beach", "Nundah", "Pinkenba", "Sandgate", "Shorncliffe", "Stafford", "Stafford Heights", "Taigum", "Virginia", "Wavell Heights", "Wilston", "Windsor", "Wooloowin", "Zillmere"]
+    },
+    "brisbane-south": {
+      "label": "Brisbane's southside",
+      "median": 1050000,
+      "suburbs": ["Acacia Ridge", "Algester", "Annerley", "Archerfield", "Burbank", "Calamvale", "Coopers Plains", "Darra", "Doolandella", "Drewvale", "Durack", "Dutton Park", "Eight Mile Plains", "Ellen Grove", "Fairfield", "Forest Lake", "Greenslopes", "Heathwood", "Holland Park", "Holland Park West", "Inala", "Kuraby", "Larapinta", "MacGregor", "Mackenzie", "Mansfield", "Moorooka", "Mount Gravatt", "Mount Gravatt East", "Nathan", "Pallara", "Parkinson", "Richlands", "Robertson", "Rochedale", "Rocklea", "Runcorn", "Salisbury", "Stones Corner", "Stretton", "Sumner", "Sunnybank", "Sunnybank Hills", "Tarragindi", "Tennyson", "Upper Mount Gravatt", "Wacol", "Wishart", "Yeerongpilly", "Yeronga"]
+    },
+    "brisbane-east": {
+      "label": "Brisbane's eastside and bayside",
+      "median": 1100000,
+      "suburbs": ["Balmoral", "Belmont", "Bulimba", "Camp Hill", "Cannon Hill", "Carina", "Carina Heights", "Carindale", "Chandler", "Coorparoo", "Gumdale", "Hawthorne", "Hemmant", "Lota", "Manly", "Manly West", "Morningside", "Murarrie", "Norman Park", "Ransome", "Seven Hills", "Tingalpa", "Wakerley", "Wynnum", "Wynnum West"]
+    },
+    "brisbane-west": {
+      "label": "Brisbane's westside",
+      "median": 1250000,
+      "suburbs": ["Anstead", "Ashgrove", "Auchenflower", "Bardon", "Bellbowrie", "Brookfield", "Chapel Hill", "Chelmer", "Corinda", "Enoggera", "Fig Tree Pocket", "Graceville", "Indooroopilly", "Jamboree Heights", "Jindalee", "Karana Downs", "Kenmore", "Kenmore Hills", "Middle Park", "Milton", "Moggill", "Mount Crosby", "Mount Ommaney", "Oxley", "Pinjarra Hills", "Pullenvale", "Riverhills", "Seventeen Mile Rocks", "Sherwood", "Sinnamon Park", "St Lucia", "Taringa", "The Gap", "Toowong", "Upper Brookfield", "Upper Kedron", "Westlake"]
+    },
+    "ipswich": {
+      "label": "the Ipswich region",
+      "median": 780000,
+      "suburbs": ["Augustine Heights", "Barellan Point", "Basin Pocket", "Bellbird Park", "Blacksoil", "Blackstone", "Booval", "Brassall", "Brookwater", "Bundamba", "Camira", "Carole Park", "Churchill", "Chuwar", "Coalfalls", "Collingwood Park", "Deebing Heights", "Dinmore", "East Ipswich", "Eastern Heights", "Ebbw Vale", "Flinders View", "Gailes", "Goodna", "Ipswich", "Karalee", "Karrabin", "Leichhardt", "Marburg", "Moores Pocket", "Muirlea", "New Chum", "Newtown", "North Booval", "North Ipswich", "North Tivoli", "One Mile", "Pine Mountain", "Raceview", "Redbank", "Redbank Plains", "Ripley", "Riverview", "Rosewood", "Sadliers Crossing", "Silkstone", "South Ripley", "Spring Mountain", "Springfield", "Springfield Central", "Springfield Lakes", "Thagoona", "Tivoli", "Walloon", "West Ipswich", "Willowbank", "Woodend", "Wulkuraka", "Yamanto"]
+    },
+    "logan": {
+      "label": "the Logan region",
+      "median": 820000,
+      "suburbs": ["Bahrs Scrub", "Bannockburn", "Beenleigh", "Belivah", "Berrinba", "Bethania", "Boronia Heights", "Browns Plains", "Buccan", "Carbrook", "Cedar Creek", "Cedar Grove", "Cedar Vale", "Chambers Flat", "Cornubia", "Crestmead", "Daisy Hill", "Eagleby", "Edens Landing", "Forestdale", "Greenbank", "Heritage Park", "Hillcrest", "Holmview", "Jimboomba", "Kingston", "Logan Central", "Logan Reserve", "Logan Village", "Loganholme", "Loganlea", "Marsden", "Meadowbrook", "Mount Warren Park", "Mundoolun", "Munruben", "New Beith", "North Maclean", "Park Ridge", "Park Ridge South", "Priestdale", "Regents Park", "Rochedale South", "Shailer Park", "Slacks Creek", "South Maclean", "Springwood", "Stockleigh", "Tanah Merah", "Underwood", "Veresdale", "Waterford", "Waterford West", "Windaroo", "Woodridge", "Yarrabilba"]
+    },
+    "redlands": {
+      "label": "the Redlands",
+      "median": 950000,
+      "suburbs": ["Alexandra Hills", "Amity Point", "Birkdale", "Capalaba", "Cleveland", "Coochiemudlo Island", "Dunwich", "Macleay Island", "Mount Cotton", "Ormiston", "Point Lookout", "Redland Bay", "Russell Island", "Sheldon", "Thorneside", "Thornlands", "Victoria Point", "Wellington Point"]
+    },
+    "moreton-bay": {
+      "label": "the Moreton Bay region",
+      "median": 850000,
+      "suburbs": ["Albany Creek", "Arana Hills", "Banksia Beach", "Beachmere", "Bellara", "Bellmere", "Bongaree", "Bray Park", "Brendale", "Bunya", "Burpengary", "Caboolture", "Caboolture South", "Cashmere", "Clontarf", "Dakabin", "Dayboro", "Deception Bay", "Delaneys Creek", "Donnybrook", "Draper", "Eatons Hill", "Elimbah", "Everton Hills", "Ferny Hills", "Godwin Beach", "Griffin", "Highvale", "Joyner", "Kallangur", "Kippa-Ring", "Kurwongbah", "Lawnton", "Mango Hill", "Margate", "Morayfield", "Mount Glorious", "Mount Mee", "Mount Nebo", "Mount Samson", "Murrumba Downs", "Narangba", "Newport", "Ningi", "North Lakes", "Ocean View", "Petrie", "Redcliffe", "Rothwell", "Samford Valley", "Samford Village", "Samsonvale", "Sandstone Point", "Scarborough", "Strathpine", "Toorbul", "Upper Caboolture", "Wamuran", "Warner", "Woodford", "Woody Point", "Woorim"]
+    },
+    "gold-coast": {
+      "label": "the Gold Coast",
+      "median": 1150000,
+      "suburbs": ["Advancetown", "Arundel", "Ashmore", "Benowa", "Biggera Waters", "Bilinga", "Bonogin", "Broadbeach", "Broadbeach Waters", "Bundall", "Burleigh Heads", "Burleigh Waters", "Carrara", "Clear Island Waters", "Coolangatta", "Coombabah", "Coomera", "Currumbin", "Currumbin Valley", "Currumbin Waters", "Elanora", "Gaven", "Gilston", "Helensvale", "Highland Park", "Hollywell", "Hope Island", "Jacobs Well", "Labrador", "Main Beach", "Maudsland", "Mermaid Beach", "Mermaid Waters", "Merrimac", "Miami", "Molendinar", "Mudgeeraba", "Nerang", "Ormeau", "Ormeau Hills", "Oxenford", "Pacific Pines", "Palm Beach", "Paradise Point", "Parkwood", "Pimpama", "Reedy Creek", "Robina", "Runaway Bay", "Southport", "Springbrook", "Surfers Paradise", "Tallai", "Tallebudgera", "Tallebudgera Valley", "Tugun", "Upper Coomera", "Varsity Lakes", "Willow Vale", "Wongawallan", "Worongary", "Yatala"]
+    },
+    "sunshine-coast": {
+      "label": "the Sunshine Coast",
+      "median": 1100000,
+      "suburbs": ["Alexandra Headland", "Aroona", "Battery Hill", "Beerburrum", "Beerwah", "Birtinya", "Bli Bli", "Bokarina", "Buddina", "Buderim", "Caloundra", "Caloundra West", "Coolum Beach", "Conondale", "Currimundi", "Dicky Beach", "Diddillibah", "Eudlo", "Eumundi", "Flaxton", "Forest Glen", "Glass House Mountains", "Glenview", "Golden Beach", "Kenilworth", "Kings Beach", "Kuluin", "Landsborough", "Little Mountain", "Maleny", "Mapleton", "Marcoola", "Maroochydore", "Meridan Plains", "Minyama", "Moffat Beach", "Montville", "Mooloolaba", "Mooloolah Valley", "Mount Coolum", "Mountain Creek", "Mudjimba", "Nambour", "Pacific Paradise", "Palmwoods", "Parrearra", "Peachester", "Pelican Waters", "Peregian Springs", "Rosemount", "Shelly Beach", "Sippy Downs", "Tanawha", "Twin Waters", "Warana", "Woombye", "Wurtulla", "Yandina", "Yaroomba"]
+    },
+    "noosa": {
+      "label": "the Noosa region",
+      "median": 1350000,
+      "suburbs": ["Black Mountain", "Boreen Point", "Castaways Beach", "Cooran", "Cooroy", "Doonan", "Kin Kin", "Lake Macdonald", "Marcus Beach", "Noosa Heads", "Noosaville", "Peregian Beach", "Pomona", "Sunrise Beach", "Sunshine Beach", "Tewantin", "Tinbeerwah"]
+    },
+    "scenic-rim-lockyer-somerset": {
+      "label": "the Scenic Rim, Lockyer Valley and Somerset",
+      "median": 720000,
+      "suburbs": ["Aratula", "Beaudesert", "Boonah", "Canungra", "Coominya", "Esk", "Fernvale", "Forest Hill", "Gatton", "Grantham", "Harrisville", "Hatton Vale", "Helidon", "Kalbar", "Kilcoy", "Kooralbyn", "Laidley", "Lowood", "Murphys Creek", "Peak Crossing", "Plainland", "Rathdowney", "Tamborine", "Tamborine Mountain", "Toogoolawah", "Withcott"]
+    },
+    "toowoomba": {
+      "label": "the Toowoomba region",
+      "median": 680000,
+      "suburbs": ["Cabarlah", "Cambooya", "Centenary Heights", "Cranley", "Crows Nest", "Darling Heights", "Drayton", "East Toowoomba", "Glenvale", "Gowrie Junction", "Harlaxton", "Harristown", "Highfields", "Kearneys Spring", "Kingsthorpe", "Middle Ridge", "Mount Lofty", "Newtown Toowoomba", "North Toowoomba", "Oakey", "Pittsworth", "Prince Henry Heights", "Rangeville", "Rockville", "South Toowoomba", "Toowoomba City", "Torrington", "Westbrook", "Wilsonton", "Wilsonton Heights", "Wyreema"]
+    },
+    "darling-downs-west": {
+      "label": "the Darling Downs and Western Queensland",
+      "median": 520000,
+      "suburbs": ["Allora", "Charleville", "Chinchilla", "Clifton", "Dalby", "Goondiwindi", "Killarney", "Kingaroy", "Miles", "Murgon", "Nanango", "Roma", "St George", "Stanthorpe", "Warwick", "Wondai"]
+    },
+    "fraser-coast-gympie": {
+      "label": "the Fraser Coast and Gympie region",
+      "median": 680000,
+      "suburbs": ["Booral", "Burrum Heads", "Curra", "Dundowran Beach", "Eli Waters", "Granville", "Gympie", "Howard", "Jones Hill", "Kawungan", "Maryborough", "Monkland", "Pialba", "Point Vernon", "Rainbow Beach", "River Heads", "Scarness", "Southside", "Tin Can Bay", "Tinana", "Toogoom", "Torquay", "Urangan", "Urraween", "Victory Heights", "Wondunna"]
+    },
+    "bundaberg": {
+      "label": "the Bundaberg region",
+      "median": 600000,
+      "suburbs": ["Avenell Heights", "Avoca", "Bargara", "Branyan", "Bundaberg Central", "Bundaberg East", "Bundaberg North", "Bundaberg South", "Bundaberg West", "Burnett Heads", "Coral Cove", "Gin Gin", "Innes Park", "Kepnock", "Millbank", "Moore Park Beach", "Norville", "Svensson Heights", "Thabeban", "Walkervale"]
+    },
+    "gladstone": {
+      "label": "the Gladstone region",
+      "median": 580000,
+      "suburbs": ["Barney Point", "Boyne Island", "Calliope", "Clinton", "Gladstone Central", "Glen Eden", "Kin Kora", "New Auckland", "South Gladstone", "Sun Valley", "Tannum Sands", "Telina", "Toolooa", "West Gladstone"]
+    },
+    "rockhampton": {
+      "label": "the Rockhampton region",
+      "median": 520000,
+      "suburbs": ["Allenstown", "Berserker", "Emu Park", "Frenchville", "Gracemere", "Koongal", "Lakes Creek", "Mount Morgan", "Norman Gardens", "North Rockhampton", "Park Avenue", "Parkhurst", "Rockhampton City", "The Range", "Wandal", "West Rockhampton", "Yeppoon", "Zilzie"]
+    },
+    "central-highlands": {
+      "label": "Central Queensland",
+      "median": 450000,
+      "suburbs": ["Biloela", "Blackwater", "Clermont", "Dysart", "Emerald", "Monto", "Moranbah", "Moura"]
+    },
+    "mackay-whitsunday": {
+      "label": "the Mackay and Whitsunday region",
+      "median": 580000,
+      "suburbs": ["Airlie Beach", "Andergrove", "Beaconsfield", "Blacks Beach", "Bowen", "Bucasia", "Cannonvale", "East Mackay", "Eimeo", "Glenella", "Mackay City", "Marian", "Mirani", "Mount Pleasant Mackay", "North Mackay", "Ooralea", "Proserpine", "Rural View", "Sarina", "Shoal Point", "Slade Point", "South Mackay", "Walkerston", "West Mackay"]
+    },
+    "townsville": {
+      "label": "the Townsville region",
+      "median": 520000,
+      "suburbs": ["Aitkenvale", "Alligator Creek", "Annandale", "Ayr", "Belgian Gardens", "Bohle Plains", "Burdell", "Bushland Beach", "Castle Hill", "Charters Towers", "Cluden", "Condon", "Cranbrook", "Currajong", "Deeragun", "Douglas", "Garbutt", "Gulliver", "Heatley", "Hermit Park", "Home Hill", "Hyde Park", "Idalia", "Ingham", "Kelso", "Kirwan", "Mount Louisa", "Mount Low", "Mundingburra", "Nelly Bay", "North Ward", "Oonoonba", "Pallarenda", "Pimlico", "Railway Estate", "Rasmussen", "Rosslea", "Rowes Bay", "South Townsville", "Thuringowa Central", "Townsville City", "Vincent", "West End Townsville", "Wulguru"]
+    },
+    "cairns-far-north": {
+      "label": "Cairns and Far North Queensland",
+      "median": 580000,
+      "suburbs": ["Aeroglen", "Atherton", "Bayview Heights", "Bentley Park", "Brinsmead", "Bungalow", "Cairns City", "Cairns North", "Caravonica", "Cardwell", "Clifton Beach", "Cooktown", "Earlville", "Edge Hill", "Edmonton", "Freshwater", "Gordonvale", "Holloways Beach", "Innisfail", "Kamerunga", "Kanimbla", "Kewarra Beach", "Kuranda", "Machans Beach", "Malanda", "Manoora", "Manunda", "Mareeba", "Mission Beach", "Mooroobool", "Mossman", "Mount Sheridan", "Palm Cove", "Parramatta Park", "Port Douglas", "Redlynch", "Smithfield", "Stratford", "Tolga", "Trinity Beach", "Trinity Park", "Tully", "Westcourt", "White Rock Cairns", "Whitfield", "Woree", "Yorkeys Knob", "Yungaburra"]
+    },
+    "outback": {
+      "label": "Outback Queensland",
+      "median": 350000,
+      "suburbs": ["Barcaldine", "Blackall", "Cloncurry", "Longreach", "Mount Isa", "Winton"]
+    }
+  }
+}

@@ -15,6 +15,7 @@
 import { verifyAdminToken } from './admin-auth.js';
 import { chargeInspectionVisit, findListingByAddress } from './inspection-billing.js';
 import { notifyAdmin } from './notify-admin.js';
+import { notifySeller } from './notify-seller.js';
 
 // ── KV helpers ───────────────────────────────────────────────────────────────
 
@@ -72,32 +73,27 @@ export default async function handler(req, res) {
       // buyer booking never turns into an unearned agent payout.
       const listing = await findListingByAddress(address);
       if (!listing || listing.inspectionMode !== 'agent') {
-        if (listing?.sellerEmail && process.env.RESEND_API_KEY) {
-          try {
-            await fetch('https://api.resend.com/emails', {
-              method: 'POST',
-              headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                from: 'No Agents <office@no-agents.com.au>',
-                to: [listing.sellerEmail],
-                subject: `Inspection request — ${address}`,
-                html: `<div style="font-family:sans-serif;max-width:500px;">
-                  <h2 style="color:#1a1a1a;margin-bottom:16px">A buyer wants to inspect your property</h2>
-                  <table style="border-collapse:collapse;width:100%;">
-                    <tr><td style="padding:8px 12px;color:#666;width:100px">Date</td><td style="padding:8px 12px;font-weight:600">${date}</td></tr>
-                    <tr style="background:#f9f9f9"><td style="padding:8px 12px;color:#666">Time</td><td style="padding:8px 12px">${time || 'TBC'}</td></tr>
-                    ${buyerName ? `<tr><td style="padding:8px 12px;color:#666">Buyer</td><td style="padding:8px 12px">${buyerName}</td></tr>` : ''}
-                  </table>
-                  <p style="margin-top:20px">You've chosen to self-facilitate inspections for this listing, so reach out directly to arrange access.</p>
-                </div>`,
-              }),
-            }).catch(e => console.error('Seller notification error:', e));
-          } catch (e) { console.error('Seller email lookup error:', e); }
+        let notified = { emailed: false, texted: false };
+        if (listing) {
+          notified = await notifySeller({
+            listing,
+            subject: `Inspection request — ${address}`,
+            html: `<div style="font-family:sans-serif;max-width:500px;">
+              <h2 style="color:#1a1a1a;margin-bottom:16px">A buyer wants to inspect your property</h2>
+              <table style="border-collapse:collapse;width:100%;">
+                <tr><td style="padding:8px 12px;color:#666;width:100px">Date</td><td style="padding:8px 12px;font-weight:600">${date}</td></tr>
+                <tr style="background:#f9f9f9"><td style="padding:8px 12px;color:#666">Time</td><td style="padding:8px 12px">${time || 'TBC'}</td></tr>
+                ${buyerName ? `<tr><td style="padding:8px 12px;color:#666">Buyer</td><td style="padding:8px 12px">${buyerName}</td></tr>` : ''}
+              </table>
+              <p style="margin-top:20px">You've chosen to self-facilitate inspections for this listing, so reach out directly to arrange access.</p>
+            </div>`,
+            sms: `No Agents: A buyer wants to inspect ${address} on ${date}${time ? ` at ${time}` : ''}. You self-facilitate this listing — please arrange access directly.`,
+          });
         }
         await notifyAdmin({
           subject: `Inspection request (self-facilitate) — ${address}`,
           html: `<p><strong>${(buyerName || 'A buyer').trim()}</strong> requested an inspection at <strong>${address}</strong> on ${date}${time ? ` at ${time}` : ''}.</p>
-<p>This listing is self-facilitate${listing ? '' : ' (listing not found)'}, so no agent-claimable request was created. ${listing?.sellerEmail ? `Seller (${listing.sellerEmail}) was emailed directly.` : 'No seller email on file — follow up manually.'}</p>`,
+<p>This listing is self-facilitate${listing ? '' : ' (listing not found)'}, so no agent-claimable request was created. ${notified.emailed ? 'Seller was emailed directly.' : notified.texted ? 'Seller was texted directly (no email on file or email failed).' : 'Could not reach the seller by email or SMS — follow up manually.'}</p>`,
         });
         return res.status(200).json({ ok: true, mode: 'self' });
       }
@@ -195,6 +191,18 @@ export default async function handler(req, res) {
     }
     ids.push(id);
     await kvSet('inspections:all', ids);
+
+    if (billing.listing) {
+      await notifySeller({
+        listing: billing.listing,
+        subject: `Inspection confirmed — ${listingAddress}`,
+        html: `<div style="font-family:sans-serif;max-width:500px;">
+          <h2 style="color:#1a1a1a;margin-bottom:16px">A licensed agent will attend your property</h2>
+          <p><strong>${inspection.agentName}</strong> will attend <strong>${listingAddress}</strong> on ${date}${time ? ` at ${time}` : ''}${buyerName ? ` to show ${buyerName} through` : ''}.</p>
+        </div>`,
+        sms: `No Agents: Agent ${inspection.agentName} will attend ${listingAddress} on ${date}${time ? ` at ${time}` : ''}.`,
+      });
+    }
 
     return res.status(200).json({ ok: true, id });
   }

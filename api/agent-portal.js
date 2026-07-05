@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { chargeInspectionVisit } from './inspection-billing.js';
+import { notifySeller } from './notify-seller.js';
 
 const { KV_REST_API_URL: KV_URL, KV_REST_API_TOKEN: KV_TOKEN } = process.env;
 
@@ -164,6 +165,18 @@ export default async function handler(req, res) {
     const ids = Array.isArray(parsedIds) ? parsedIds : [];
     ids.push(inspId);
     await kvSet('inspections:all', ids);
+
+    if (billing.listing) {
+      await notifySeller({
+        listing: billing.listing,
+        subject: `Inspection confirmed — ${request.address}`,
+        html: `<div style="font-family:sans-serif;max-width:500px;">
+          <h2 style="color:#1a1a1a;margin-bottom:16px">A licensed agent will attend your property</h2>
+          <p><strong>${agent.name}</strong> will attend <strong>${request.address}</strong> on ${request.date}${request.time ? ` at ${request.time}` : ''}${request.buyerName ? ` to show ${request.buyerName} through` : ''}.</p>
+        </div>`,
+        sms: `No Agents: Agent ${agent.name} will attend ${request.address} on ${request.date}${request.time ? ` at ${request.time}` : ''}.`,
+      });
+    }
 
     return res.status(200).json({ ok: true, inspection });
   }

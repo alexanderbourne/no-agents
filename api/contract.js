@@ -8,6 +8,7 @@
 // Required env vars: KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY (optional)
 
 import { notifyConveyancer } from './conveyancing-handoff.js';
+import { notifySeller } from './notify-seller.js';
 
 const { KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY } = process.env;
 
@@ -43,44 +44,47 @@ function safeParse(raw) {
 }
 
 async function notifySellerTurn(listing) {
-  if (!RESEND_API_KEY || !listing.sellerEmail) return;
-  try {
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from: 'No Agents <office@no-agents.com.au>',
-        to: [listing.sellerEmail],
-        subject: `${listing.contract.buyerName} has signed — your turn — ${listing.address}`,
-        html: `<div style="font-family:sans-serif;max-width:500px;">
-          <h2>The buyer has signed</h2>
-          <p>${listing.contract.buyerName} has signed the contract for <strong>${listing.address}</strong>. It's now ready for your signature on your seller dashboard, under the Documents tab.</p>
-        </div>`,
-      }),
-    });
-  } catch (e) { console.error('contract seller-turn notify error:', e.message); }
+  await notifySeller({
+    listing,
+    subject: `${listing.contract.buyerName} has signed — your turn — ${listing.address}`,
+    html: `<div style="font-family:sans-serif;max-width:500px;">
+      <h2>The buyer has signed</h2>
+      <p>${listing.contract.buyerName} has signed the contract for <strong>${listing.address}</strong>. It's now ready for your signature on your seller dashboard, under the Documents tab.</p>
+    </div>`,
+    sms: `No Agents: ${listing.contract.buyerName} has signed the contract for ${listing.address}. It's your turn — sign it in your seller dashboard.`,
+  });
 }
 
 async function notifyBothExecuted(listing) {
-  const recipients = [listing.sellerEmail, listing.contract.buyerEmail].filter(Boolean);
-  if (RESEND_API_KEY && recipients.length) {
+  if (listing.contract.buyerEmail && RESEND_API_KEY) {
     try {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           from: 'No Agents <office@no-agents.com.au>',
-          to: recipients,
+          to: [listing.contract.buyerEmail],
           subject: `Heads of Agreement signed by both parties — ${listing.address}`,
           html: `<div style="font-family:sans-serif;max-width:500px;">
             <h2>Heads of Agreement signed by both parties</h2>
             <p>The agreed terms for <strong>${listing.address}</strong> have now been signed by both the seller and the buyer.</p>
-            <p>${listing.conveyancer?.email ? `This has been passed to ${listing.conveyancer.name || 'your nominated conveyancer'}, who will prepare the formal Contract of Sale and be in touch to finalise it.` : "Engage your conveyancer or solicitor to prepare the formal Contract of Sale — nominate one in your dashboard Settings tab so we can notify them automatically next time."}</p>
+            <p>${listing.conveyancer?.email ? `This has been passed to ${listing.conveyancer.name || 'your nominated conveyancer'}, who will prepare the formal Contract of Sale and be in touch to finalise it.` : "The seller's conveyancer or solicitor will be in touch to prepare the formal Contract of Sale."}</p>
           </div>`,
         }),
       });
     } catch (e) { console.error('contract executed notify error:', e.message); }
   }
+
+  await notifySeller({
+    listing,
+    subject: `Heads of Agreement signed by both parties — ${listing.address}`,
+    html: `<div style="font-family:sans-serif;max-width:500px;">
+      <h2>Heads of Agreement signed by both parties</h2>
+      <p>The agreed terms for <strong>${listing.address}</strong> have now been signed by both you and the buyer.</p>
+      <p>${listing.conveyancer?.email ? `This has been passed to ${listing.conveyancer.name || 'your nominated conveyancer'}, who will prepare the formal Contract of Sale and be in touch to finalise it.` : 'Engage your conveyancer or solicitor to prepare the formal Contract of Sale — nominate one in your dashboard Settings tab so we can notify them automatically next time.'}</p>
+    </div>`,
+    sms: `No Agents: Heads of Agreement for ${listing.address} signed by both parties.${listing.conveyancer?.email ? '' : ' Nominate a conveyancer in your dashboard Settings.'}`,
+  });
 
   return { conveyancerNotified: await notifyConveyancer(listing) };
 }
