@@ -527,7 +527,7 @@ Buyers must:
 All verified offers are displayed in real time and are visible to all verified buyers. This transparency is designed to encourage genuine best offers through competitive tension. Offers submitted through the Platform are expressions of interest only and are not legally binding. A legally binding contract of sale requires execution of a formal contract prepared by a licensed conveyancer or solicitor.
 
 7. Conveyancing
-We do not currently have a signed conveyancing referral partner. Sellers and buyers must engage their own independent conveyancer or solicitor to complete the transaction. We are working on a referral arrangement and will update these terms and notify users once one is in place. Conveyancing fees are separate from the $798 listing fee and are payable directly to the conveyancer.
+Unless you nominate your own independent conveyancer or solicitor in your dashboard Settings, we will automatically refer your matter to our conveyancing partner once a contract is ready to be prepared. You are free to instead engage any independent conveyancer or solicitor of your choosing at any time. Conveyancing fees are separate from the $798 listing fee, are set by the conveyancer, and are payable directly to them. No Agents Pty Ltd may receive a referral fee, commission or other benefit in connection with this arrangement.
 
 8. Intellectual Property
 All content, design, code and functionality of the Platform is owned by No Agents Pty Ltd. Sellers grant us a non-exclusive licence to use property photos, descriptions and details for the purpose of marketing and advertising the listing.
@@ -988,7 +988,7 @@ function Sell(){
           </label>
         </div>`}
         <div style="display:flex;gap:10px;background:${T.bg};border-radius:10px;padding:12px 14px;border:1px solid ${T.bd};align-items:flex-start"><span style="flex-shrink:0;font-size:16px">🔑</span><div><div style="font-weight:600;font-size:13px;margin-bottom:2px">Human Agent Visit — $99 per visit</div><div style="font-size:12px;color:${T.tu}">Pay as you go — only billed when you book one. Licensed agent attends for inspections, photography, B&P access. Or self-facilitate for free.</div></div></div>
-        <div style="display:flex;gap:10px;background:${T.bg};border-radius:10px;padding:12px 14px;border:1px solid ${T.bd};align-items:flex-start;margin-top:10px"><span style="flex-shrink:0;font-size:16px">📄</span><div><div style="font-weight:600;font-size:13px;margin-bottom:2px">Conveyancing — arranged separately</div><div style="font-size:12px;color:${T.tu}">We're finalising a referral partner so you'll be able to book conveyancing in a couple of clicks once an offer is accepted. Until then, use your own solicitor or conveyancer — <a href="mailto:office@no-agents.com.au" style="color:${T.t};font-weight:500">ask us for a recommendation</a>.</div></div></div>
+        <div style="display:flex;gap:10px;background:${T.bg};border-radius:10px;padding:12px 14px;border:1px solid ${T.bd};align-items:flex-start;margin-top:10px"><span style="flex-shrink:0;font-size:16px">📄</span><div><div style="font-weight:600;font-size:13px;margin-bottom:2px">Conveyancing — arranged for you</div><div style="font-size:12px;color:${T.tu}">Once an offer is accepted and signed, we automatically pass your case to our conveyancing partner to prepare the Contract of Sale — no need to find one yourself. Prefer to use your own solicitor or conveyancer instead? Nominate them in your dashboard Settings once your listing is live.</div></div></div>
         <div style="display:flex;gap:10px;background:${T.bg};border-radius:10px;padding:12px 14px;border:1px solid ${T.bd};align-items:flex-start;margin-top:10px"><span style="flex-shrink:0;font-size:16px">🏦</span><div><div style="font-weight:600;font-size:13px;margin-bottom:2px">Buyer finance — coming soon</div><div style="font-size:12px;color:${T.tu}">We're setting up a mortgage broker referral so buyers can get pre-approved without leaving the listing. Not available yet — buyers should arrange their own finance in the meantime.</div></div></div>
       </div>`}
 
@@ -1805,12 +1805,12 @@ function SellerDash({go,token,listingId,onLogout}){
         <div><label style="${LB}">Price guide</label><input style="${IS}" value=${priceInput} onInput=${e=>{setPriceInput(e.target.value);setSettingsSaved(false);}}/></div>
       </div>
       <div style="margin-bottom:16px"><label style="${LB}">Your conveyancer</label>
+        <div style="font-size:12px;color:${T.tu};margin-bottom:10px">By default, we automatically engage our conveyancing partner on your behalf once a contract is ready — no action needed. Prefer to use your own solicitor or conveyancer instead? Enter their details below and we'll contact them instead.</div>
         <input style="${IS};margin-bottom:8px" value=${conveyancer.name} onInput=${e=>{setConveyancer(c=>({...c,name:e.target.value}));setSettingsSaved(false);}} placeholder="Conveyancer or solicitor name"/>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <input style="${IS}" type="email" value=${conveyancer.email} onInput=${e=>{setConveyancer(c=>({...c,email:e.target.value}));setSettingsSaved(false);}} placeholder="Email address"/>
           <input style="${IS}" type="tel" value=${conveyancer.phone} onInput=${e=>{setConveyancer(c=>({...c,phone:e.target.value}));setSettingsSaved(false);}} placeholder="Phone number"/>
         </div>
-        <div style="font-size:12px;color:${T.tu};margin-top:6px">Nominate your own conveyancer or solicitor. They'll be contacted when a contract is ready.</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <button style="${B('p','m')};opacity:${savingSettings?.6:1}" disabled=${savingSettings} onclick=${saveSettings}>${savingSettings?'Saving…':'Save changes'}</button>

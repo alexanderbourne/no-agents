@@ -1,17 +1,42 @@
 // api/conveyancing-handoff.js
 // Once both parties have signed the Heads of Agreement, hand the case off to
-// whichever conveyancer/solicitor the seller nominated in their dashboard
-// Settings tab (see api/seller-portal.js, action=update-details).
+// a conveyancer/solicitor — either whoever the seller nominated in their
+// dashboard Settings tab (see api/seller-portal.js, action=update-details),
+// or, if they didn't nominate one, our default conveyancing partner.
 //
-// We do not have a signed conveyancing referral partner (see ToS s.6) — this
-// notifies the seller's own chosen conveyancer, not a No Agents partner.
+// The default partner's contact details are deliberately NOT hardcoded here —
+// they live in env vars (DEFAULT_CONVEYANCER_EMAIL / _NAME / _PHONE) so they
+// can be set directly in Vercel without a code change or ever appearing in
+// source control. Until those env vars are set, effectiveConveyancer() simply
+// returns null for a seller who hasn't nominated their own, same as before.
+//
+// Seller-facing copy never names the default partner — see index.html and
+// api/contract.js, which only ever say "our conveyancing partner" generically.
 //
 // Never throws — a notification failure must not block the signing flow.
 
-const { RESEND_API_KEY } = process.env;
+const { RESEND_API_KEY, DEFAULT_CONVEYANCER_EMAIL, DEFAULT_CONVEYANCER_NAME, DEFAULT_CONVEYANCER_PHONE } = process.env;
+
+// Resolves which conveyancer actually handles this case: the seller's own
+// nomination takes priority; otherwise falls back to the default partner
+// (isDefault:true) if one is configured via env vars; otherwise null.
+export function effectiveConveyancer(listing) {
+  if (listing.conveyancer?.email) {
+    return { ...listing.conveyancer, isDefault: false };
+  }
+  if (DEFAULT_CONVEYANCER_EMAIL) {
+    return {
+      name: DEFAULT_CONVEYANCER_NAME || null,
+      email: DEFAULT_CONVEYANCER_EMAIL,
+      phone: DEFAULT_CONVEYANCER_PHONE || null,
+      isDefault: true,
+    };
+  }
+  return null;
+}
 
 export async function notifyConveyancer(listing) {
-  const conveyancer = listing.conveyancer;
+  const conveyancer = effectiveConveyancer(listing);
   if (!RESEND_API_KEY || !conveyancer?.email) return false;
 
   const c = listing.contract || {};
@@ -25,7 +50,7 @@ export async function notifyConveyancer(listing) {
         subject: `New case — Heads of Agreement signed — ${listing.address}`,
         html: `<div style="font-family:sans-serif;max-width:560px;">
           <h2>Heads of Agreement signed — new case</h2>
-          <p>${listing.sellerName || 'Your client'} has nominated you to prepare the Contract of Sale for the sale below via no-agents.com.au (Licence 4542501, QLD). Both parties have signed the summary of agreed terms.</p>
+          <p>${conveyancer.isDefault ? `${listing.sellerName || 'The seller'} did not nominate their own conveyancer, so this case has been routed to you as No Agents' conveyancing partner` : `${listing.sellerName || 'Your client'} has nominated you to prepare the Contract of Sale`} for the sale below via no-agents.com.au (Licence 4542501, QLD). Both parties have signed the summary of agreed terms.</p>
           <table style="border-collapse:collapse;width:100%;margin:16px 0;">
             <tr><td style="padding:6px 12px;color:#666;width:170px;">Property</td><td style="padding:6px 12px;font-weight:600;">${listing.address}, ${listing.suburb || ''} ${listing.state || 'QLD'}</td></tr>
             <tr style="background:#f9f9f9;"><td style="padding:6px 12px;color:#666;">Sale price</td><td style="padding:6px 12px;font-weight:600;">$${(c.amount || 0).toLocaleString()}</td></tr>

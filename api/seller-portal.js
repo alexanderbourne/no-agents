@@ -16,7 +16,7 @@
 import { verifySellerToken } from './seller-auth.js';
 import { randomBytes } from 'crypto';
 import { notifyAdmin } from './notify-admin.js';
-import { notifyConveyancer } from './conveyancing-handoff.js';
+import { notifyConveyancer, effectiveConveyancer } from './conveyancing-handoff.js';
 import { notifySeller } from './notify-seller.js';
 import { put } from '@vercel/blob';
 import { renderForm6Pdf } from './form6-pdf.js';
@@ -260,6 +260,13 @@ export default async function handler(req, res) {
       if (!signatureImage) return res.status(400).json({ error: 'signatureImage required' });
       listing.contract.sellerSigned = { signedAt: new Date().toISOString(), signedByName: name, signatureImage };
 
+      const conveyancer = effectiveConveyancer(listing);
+      const handoffLine = conveyancer?.email
+        ? (conveyancer.isDefault
+            ? 'This has been passed to our conveyancing partner, who will prepare the formal Contract of Sale and be in touch to finalise it.'
+            : `This has been passed to ${conveyancer.name || "the seller's nominated conveyancer"}, who will prepare the formal Contract of Sale and be in touch to finalise it.`)
+        : null;
+
       if (listing.contract.buyerEmail && RESEND_API_KEY) {
         try {
           await fetch('https://api.resend.com/emails', {
@@ -272,7 +279,7 @@ export default async function handler(req, res) {
               html: `<div style="font-family:sans-serif;max-width:500px;">
                 <h2>Heads of Agreement signed by both parties</h2>
                 <p>The agreed terms for <strong>${listing.address}</strong> at $${(listing.contract.amount || 0).toLocaleString()} have now been signed by both you and the seller.</p>
-                <p>${listing.conveyancer?.email ? `This has been passed to ${listing.conveyancer.name || "the seller's nominated conveyancer"}, who will prepare the formal Contract of Sale and be in touch to finalise it.` : "The seller's conveyancer or solicitor will be in touch to prepare the formal Contract of Sale."}</p>
+                <p>${handoffLine || "The seller's conveyancer or solicitor will be in touch to prepare the formal Contract of Sale."}</p>
               </div>`,
             }),
           });
@@ -285,22 +292,22 @@ export default async function handler(req, res) {
         html: `<div style="font-family:sans-serif;max-width:500px;">
           <h2>Heads of Agreement signed by both parties</h2>
           <p>The agreed terms for <strong>${listing.address}</strong> at $${(listing.contract.amount || 0).toLocaleString()} have now been signed by both you and the buyer.</p>
-          <p>${listing.conveyancer?.email ? `This has been passed to ${listing.conveyancer.name || 'your nominated conveyancer'}, who will prepare the formal Contract of Sale and be in touch to finalise it.` : 'Engage your conveyancer or solicitor to prepare the formal Contract of Sale — nominate one in your dashboard Settings tab so we can notify them automatically next time.'}</p>
+          <p>${handoffLine || 'Engage your conveyancer or solicitor to prepare the formal Contract of Sale — nominate one in your dashboard Settings tab so we can notify them automatically next time.'}</p>
         </div>`,
-        sms: `No Agents: Heads of Agreement for ${listing.address} signed by both parties.${listing.conveyancer?.email ? '' : ' Nominate a conveyancer in your dashboard Settings.'}`,
+        sms: `No Agents: Heads of Agreement for ${listing.address} signed by both parties.${handoffLine ? '' : ' Nominate a conveyancer in your dashboard Settings.'}`,
       });
 
       const conveyancerNotified = await notifyConveyancer(listing);
       listing.conveyancingHandoff = {
         notified: conveyancerNotified,
         notifiedAt: new Date().toISOString(),
-        sentTo: conveyancerNotified ? (listing.conveyancer?.email || null) : null,
+        sentTo: conveyancerNotified ? (conveyancer?.email || null) : null,
       };
 
       await kvSet(`listing:${listingId}`, listing);
       await notifyAdmin({
         subject: `Contract fully signed — ${listing.address}`,
-        html: `<p>Both parties have signed the Heads of Agreement for <strong>${listing.address}, ${listing.suburb}</strong> at $${(listing.contract.amount || 0).toLocaleString()}. ${conveyancerNotified ? `Conveyancer (${listing.conveyancer?.name || listing.conveyancer?.email}) notified automatically.` : 'No conveyancer nominated yet — follow up with the seller to get one entered in Settings, or hand off manually.'}</p>`,
+        html: `<p>Both parties have signed the Heads of Agreement for <strong>${listing.address}, ${listing.suburb}</strong> at $${(listing.contract.amount || 0).toLocaleString()}. ${conveyancerNotified ? `Conveyancer (${conveyancer?.name || conveyancer?.email}${conveyancer?.isDefault ? ' — default partner' : ' — seller-nominated'}) notified automatically.` : 'No conveyancer nominated yet — follow up with the seller to get one entered in Settings, or hand off manually.'}</p>`,
       });
       return res.status(200).json({ ok: true, contract: listing.contract });
     }

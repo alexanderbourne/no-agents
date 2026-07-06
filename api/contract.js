@@ -7,7 +7,7 @@
 //
 // Required env vars: KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY (optional)
 
-import { notifyConveyancer } from './conveyancing-handoff.js';
+import { notifyConveyancer, effectiveConveyancer } from './conveyancing-handoff.js';
 import { notifySeller } from './notify-seller.js';
 
 const { KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY } = process.env;
@@ -56,6 +56,13 @@ async function notifySellerTurn(listing) {
 }
 
 async function notifyBothExecuted(listing) {
+  const conveyancer = effectiveConveyancer(listing);
+  const handoffLine = conveyancer?.email
+    ? (conveyancer.isDefault
+        ? 'This has been passed to our conveyancing partner, who will prepare the formal Contract of Sale and be in touch to finalise it.'
+        : `This has been passed to ${conveyancer.name || 'your nominated conveyancer'}, who will prepare the formal Contract of Sale and be in touch to finalise it.`)
+    : null;
+
   if (listing.contract.buyerEmail && RESEND_API_KEY) {
     try {
       await fetch('https://api.resend.com/emails', {
@@ -68,7 +75,7 @@ async function notifyBothExecuted(listing) {
           html: `<div style="font-family:sans-serif;max-width:500px;">
             <h2>Heads of Agreement signed by both parties</h2>
             <p>The agreed terms for <strong>${listing.address}</strong> have now been signed by both the seller and the buyer.</p>
-            <p>${listing.conveyancer?.email ? `This has been passed to ${listing.conveyancer.name || 'your nominated conveyancer'}, who will prepare the formal Contract of Sale and be in touch to finalise it.` : "The seller's conveyancer or solicitor will be in touch to prepare the formal Contract of Sale."}</p>
+            <p>${handoffLine || "The seller's conveyancer or solicitor will be in touch to prepare the formal Contract of Sale."}</p>
           </div>`,
         }),
       });
@@ -81,9 +88,9 @@ async function notifyBothExecuted(listing) {
     html: `<div style="font-family:sans-serif;max-width:500px;">
       <h2>Heads of Agreement signed by both parties</h2>
       <p>The agreed terms for <strong>${listing.address}</strong> have now been signed by both you and the buyer.</p>
-      <p>${listing.conveyancer?.email ? `This has been passed to ${listing.conveyancer.name || 'your nominated conveyancer'}, who will prepare the formal Contract of Sale and be in touch to finalise it.` : 'Engage your conveyancer or solicitor to prepare the formal Contract of Sale — nominate one in your dashboard Settings tab so we can notify them automatically next time.'}</p>
+      <p>${handoffLine || 'Engage your conveyancer or solicitor to prepare the formal Contract of Sale — nominate one in your dashboard Settings tab so we can notify them automatically next time.'}</p>
     </div>`,
-    sms: `No Agents: Heads of Agreement for ${listing.address} signed by both parties.${listing.conveyancer?.email ? '' : ' Nominate a conveyancer in your dashboard Settings.'}`,
+    sms: `No Agents: Heads of Agreement for ${listing.address} signed by both parties.${handoffLine ? '' : ' Nominate a conveyancer in your dashboard Settings.'}`,
   });
 
   return { conveyancerNotified: await notifyConveyancer(listing) };
@@ -121,7 +128,7 @@ export default async function handler(req, res) {
       listing.conveyancingHandoff = {
         notified: conveyancerNotified,
         notifiedAt: new Date().toISOString(),
-        sentTo: conveyancerNotified ? (listing.conveyancer?.email || null) : null,
+        sentTo: conveyancerNotified ? (effectiveConveyancer(listing)?.email || null) : null,
       };
       await kvSet(`listing:${listingId}`, listing);
     } else {
