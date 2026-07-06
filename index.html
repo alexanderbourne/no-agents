@@ -341,7 +341,7 @@ function Bdg({st=''}){return html`<div style="display:flex;gap:8px;align-items:c
 
 function Nav({v,go,gl}){
   const[open,setOpen]=useState(false);
-  const nav=[['home','Home'],['sell','Sell'],['buy','Buy'],['fractional','Fractional'],['dash','My listing'],['agents','For agents']];
+  const nav=[['home','Home'],['sell','Sell'],['buy','Buy'],['fractional','Fractional'],['dash','My listing'],['agents','For agents'],['vendors','Vendors']];
   return html`<nav style="position:sticky;top:0;z-index:100;background:rgba(250,249,246,.96);backdrop-filter:blur(12px);border-bottom:1px solid ${T.bd}">
     <div style="max-width:1100px;margin:0 auto;padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between">
       <div onclick=${()=>go('home')} style="cursor:pointer;display:flex;align-items:center;gap:10px"><${Logo}/><span class="sf" style="font-size:17px;font-weight:600;color:${T.t};letter-spacing:-.3px">no-agents</span></div>
@@ -1918,6 +1918,84 @@ function Agents({go}){
     </section>
   </div>`;}
 
+function Vendors({go}){
+  const[cat,setCat]=useState('inspection');
+  const[dir,setDir]=useState([]);
+  const[loadingDir,setLoadingDir]=useState(true);
+  const[form,setForm]=useState({category:'inspection',businessName:'',contactName:'',email:'',phone:'',serviceArea:'',licenceOrCert:'',portfolioUrl:'',message:''});
+  const[submitted,setSubmitted]=useState(false);
+  const[submitting,setSubmitting]=useState(false);
+  const[submitErr,setSubmitErr]=useState('');
+  const up=(k,v)=>setForm(f=>({...f,[k]:v}));
+
+  useEffect(()=>{
+    fetch('/api/vendors').then(r=>r.ok?r.json():[]).then(d=>setDir(Array.isArray(d)?d:[])).catch(()=>{}).finally(()=>setLoadingDir(false));
+  },[]);
+
+  const submitApp=async()=>{
+    if(!form.businessName||!form.contactName||!form.email||!form.phone)return;
+    setSubmitting(true);setSubmitErr('');
+    try{
+      const r=await fetch('/api/vendors',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(form)});
+      if(r.ok)setSubmitted(true);else setSubmitErr('Something went wrong. Email office@no-agents.com.au to apply directly.');
+    }catch(e){setSubmitErr('Connection error. Try again or email office@no-agents.com.au');}
+    setSubmitting(false);
+  };
+
+  const listed=dir.filter(v=>v.category===cat);
+  const catLabel={inspection:'Building & pest inspections',styling:'Styling & staging'};
+
+  return html`<div>
+    <section style="background:${T.k};padding:80px 32px 72px;text-align:center" class="mp">
+      <div style="max-width:720px;margin:0 auto">
+        <div style="${P('w')};margin-bottom:20px;display:inline-flex;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600">Vendor directory</div>
+        <h1 class="sf mh1" style="font-size:50px;font-weight:600;color:#fff;letter-spacing:-1px;line-height:1.15;margin-bottom:16px">Trusted pros for your sale.</h1>
+        <p style="font-size:17px;color:rgba(255,255,255,.6);line-height:1.75;margin-bottom:36px;max-width:520px;margin-left:auto;margin-right:auto">Building & pest inspectors and stylists our sellers and buyers can contact directly — no booking fee, no middle-man.</p>
+        <button style="${B('a','l')}" onclick=${()=>document.getElementById('vendor-form').scrollIntoView({behavior:'smooth'})}>List your business →</button>
+      </div>
+    </section>
+
+    <section style="padding:64px 32px" class="mp">
+      <div style="max-width:900px;margin:0 auto">
+        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:32px">
+          ${Object.entries(catLabel).map(([k,l])=>html`<button onclick=${()=>setCat(k)} style="padding:10px 20px;border-radius:8px;border:1px solid ${T.bd};cursor:pointer;font-size:14px;font-weight:500;background:${cat===k?T.k:'#fff'};color:${cat===k?'#fff':T.tm};font-family:Inter,sans-serif">${l}</button>`)}
+        </div>
+        ${loadingDir?html`<div style="text-align:center;color:${T.tu};font-size:14px">Loading…</div>`:
+          !listed.length?html`<div style="${CD};text-align:center;padding:40px;color:${T.tm}">No ${catLabel[cat].toLowerCase()} vendors listed yet. Check back soon, or be the first to apply below.</div>`:
+          html`<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px" class="g1">
+            ${listed.map(v=>html`<div style="${CD}">
+              <div class="card-name sf" style="font-size:17px;font-weight:600;margin-bottom:4px">${v.businessName}</div>
+              ${v.serviceArea&&html`<div style="font-size:13px;color:${T.tu};margin-bottom:10px">${v.serviceArea}</div>`}
+              <div style="font-size:14px;color:${T.tm};margin-bottom:2px">${v.contactName}</div>
+              <div style="font-size:14px;color:${T.tm};margin-bottom:2px"><a href="mailto:${v.email}" style="color:inherit">${v.email}</a></div>
+              <div style="font-size:14px;color:${T.tm}">${v.phone}</div>
+              ${v.portfolioUrl&&html`<a href=${v.portfolioUrl} target="_blank" rel="noopener" style="font-size:13px;color:${T.a};display:inline-block;margin-top:8px">View portfolio →</a>`}
+              ${v.message&&html`<div style="font-size:13px;color:${T.tm};margin-top:10px;font-style:italic">"${v.message}"</div>`}
+            </div>`)}
+          </div>`}
+      </div>
+    </section>
+
+    <section style="padding:64px 32px;background:#fff;border-top:1px solid ${T.bd}" class="mp">
+      <div style="max-width:560px;margin:0 auto" id="vendor-form">
+        ${!submitted?html`<div style="${CD}">
+          <h3 class="sf" style="font-size:22px;font-weight:600;margin-bottom:8px">List your business</h3>
+          <p style="font-size:14px;color:${T.tm};line-height:1.6;margin-bottom:20px">Self-serve signup. We review every application before it goes live — usually within 1 business day.</p>
+          <div style="margin-bottom:14px"><label style="${LB}">Category</label><select style="${IS}" value=${form.category} onChange=${e=>up('category',e.target.value)}><option value="inspection">Building & pest inspections</option><option value="styling">Styling & staging</option></select></div>
+          ${[['Business name','businessName','text','e.g. Brisbane Building Inspections'],['Contact name','contactName','text','Jane Smith'],['Email','email','email','jane@example.com'],['Mobile','phone','tel','04XX XXX XXX'],['Service area','serviceArea','text','e.g. Brisbane inner north'],[form.category==='inspection'?'QBCC licence number':'Certification (optional)','licenceOrCert','text','e.g. 1234567'],['Portfolio / website (optional)','portfolioUrl','text','https://…']].map(([l,k,t,ph])=>html`<div style="margin-bottom:14px"><label style="${LB}">${l}</label><input style="${IS}" type=${t} value=${form[k]} onInput=${e=>up(k,e.target.value)} placeholder=${ph}/></div>`)}
+          <div style="margin-bottom:20px"><label style="${LB}">Message (optional)</label><textarea style="${IS};min-height:80px;resize:vertical" value=${form.message} onInput=${e=>up('message',e.target.value)} placeholder="Anything sellers/buyers should know"></textarea></div>
+          ${submitErr&&html`<div style="font-size:12px;color:${T.r};margin-bottom:10px">${submitErr}</div>`}
+          <button style="${B('p','l')};width:100%;opacity:${form.businessName&&form.contactName&&form.email&&form.phone&&!submitting?1:.5}" onclick=${submitApp} disabled=${submitting||!(form.businessName&&form.contactName&&form.email&&form.phone)}>${submitting?'Submitting…':'Apply →'}</button>
+          <div style="text-align:center;font-size:12px;color:${T.tu};margin-top:8px">We'll be in touch within 1 business day.</div>
+        </div>`:html`<div style="${CD};text-align:center;padding:40px">
+          <div style="font-size:40px;margin-bottom:12px">✅</div>
+          <h3 class="sf" style="font-size:22px;font-weight:600;margin-bottom:8px">Application received</h3>
+          <p style="font-size:14px;color:${T.tm};line-height:1.6;margin-top:8px">We'll review your details and be in touch within 1 business day at <strong>${form.email}</strong>.</p>
+        </div>`}
+      </div>
+    </section>
+  </div>`;}
+
 function Admin(){
   const[authed,setAuthed]=useState(false);
   const[pw,setPw]=useState('');
@@ -1926,6 +2004,9 @@ function Admin(){
   const[agents,setAgents]=useState([]);
   const[inspections,setInspections]=useState([]);
   const[eois,setEois]=useState([]);
+  const[listings,setListings]=useState([]);
+  const[photoInputs,setPhotoInputs]=useState({});
+  const[photoBusyId,setPhotoBusyId]=useState(null);
   const[loading,setLoading]=useState(false);
   const[loginErr,setLoginErr]=useState('');
   const[actionMsg,setActionMsg]=useState('');
@@ -1941,12 +2022,26 @@ function Admin(){
 
   const loadAll=async t=>{
     setLoading(true);
-    try{const[ar,ir,er]=await Promise.all([fetch('/api/agents',{headers:{'x-admin-token':t}}),fetch('/api/inspections',{headers:{'x-admin-token':t}}),fetch('/api/eoi-list',{headers:{'x-admin-token':t}})]);
+    try{const[ar,ir,er,lr]=await Promise.all([fetch('/api/agents',{headers:{'x-admin-token':t}}),fetch('/api/inspections',{headers:{'x-admin-token':t}}),fetch('/api/eoi-list',{headers:{'x-admin-token':t}}),fetch('/api/listing-store',{headers:{'x-admin-token':t}})]);
     if(ar.ok)setAgents(await ar.json());
     if(ir.ok)setInspections(await ir.json());
-    if(er.ok)setEois((await er.json()).eois||[]);}
+    if(er.ok)setEois((await er.json()).eois||[]);
+    if(lr.ok)setListings((await lr.json()).listings||[]);}
     catch(e){}
     setLoading(false);
+  };
+
+  const markPhotosReady=async id=>{
+    const raw=(photoInputs[id]||'').split('\n').map(s=>s.trim()).filter(Boolean);
+    if(!raw.length){setActionMsg('Paste at least one photo URL first');setTimeout(()=>setActionMsg(''),3500);return;}
+    setPhotoBusyId(id);
+    try{
+      const r=await fetch('/api/mark-photos-ready',{method:'POST',headers:{'Content-Type':'application/json','x-admin-token':token},body:JSON.stringify({listingId:id,images:raw})});
+      if(r.ok){const d=await r.json();setActionMsg(d.goesLiveNow?'Photos confirmed — listing is now live':`Photos confirmed — scheduled to go live ${new Date(d.effectivePublishAt).toLocaleDateString('en-AU')}`);loadAll(token);}
+      else setActionMsg('Error marking photos ready');
+    }catch(e){setActionMsg('Connection error');}
+    setPhotoBusyId(null);
+    setTimeout(()=>setActionMsg(''),4000);
   };
 
   const updateAgent=async(id,status)=>{
@@ -1984,13 +2079,13 @@ function Admin(){
     </div>
 
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px" class="g1">
-      ${[{l:'Pending applications',v:pending.length,a:pending.length>0},{l:'Approved agents',v:approved.length},{l:'Commission owed',v:'$'+totalOwed,a:totalOwed>0},{l:'Commission paid',v:'$'+totalPaid},{l:'EOIs received',v:eois.length}].map(s=>html`<div style="${CD};text-align:center;padding:16px 12px"><div class="sf" style="font-size:${typeof s.v==='number'?24:20}px;font-weight:600;color:${s.a?T.a:T.t};letter-spacing:-.3px">${s.v}</div><div style="font-size:11px;color:${T.tu};font-weight:500;margin-top:4px;text-transform:uppercase;letter-spacing:.04em">${s.l}</div></div>`)}
+      ${(()=>{const pendingListings=listings.filter(l=>l.status==='pending');return[{l:'Pending applications',v:pending.length,a:pending.length>0},{l:'Approved agents',v:approved.length},{l:'Commission owed',v:'$'+totalOwed,a:totalOwed>0},{l:'Commission paid',v:'$'+totalPaid},{l:'EOIs received',v:eois.length},{l:'Listings awaiting photos',v:pendingListings.length,a:pendingListings.length>0}];})().map(s=>html`<div style="${CD};text-align:center;padding:16px 12px"><div class="sf" style="font-size:${typeof s.v==='number'?24:20}px;font-weight:600;color:${s.a?T.a:T.t};letter-spacing:-.3px">${s.v}</div><div style="font-size:11px;color:${T.tu};font-weight:500;margin-top:4px;text-transform:uppercase;letter-spacing:.04em">${s.l}</div></div>`)}
     </div>
 
     ${actionMsg&&html`<div style="background:#d4ede1;border-radius:10px;padding:10px 16px;font-size:13px;color:${T.g};margin-bottom:16px;font-weight:500">${actionMsg}</div>`}
 
     <div style="display:flex;gap:4px;border-bottom:1px solid ${T.bd};margin-bottom:20px">
-      ${['applications','inspections','eois'].map(t=>html`<button onclick=${()=>setTab(t)} style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:500;color:${tab===t?T.t:T.tu};border-bottom:2px solid ${tab===t?T.k:'transparent'};margin-bottom:-1px;transition:all .15s;font-family:Inter,sans-serif;text-transform:capitalize">${t==='eois'?'EOIs':t}</button>`)}
+      ${['applications','inspections','eois','listings'].map(t=>html`<button onclick=${()=>setTab(t)} style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:500;color:${tab===t?T.t:T.tu};border-bottom:2px solid ${tab===t?T.k:'transparent'};margin-bottom:-1px;transition:all .15s;font-family:Inter,sans-serif;text-transform:capitalize">${t==='eois'?'EOIs':t}</button>`)}
     </div>
 
     ${tab==='applications'&&html`<div>
@@ -2061,6 +2156,31 @@ function Admin(){
           </div>
         </div>
       </div>`)}
+    </div>`}
+
+    ${tab==='listings'&&html`<div>
+      <div style="font-size:13px;color:${T.tu};margin-bottom:16px">Domain provides photography themselves (Platinum Edge + Matterport) — nothing here auto-detects when a shoot is done. Paste the final photo URLs below once Domain delivers them; this is the only thing that takes a listing off "pending" and onto the live feed/Domain.com.au.</div>
+      ${listings.length===0&&html`<div style="text-align:center;padding:40px;color:${T.tu};font-size:14px">${loading?'Loading…':'No listings yet.'}</div>`}
+      ${listings.slice().sort((a,b)=>(a.status==='pending'?0:1)-(b.status==='pending'?0:1)).map(l=>{
+        const effAt=[l.earliestPublishAt,l.requestedStartDate].filter(Boolean).map(d=>new Date(d));
+        const effective=effAt.length?new Date(Math.max(...effAt.map(d=>d.getTime()))):null;
+        return html`<div style="${CD};margin-bottom:10px">
+        <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+          <div style="flex:1">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap">
+              <span style="font-weight:600;font-size:15px">${l.address}${l.suburb?', '+l.suburb:''}</span>
+              <span style="${P(l.status==='current'?'g':l.status==='pending'?'o':'u')};font-size:11px">${l.status}</span>
+            </div>
+            <div style="font-size:13px;color:${T.tu};margin-bottom:3px">${l.sellerName||'—'} · ${l.sellerEmail||'—'}${l.sellerPhone?' · '+l.sellerPhone:''}</div>
+            ${l.status==='pending'&&html`<div style="font-size:12px;color:${T.tu};margin-bottom:3px">Photos: <strong style="color:${T.t}">${(l.photoShoot?.status||'not_booked').replace('_',' ')}</strong> · Requested start: <strong style="color:${T.t}">${l.requestedStartDate||'ASAP'}</strong> · Earliest allowed: <strong style="color:${T.t}">${l.earliestPublishAt?new Date(l.earliestPublishAt).toLocaleDateString('en-AU'):'—'}</strong>${effective?html` · Will go live: <strong style="color:${T.t}">${effective.toLocaleDateString('en-AU')}</strong>`:''}${l.readyToPublish?html` · <span style="color:${T.g}">scheduled, awaiting date</span>`:''}</div>`}
+          </div>
+        </div>
+        ${l.status==='pending'&&html`<div style="margin-top:12px;padding-top:12px;border-top:1px solid ${T.bd}">
+          <label style="${LB};margin-bottom:6px">Photo URLs (one per line, from Domain/Skylight delivery)</label>
+          <textarea style="${IS};min-height:70px;font-family:monospace;font-size:12px;margin-bottom:8px" value=${photoInputs[l.id]||''} onInput=${e=>setPhotoInputs(p=>({...p,[l.id]:e.target.value}))} placeholder="https://.../photo1.jpg&#10;https://.../photo2.jpg"></textarea>
+          <button style="${B('p','s')};opacity:${photoBusyId===l.id?.6:1}" disabled=${photoBusyId===l.id} onclick=${()=>markPhotosReady(l.id)}>${photoBusyId===l.id?'Saving…':'Mark photos ready →'}</button>
+        </div>`}
+      </div>`;})}
     </div>`}
   </div>`;}
 
@@ -2488,7 +2608,7 @@ function ContractSign(){
 }
 
 // ── SEO routes: real URLs per view ─────────────────────────────
-const ROUTES={home:'/',sell:'/sell',buy:'/buy',fractional:'/fractional',dash:'/my-listing',agents:'/for-agents',legal:'/legal'};
+const ROUTES={home:'/',sell:'/sell',buy:'/buy',fractional:'/fractional',dash:'/my-listing',agents:'/for-agents',vendors:'/vendors',legal:'/legal'};
 const ROUTE_META={
   home:{t:'no-agents — Sell your property. Keep the commission.',d:'Sell your home in Brisbane for a $798 flat fee — Domain.com.au listing, photography and 3D tour included. No commission, ever.'},
   sell:{t:'List your property for $798 flat — no commission | no-agents',d:'List your Brisbane property in about 10 minutes. $798 covers Domain.com.au publication, professional photography and a 3D virtual tour. No commission.'},
@@ -2496,6 +2616,7 @@ const ROUTE_META={
   fractional:{t:'Fractional property ownership — own a Slice | no-agents',d:'Register interest in No Agents Fractional: buy Slices in residential property, earn monthly income and capital growth. Expression of interest now open.'},
   dash:{t:'My listing — seller dashboard | no-agents',d:'Manage your no-agents listing: enquiries, inspection bookings and live offers in one dashboard.'},
   agents:{t:'Earn $70 per inspection — for licensed QLD agents | no-agents',d:'Licensed Queensland agents: pick up buyer inspections around Brisbane at $70 per confirmed inspection, paid weekly. Join the panel in 2 minutes.'},
+  vendors:{t:'Building & pest inspectors, stylists — vendor directory | no-agents',d:'Find building & pest inspectors and property stylists our sellers and buyers can contact directly. Vendors: list your business for free.'},
   legal:{t:'Legal | no-agents',d:'Privacy policy, terms of service and complaints handling for No Agents Pty Ltd.'}
 };
 const pathToView=p=>{const clean=(p||'/').replace(/\/+$/,'')||'/';for(const[v,r]of Object.entries(ROUTES))if(r===clean)return v;return null;};
@@ -2565,6 +2686,7 @@ function App(){
       ${view==='fractional'&&html`<${Fractional} go=${go}/>`}
       ${view==='dash'&&html`<${Dash} go=${go}/>`}
       ${view==='agents'&&html`<${Agents} go=${go}/>`}
+      ${view==='vendors'&&html`<${Vendors} go=${go}/>`}
       ${view==='legal'&&html`<${Legal} page=${legalPage}/>`}
       ${view==='admin'&&html`<${Admin}/>`}
       ${view==='checkout-redirect'&&html`<div style="max-width:480px;margin:0 auto;padding:140px 32px;text-align:center" class="mp"><div style="font-size:14px;color:${T.tm}">Setting up your seller dashboard…</div></div>`}

@@ -11,16 +11,16 @@
   "redirects": [
     { "source": "/sell-your-house", "destination": "/qld-suburbs", "permanent": true }
   ],
+  "crons": [
+    { "path": "/api/cron-publish", "schedule": "0 21 * * *" }
+  ],
   "rewrites": [
     { "source": "/leads", "destination": "/leads.html" },
     { "source": "/admin", "destination": "/admin.html" },
     { "source": "/portal", "destination": "/portal.html" },
-    { "source": "/sell", "destination": "/api/route-meta?view=sell" },
-    { "source": "/buy", "destination": "/api/route-meta?view=buy" },
-    { "source": "/fractional", "destination": "/api/route-meta?view=fractional" },
     { "source": "/my-listing", "destination": "/" },
-    { "source": "/for-agents", "destination": "/api/route-meta?view=agents" },
     { "source": "/legal", "destination": "/" },
+    { "source": "/vendors", "destination": "/" },
     { "source": "/qld-suburbs", "destination": "/api/suburb-page" },
     { "source": "/sell-your-house/:slug", "destination": "/api/suburb-page?slug=:slug" },
     { "source": "/offer/:path*", "destination": "/" },

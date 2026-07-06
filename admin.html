@@ -118,6 +118,7 @@ select.status-sel{padding:6px 12px;border:1px solid #ddd;border-radius:8px;font-
   <div class="tabs" id="tabs">
     <div class="tab active" data-tab="agents">Agents <span class="count" id="cnt-agents">0</span></div>
     <div class="tab" data-tab="inspections">Inspections <span class="count" id="cnt-inspections">0</span></div>
+    <div class="tab" data-tab="vendors">Vendors <span class="count" id="cnt-vendors">0</span></div>
     <div class="tab" data-tab="leads">Leads <span class="count" id="cnt-leads">0</span></div>
     <div class="tab" data-tab="listings">Listings <span class="count" id="cnt-listings">0</span></div>
   </div>
@@ -130,7 +131,7 @@ select.status-sel{padding:6px 12px;border:1px solid #ddd;border-radius:8px;font-
 <script>
 const token = () => localStorage.getItem('na_token') || '';
 let currentTab = 'agents';
-let data = { agents: [], inspections: [], leads: [], listings: [] };
+let data = { agents: [], inspections: [], vendors: [], leads: [], listings: [] };
 
 if (token()) init();
 
@@ -161,13 +162,15 @@ async function apiFetch(url, opts = {}) {
 }
 
 async function loadAll() {
-  const [agents, inspections, leads] = await Promise.all([
+  const [agents, inspections, vendors, leads] = await Promise.all([
     apiFetch('/api/agents'),
     apiFetch('/api/inspections'),
+    apiFetch('/api/vendors?all=1'),
     apiFetch('/api/leads?token=' + token()),
   ]);
   data.agents = Array.isArray(agents) ? agents : [];
   data.inspections = Array.isArray(inspections) ? inspections : [];
+  data.vendors = Array.isArray(vendors) ? vendors : [];
   data.leads = (leads && leads.leads) ? leads.leads : [];
   try {
     const ld = await apiFetch('/api/listing-store');
@@ -176,6 +179,7 @@ async function loadAll() {
 
   document.getElementById('cnt-agents').textContent = data.agents.length;
   document.getElementById('cnt-inspections').textContent = data.inspections.length;
+  document.getElementById('cnt-vendors').textContent = data.vendors.length;
   document.getElementById('cnt-leads').textContent = data.leads.length;
   document.getElementById('cnt-listings').textContent = data.listings.length;
 
@@ -193,7 +197,7 @@ document.getElementById('tabs').addEventListener('click', e => {
 });
 
 function renderTab() {
-  const fns = { agents: renderAgents, inspections: renderInspections, leads: renderLeads, listings: renderListings };
+  const fns = { agents: renderAgents, inspections: renderInspections, vendors: renderVendors, leads: renderLeads, listings: renderListings };
   fns[currentTab]();
 }
 
@@ -273,6 +277,81 @@ async function updateAgent(id, status) {
   if (ag) { ag.status = status; if (status === 'approved') ag.approvedAt = new Date().toISOString(); }
   document.getElementById('cnt-agents').textContent = data.agents.length;
   showAgent(id);
+}
+
+// ── Vendors ──
+
+function renderVendors() {
+  const v = data.vendors;
+  const pending = v.filter(x => x.status === 'pending').length;
+  const approved = v.filter(x => x.status === 'approved').length;
+  const suspended = v.filter(x => x.status === 'suspended').length;
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="n">${v.length}</div><div class="l">Total</div></div>
+      <div class="stat"><div class="n" style="color:#e65100">${pending}</div><div class="l">Pending</div></div>
+      <div class="stat"><div class="n" style="color:#2e7d32">${approved}</div><div class="l">Approved</div></div>
+      <div class="stat"><div class="n" style="color:#c62828">${suspended}</div><div class="l">Suspended</div></div>
+    </div>`;
+
+  if (!v.length) { document.getElementById('content').innerHTML = '<div class="empty">No vendor applications yet.</div>'; return; }
+
+  document.getElementById('content').innerHTML = v.map(ve => `
+    <div class="card" onclick="showVendor('${ve.id}')">
+      <div class="card-top">
+        <div>
+          <div class="card-name">${esc(ve.businessName)}</div>
+          <div class="card-sub">${ve.category === 'inspection' ? 'Building & pest' : 'Styling & staging'}${ve.serviceArea ? ' &middot; ' + esc(ve.serviceArea) : ''}</div>
+        </div>
+        <span class="badge badge-${ve.status}">${ve.status}</span>
+      </div>
+      <div class="card-meta">
+        <span>${esc(ve.contactName)}</span>
+        <span>${esc(ve.email)}</span>
+        <span>${timeAgo(ve.appliedAt)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showVendor(id) {
+  const ve = data.vendors.find(x => x.id === id);
+  if (!ve) return;
+  hideList();
+  const el = document.getElementById('detail');
+  el.style.display = 'block';
+
+  el.innerHTML = `
+    <button class="back-btn" onclick="closeDetail()">&larr; Back</button>
+    <h2>${esc(ve.businessName)}</h2>
+    <div class="detail-grid">
+      <span class="lbl">Status</span><span class="badge badge-${ve.status}">${ve.status}</span>
+      <span class="lbl">Category</span><span>${ve.category === 'inspection' ? 'Building & pest' : 'Styling & staging'}</span>
+      <span class="lbl">Contact</span><span>${esc(ve.contactName)}</span>
+      <span class="lbl">Email</span><span>${esc(ve.email)}</span>
+      <span class="lbl">Phone</span><span>${esc(ve.phone)}</span>
+      <span class="lbl">Service area</span><span>${esc(ve.serviceArea || 'Not specified')}</span>
+      <span class="lbl">Licence/cert</span><span>${esc(ve.licenceOrCert || 'Not provided')}</span>
+      ${ve.portfolioUrl ? `<span class="lbl">Portfolio</span><span><a href="${esc(ve.portfolioUrl)}" target="_blank">${esc(ve.portfolioUrl)}</a></span>` : ''}
+      <span class="lbl">Applied</span><span>${ve.appliedAt ? new Date(ve.appliedAt).toLocaleDateString('en-AU') : 'N/A'}</span>
+      ${ve.approvedAt ? `<span class="lbl">Approved</span><span>${new Date(ve.approvedAt).toLocaleDateString('en-AU')}</span>` : ''}
+      ${ve.message ? `<span class="lbl">Message</span><span style="font-style:italic">"${esc(ve.message)}"</span>` : ''}
+      ${ve.notes ? `<span class="lbl">Notes</span><span>${esc(ve.notes)}</span>` : ''}
+    </div>
+    <div class="actions">
+      ${ve.status !== 'approved' ? `<button class="btn btn-approve" onclick="updateVendor('${id}','approved')">Approve</button>` : ''}
+      ${ve.status !== 'suspended' ? `<button class="btn btn-suspend" onclick="updateVendor('${id}','suspended')">Suspend</button>` : ''}
+      ${ve.status === 'suspended' ? `<button class="btn btn-approve" onclick="updateVendor('${id}','pending')">Reactivate</button>` : ''}
+    </div>`;
+}
+
+async function updateVendor(id, status) {
+  await apiFetch(`/api/vendors?id=${id}`, { method: 'PATCH', body: JSON.stringify({ status }) });
+  const ve = data.vendors.find(x => x.id === id);
+  if (ve) { ve.status = status; if (status === 'approved') ve.approvedAt = new Date().toISOString(); }
+  document.getElementById('cnt-vendors').textContent = data.vendors.length;
+  showVendor(id);
 }
 
 // ── Inspections ──
