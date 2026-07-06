@@ -3,6 +3,7 @@
 // api/suburb-page.js. Referenced from the static /sitemap.xml (sitemap index).
 
 import qld from '../data/suburbs-qld.json' with { type: 'json' };
+import { GUIDES } from './guides.js';
 
 const SITE = 'https://www.no-agents.com.au';
 const slugify = n => n.toLowerCase().replace(/['’.]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -27,6 +28,8 @@ export default function handler(req, res) {
     { loc: '/fractional', pri: '0.7' },
     { loc: '/for-agents', pri: '0.7' },
     { loc: '/qld-suburbs', pri: '0.9' },
+    { loc: '/guides', pri: '0.7' },
+    ...GUIDES.map(g => ({ loc: `/guides/${g.slug}`, pri: '0.6' })),
     ...slugs.map(s => ({ loc: `/sell-your-house/${s}`, pri: '0.7' }))
   ];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

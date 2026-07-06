@@ -2,6 +2,7 @@ User-agent: *
 Allow: /
 Allow: /api/sitemap
 Allow: /api/suburb-page
+Allow: /api/guides
 Disallow: /admin
 Disallow: /leads
 Disallow: /portal

@@ -374,6 +374,7 @@ function Footer({go,gl}){
       </div>
       <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
         <a href="/qld-suburbs" style="font-size:13px;color:${T.tu};font-weight:500;text-decoration:none">Suburbs we serve</a>
+        <a href="/guides" style="font-size:13px;color:${T.tu};font-weight:500;text-decoration:none">Guides</a>
         ${['privacy','terms','complaints'].map(p=>html`<span onclick=${()=>{gl(p);go('legal')}} style="font-size:13px;color:${T.tu};cursor:pointer;font-weight:500;text-transform:capitalize">${p}</span>`)}
       </div>
     </div>

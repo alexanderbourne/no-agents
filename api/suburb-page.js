@@ -75,6 +75,30 @@ const INTROS = [
   (s, c) => `${s.name} sellers typically hand over about <strong>${aud(c)}</strong> in commission at ${PCT}%. There's another way: <strong>$798 flat</strong>, everything included, no commission ever.`
 ];
 
+// FAQ phrasing variants — same 4 questions, different wording per variant, so
+// nearby suburb pages (often sharing a near-identical median) don't read as
+// carbon copies to a crawler evaluating content similarity.
+const FAQ_VARIANTS = [
+  s => [
+    ['How much does it cost?', `$798 flat, including the Domain.com.au portal fee, photography, floor plans and 3D tour. Optional $99 licensed-agent visits. No commission at any sale price.`],
+    ['How much would an agent charge?', `Around ${PCT}% — roughly ${aud(s.commission)} on a typical home in ${esc(s.regionLabel)}, plus marketing. That money stays with you instead.`],
+    ['Is it legal to sell this way?', `Yes. No Agents Pty Ltd is a licensed Queensland agency (licence 4542501). Contracts go through your conveyancer, exactly as with any agent.`],
+    ['Who shows buyers through?', `Your choice: meet buyers yourself for free, or hand over a spare key and a licensed agent opens up, shows through and locks up for $99 a visit.`],
+  ],
+  s => [
+    ['What will I actually pay?', `One flat fee — $798 — covering your Domain.com.au listing, professional photography, floor plans and a 3D tour. No commission, no matter your sale price.`],
+    [`What's the commission alternative costing me?`, `At the typical ${esc(s.regionLabel)} rate of ${PCT}%, that's around ${aud(s.commission)} on a home like yours — gone before you've paid marketing costs. Ours doesn't scale with price.`],
+    ['Is this above board?', `Completely. We're a licensed Queensland real estate agency (licence 4542501), and your contract still runs through a conveyancer like any other sale.`],
+    ['Do I have to run inspections myself?', `No — that's optional. Show buyers through yourself at no cost, or pay $99 for a licensed agent to attend, unlock up and lock up on your behalf.`],
+  ],
+  s => [
+    ['Is $798 really the total cost?', `Yes — it's the whole Complete Listing Package: Domain.com.au publication, photography, floor plans, 3D tour. No commission is ever added on top.`],
+    ['How does that compare to a normal agent?', `A typical ${esc(s.regionLabel)} agent charges around ${PCT}%, which is roughly ${aud(s.commission)} on a home at this price point — before their marketing spend. That's the gap you keep.`],
+    ['Is a licensed agency actually behind this?', `Yes — No Agents Pty Ltd, Queensland licence 4542501. Nothing about the legal side of your sale changes; only who gets paid does.`],
+    ['Can I skip hosting inspections?', `Yes. A licensed agent can attend on your behalf for $99 a visit, or you can meet buyers yourself for free — switch between the two any time.`],
+  ],
+];
+
 function suburbPage(s) {
   const commission = s.median * (PCT / 100);
   const saving = commission - NA_COST;
@@ -87,6 +111,16 @@ function suburbPage(s) {
   const near = [];
   for (let i = 0; i < Math.min(6, siblings.length); i++) near.push(siblings[(start + i) % siblings.length]);
   const intro = INTROS[hash(s.slug) % INTROS.length](s, commission);
+  const faqs = FAQ_VARIANTS[hash(s.slug + 'faq') % FAQ_VARIANTS.length]({ ...s, commission });
+  // Real, already-present median data for the 3 nearest suburbs — genuine
+  // per-page variation rather than templated filler, since it's derived from
+  // each suburb's own (possibly curated-override) median.
+  const compareRows = near.slice(0, 3).map(n => {
+    const nMedian = n.median;
+    const diff = nMedian - s.median;
+    const diffLabel = diff === 0 ? 'about the same' : `${diff > 0 ? aud(Math.abs(diff)) + ' higher' : aud(Math.abs(diff)) + ' lower'}`;
+    return `<tr><td>${esc(n.name)}</td><td>${aud(nMedian)}</td><td>${diffLabel}</td></tr>`;
+  }).join('');
 
   const ld = {
     '@context': 'https://schema.org',
@@ -100,14 +134,9 @@ function suburbPage(s) {
         areaServed: { '@type': 'Place', name: `${s.name}, Queensland` },
         provider: { '@type': 'RealEstateAgent', name: 'No Agents', url: SITE, telephone: '+61485043210' },
         offers: { '@type': 'Offer', price: '798', priceCurrency: 'AUD' } },
-      { '@type': 'FAQPage', mainEntity: [
-        { '@type': 'Question', name: `How much does it cost to sell a house in ${s.name} with no-agents?`,
-          acceptedAnswer: { '@type': 'Answer', text: `A flat $798 covers your Domain.com.au listing, professional photography, floor plans and 3D virtual tour. Optional licensed-agent inspection visits are $99 each. There is no commission at any sale price.` } },
-        { '@type': 'Question', name: `How much commission would a traditional agent charge in ${s.name}?`,
-          acceptedAnswer: { '@type': 'Answer', text: `At a typical ${PCT}% rate on a home around ${aud(s.median)} in ${s.regionLabel}, commission alone is roughly ${aud(commission)} — before marketing and auctioneer costs. With no-agents you keep that difference.` } },
-        { '@type': 'Question', name: 'Is this a licensed agency?',
-          acceptedAnswer: { '@type': 'Answer', text: 'Yes. No Agents Pty Ltd holds Queensland real estate licence 4542501, so your sale runs through a licensed agency while you keep the commission.' } }
-      ]}
+      { '@type': 'FAQPage', mainEntity: faqs.map(([q, a]) => ({
+        '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a },
+      })) },
     ]
   };
 
@@ -131,6 +160,11 @@ ${NAV}
 <tr><td><strong>You keep</strong></td><td>—</td><td class="save">~${aud(saving)} more</td></tr>
 </table>
 <p class="note">*Based on an indicative median house price of ${aud(s.median)} for ${esc(s.regionLabel)} and a ${PCT}% commission. Your price and an agent's rate will vary — the flat fee doesn't.</p>
+${compareRows ? `<h2 class="sf" style="margin-top:28px">How ${esc(s.name)} compares nearby</h2>
+<table>
+<tr><th>Suburb</th><th>Median house price</th><th>vs. ${esc(s.name)}</th></tr>
+${compareRows}
+</table>` : ''}
 </div></section>
 <section><div class="wrap">
 <h2 class="sf">How it works in ${esc(s.name)}</h2>
@@ -142,10 +176,7 @@ ${NAV}
 </div></section>
 <section class="alt"><div class="wrap">
 <h2 class="sf">Common questions — selling in ${esc(s.name)}</h2>
-<div class="faq"><h3>How much does it cost?</h3><p>$798 flat, including the Domain.com.au portal fee, photography, floor plans and 3D tour. Optional $99 licensed-agent visits. No commission at any sale price.</p></div>
-<div class="faq"><h3>How much would an agent charge?</h3><p>Around ${PCT}% — roughly ${aud(commission)} on a typical home in ${esc(s.regionLabel)}, plus marketing. That money stays with you instead.</p></div>
-<div class="faq"><h3>Is it legal to sell this way?</h3><p>Yes. No Agents Pty Ltd is a licensed Queensland agency (licence 4542501). Contracts go through your conveyancer, exactly as with any agent.</p></div>
-<div class="faq"><h3>Who shows buyers through?</h3><p>Your choice: meet buyers yourself for free, or hand over a spare key and a licensed agent opens up, shows through and locks up for $99 a visit.</p></div>
+${faqs.map(([q, a]) => `<div class="faq"><h3>${esc(q)}</h3><p>${a}</p></div>`).join('')}
 </div></section>
 <section><div class="wrap">
 <h2 class="sf">Also selling in ${esc(s.regionLabel)}</h2>

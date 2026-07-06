@@ -23,6 +23,8 @@
     { "source": "/refer", "destination": "/" },
     { "source": "/qld-suburbs", "destination": "/api/suburb-page" },
     { "source": "/sell-your-house/:slug", "destination": "/api/suburb-page?slug=:slug" },
+    { "source": "/guides", "destination": "/api/guides" },
+    { "source": "/guides/:slug", "destination": "/api/guides?slug=:slug" },
     { "source": "/offer/:path*", "destination": "/" },
     { "source": "/contract/:path*", "destination": "/" }
   ],
