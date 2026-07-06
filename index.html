@@ -253,7 +253,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   <p style="margin-top:40px;font-size:14px;color:#8a8078">Selling in Brisbane? See suburb-specific commission savings at <a href="/sell-your-house" style="color:#a07828">no-agents.com.au/sell-your-house</a>.</p>
 </div><!--STATIC_CONTENT_END--></div>
 <script type="module">
-import{html,render,useState,useEffect,useRef}from'https://unpkg.com/htm/preact/standalone.module.js';
+import{html,render,useState,useEffect,useRef}from'/preact-standalone.module.js';
 
 const SK='pk_live_51TaFXi94AreLVHIU2ybkPujIIL0JY7PZGiEqvQurwn3Vc5lrFRYzYEhb40XCXZF8468K2jcodH29mwGlxi1VPUtx00HPYfV5YM';
 const T={bg:'#faf9f6',bw:'#f5f0e8',w:'#ffffff',bd:'#e5e0d6',bdd:'#d0c8b8',t:'#1a1a1a',tm:'#4a4540',tu:'#8a8078',a:'#c8973a',al:'#e8d5b0',ad:'#a07828',r:'#c0392b',g:'#2d7d52',k:'#1a1a1a'};
@@ -2542,6 +2542,8 @@ function ContractSign(){
   const[signing,setSigning]=useState(false);
   const[convBusy,setConvBusy]=useState(false);
   const[convErr,setConvErr]=useState('');
+  const[mtgBusy,setMtgBusy]=useState(false);
+  const[mtgErr,setMtgErr]=useState('');
 
   useEffect(()=>{
     fetch(`/api/contract?listingId=${encodeURIComponent(listingId)}&token=${encodeURIComponent(token)}`)
@@ -2574,6 +2576,17 @@ function ContractSign(){
     setConvBusy(false);
   };
 
+  const requestMortgageBroker=async()=>{
+    setMtgBusy(true);setMtgErr('');
+    try{
+      const r=await fetch(`/api/contract?listingId=${encodeURIComponent(listingId)}&token=${encodeURIComponent(token)}&action=request-mortgage-broker`,{method:'POST'});
+      const d=await r.json();
+      if(r.ok)setData(prev=>({...prev,contract:{...prev.contract,mortgageBrokerRequested:true}}));
+      else setMtgErr(d.error||'Could not send your request.');
+    }catch{setMtgErr('Connection error. Try again.');}
+    setMtgBusy(false);
+  };
+
   if(loading)return html`<div style="max-width:480px;margin:0 auto;padding:120px 32px;text-align:center" class="mp"><div style="font-size:14px;color:${T.tm}">Loading your contract…</div></div>`;
   if(err)return html`<div style="max-width:480px;margin:0 auto;padding:120px 32px;text-align:center" class="mp"><div style="font-size:14px;color:${T.r}">${err}</div></div>`;
 
@@ -2589,6 +2602,12 @@ function ContractSign(){
         <div style="font-size:12px;color:${T.tm};line-height:1.6;margin-bottom:${c.buyerConveyancerRequested?'0':'10px'}">The seller is using their own conveyancer — since you'll need a separate one for your side, we can introduce you to our conveyancing partner.</div>
         ${c.buyerConveyancerRequested?html`<span style="${P('g')};font-size:11px">✓ Introduction requested — they'll be in touch</span>`:html`<button style="${B('o','s')}" disabled=${convBusy} onclick=${requestConveyancer}>${convBusy?'Sending…':'Request an introduction →'}</button>`}
         ${convErr&&html`<div style="font-size:12px;color:${T.r};margin-top:8px">${convErr}</div>`}
+      </div>`}
+      ${c.finance&&html`<div style="border-radius:10px;background:${T.bw};border:1px solid ${T.bdd};padding:14px 16px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">Need finance?</div>
+        <div style="font-size:12px;color:${T.tm};line-height:1.6;margin-bottom:${c.mortgageBrokerRequested?'0':'10px'}">Your offer has a finance condition — we can connect you with a mortgage broker to help sort it before your ${c.financeDays}-day deadline.</div>
+        ${c.mortgageBrokerRequested?html`<span style="${P('g')};font-size:11px">✓ Introduction requested — they'll be in touch</span>`:html`<button style="${B('o','s')}" disabled=${mtgBusy} onclick=${requestMortgageBroker}>${mtgBusy?'Sending…':'Request an introduction →'}</button>`}
+        ${mtgErr&&html`<div style="font-size:12px;color:${T.r};margin-top:8px">${mtgErr}</div>`}
       </div>`}
       ${signed?html`<div style="border-radius:12px;background:#d4ede1;border:1px solid ${T.g};padding:16px;text-align:center">
         <div style="font-size:14px;font-weight:600;color:${T.g};margin-bottom:4px">✓ You signed on ${new Date(c.buyerSigned.signedAt).toLocaleDateString('en-AU')}</div>

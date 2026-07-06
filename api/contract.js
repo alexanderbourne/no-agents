@@ -8,6 +8,7 @@
 // Required env vars: KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY (optional)
 
 import { notifyConveyancer, effectiveConveyancer, getDefaultConveyancer } from './conveyancing-handoff.js';
+import { notifyMortgageBroker } from './mortgage-broker.js';
 import { notifySeller } from './notify-seller.js';
 
 const { KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY } = process.env;
@@ -155,6 +156,29 @@ export default async function handler(req, res) {
     }
 
     listing.contract.buyerConveyancerRequested = true;
+    await kvSet(`listing:${listingId}`, listing);
+    return res.status(200).json({ ok: true, sent });
+  }
+
+  // Buyer opts in to an introduction to our mortgage broker — only offered
+  // when their accepted offer actually has a finance condition, since a
+  // buyer who didn't need one has nothing to refer.
+  if (req.method === 'POST' && req.query.action === 'request-mortgage-broker') {
+    if (!listing.contract.finance) {
+      return res.status(400).json({ error: 'No finance condition on this contract.' });
+    }
+    if (listing.contract.mortgageBrokerRequested) {
+      return res.status(200).json({ ok: true, alreadyRequested: true });
+    }
+
+    const sent = await notifyMortgageBroker({
+      buyerName: listing.contract.buyerName,
+      buyerEmail: listing.contract.buyerEmail,
+      buyerPhone: listing.contract.buyerPhone,
+      address: `${listing.address}, ${listing.suburb || ''}`.trim(),
+    });
+
+    listing.contract.mortgageBrokerRequested = true;
     await kvSet(`listing:${listingId}`, listing);
     return res.status(200).json({ ok: true, sent });
   }
