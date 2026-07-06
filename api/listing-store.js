@@ -22,7 +22,14 @@
 // ─── Listing schema ──────────────────────────────────────────────────────────
 //   {
 //     id:             string    // auto-generated "na-<timestamp>-<rand>"
-//     status:         "current" | "sold" | "leased" | "withdrawn" | "offmarket"
+//     status:         "pending" | "current" | "sold" | "leased" | "withdrawn" | "offmarket"
+//                     // "pending" = paid but not yet on the public feed/FTP —
+//                     // held until photos are confirmed ready. See
+//                     // api/mark-photos-ready.js and api/cron-publish.js.
+//     requestedStartDate: string|null  // seller's nominated go-live date (YYYY-MM-DD)
+//     earliestPublishAt:  ISO string   // 7-day photography-turnaround floor set at checkout
+//     readyToPublish: boolean   // true once photos confirmed but requestedStartDate is still future
+//     publishedAt:    ISO string|null  // set when status flips to "current"
 //     createdAt:      ISO string
 //     address:        string    // street e.g. "12 Smith Street"
 //     suburb:         string

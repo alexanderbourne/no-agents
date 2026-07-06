@@ -55,7 +55,10 @@ async function getActiveListings() {
   const results = await Promise.all(ids.map(id => kvGet(`listing:${id}`)));
   return results
     .map(r => { try { return r ? JSON.parse(r) : null; } catch { return null; } })
-    .filter(l => l && l.status !== 'withdrawn' && l.status !== 'sold');
+    // 'pending' = paid but photography not yet confirmed ready, or the
+    // seller's/photo-floor date hasn't arrived — must never appear in the
+    // portal feed. See api/mark-photos-ready.js and api/cron-publish.js.
+    .filter(l => l && l.status !== 'withdrawn' && l.status !== 'sold' && l.status !== 'pending');
 }
 
 // ---------------------------------------------------------------------------

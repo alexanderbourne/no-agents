@@ -528,15 +528,16 @@ async function updateLead(id, status) {
 
 function renderListings() {
   const ls = data.listings;
+  const pending = ls.filter(x => x.status === 'pending').length;
   const current = ls.filter(x => x.status === 'current').length;
   const sold = ls.filter(x => x.status === 'sold').length;
 
   document.getElementById('stats-bar').innerHTML = `
     <div class="stats">
       <div class="stat"><div class="n">${ls.length}</div><div class="l">Total</div></div>
+      <div class="stat"><div class="n" style="color:#e65100">${pending}</div><div class="l">Awaiting photos</div></div>
       <div class="stat"><div class="n" style="color:#2e7d32">${current}</div><div class="l">Current</div></div>
       <div class="stat"><div class="n" style="color:#7b1fa2">${sold}</div><div class="l">Sold</div></div>
-      <div class="stat"><div class="n">${ls.length - current - sold}</div><div class="l">Other</div></div>
     </div>`;
 
   if (!ls.length) { document.getElementById('content').innerHTML = '<div class="empty">No listings yet.</div>'; return; }
@@ -588,6 +589,19 @@ function showListing(id) {
       <div style="font-weight:700;color:#166534;margin-bottom:8px">✅ Settled</div>
       <div style="font-size:14px;color:#166534">Sale price: <strong>$${Number(l.salePrice||0).toLocaleString('en-AU')}</strong>${l.tier === 'assisted' ? ` &nbsp;·&nbsp; Success fee charged: <strong>$${Number(l.successFee||0).toLocaleString('en-AU')}</strong>` : ' &nbsp;·&nbsp; Self-Managed — no fee'}</div>
       ${l.settledAt ? `<div style="font-size:12px;color:#4ade80;margin-top:4px">Settled ${new Date(l.settledAt).toLocaleDateString('en-AU')}</div>` : ''}
+    </div>` : l.status === 'pending' ? `
+    <div style="margin-top:24px;padding:16px;background:#fff3e0;border:1px solid #ffcc80;border-radius:12px" id="photos-panel-${l.id}">
+      <div style="font-weight:700;color:#e65100;margin-bottom:4px">📷 Awaiting photography</div>
+      <div style="font-size:12px;color:#e65100;margin-bottom:12px">
+        ${l.readyToPublish ? `Photos already confirmed — scheduled to go live ${l.requestedStartDate ? 'on ' + new Date(l.requestedStartDate).toLocaleDateString('en-AU') : 'automatically'} (see the daily cron).` : `Held off the public feed until Domain's photography (Matterport/Skylight) is delivered${l.earliestPublishAt ? ' — earliest allowed publish date ' + new Date(l.earliestPublishAt).toLocaleDateString('en-AU') : ''}${l.requestedStartDate ? `, seller requested ${new Date(l.requestedStartDate).toLocaleDateString('en-AU')}` : ''}.`}
+      </div>
+      ${!l.readyToPublish ? `
+      <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Image URLs (one per line, once photos are delivered)</label>
+      <textarea id="photos-urls-${l.id}" rows="4" style="width:100%;padding:8px 12px;border:1px solid #ffcc80;border-radius:8px;font-size:13px;font-family:monospace;margin-bottom:10px" placeholder="https://…/photo1.jpg
+https://…/photo2.jpg"></textarea>
+      <button onclick="markPhotosReady('${l.id}')" style="padding:9px 20px;background:#e65100;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px">
+        Mark photos ready
+      </button>` : ''}
     </div>` : l.tier === 'assisted' ? `
     <div style="margin-top:24px;padding:16px;background:#fff7ed;border:1px solid #fdba74;border-radius:12px" id="settle-panel-${l.id}">
       <div style="font-weight:700;color:#9a3412;margin-bottom:4px">Confirm Settlement &amp; Charge Success Fee</div>
@@ -645,7 +659,7 @@ async function confirmSettle(id) {
     const r = await apiFetch('/api/settle', { method: 'POST', body: JSON.stringify({ listingId: id, salePrice }) });
     if (r?.ok) {
       alert(`Settlement confirmed. Fee $${r.feeDisplay || fee} charged. Charge ID: ${r.chargeId}`);
-      await loadData();
+      await loadAll();
       renderTab();
     } else {
       alert('Error: ' + (r?.error || 'Unknown error'));
@@ -654,6 +668,28 @@ async function confirmSettle(id) {
   } catch(e) {
     alert('Request failed: ' + e.message);
     if (btn) { btn.disabled = false; btn.textContent = 'Charge & Mark Sold'; }
+  }
+}
+
+async function markPhotosReady(id) {
+  const ta = document.getElementById('photos-urls-' + id);
+  const images = (ta?.value || '').split('\n').map(s => s.trim()).filter(Boolean);
+  if (!images.length) { alert('Paste at least one image URL first.'); return; }
+  const btn = document.querySelector(`#photos-panel-${id} button`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const r = await apiFetch('/api/mark-photos-ready', { method: 'POST', body: JSON.stringify({ listingId: id, images }) });
+    if (r?.ok) {
+      alert(r.goesLiveNow ? 'Photos confirmed — listing is now live.' : `Photos confirmed — scheduled to go live ${new Date(r.effectivePublishAt).toLocaleDateString('en-AU')}.`);
+      await loadAll();
+      renderTab();
+    } else {
+      alert('Error: ' + (r?.error || 'Unknown error'));
+      if (btn) { btn.disabled = false; btn.textContent = 'Mark photos ready'; }
+    }
+  } catch (e) {
+    alert('Request failed: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Mark photos ready'; }
   }
 }
 
@@ -671,7 +707,7 @@ async function markSoldNoFee(id) {
       body: JSON.stringify({ ...listing, status: 'sold', salePrice, settledAt: new Date().toISOString() }),
     });
     if (r?.success !== false) {
-      await loadData();
+      await loadAll();
       renderTab();
     } else {
       alert('Error: ' + (r?.error || 'Unknown error'));

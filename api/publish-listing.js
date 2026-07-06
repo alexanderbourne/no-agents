@@ -132,6 +132,13 @@ export default async function handler(req, res) {
 
   if (!listing) return res.status(400).json({ error: 'listing object required' });
 
+  // Hard stop: never push an ad to a portal without photos — this is the
+  // whole point of the pending/photo-ready gate upstream. Defense in depth
+  // in case a future caller forgets to check.
+  if (!Array.isArray(listing.images) || listing.images.length === 0) {
+    return res.status(400).json({ error: 'Cannot publish a listing with no photos' });
+  }
+
   // Validate required fields
   const required = ['uniqueId', 'address', 'suburb', 'postcode', 'streetNumber', 'streetName', 'beds', 'baths', 'price', 'description'];
   const missing = required.filter(f => !listing[f]);
