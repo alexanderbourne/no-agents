@@ -166,6 +166,174 @@ const GUIDES = [
 <div class="callout">If you haven't nominated your own conveyancer by this stage, this is the point in the process where one needs to be engaged — don't leave it until the contract is due to be signed.</div>
 `,
   },
+  {
+    slug: 'cooling-off-periods-queensland-property-sales',
+    title: 'Cooling-Off Periods in Queensland Property Sales: What Buyers and Sellers Need to Know',
+    desc: 'How the statutory cooling-off period works for residential property sales in Queensland, what it protects, and how it can be waived.',
+    published: '2026-06-28',
+    summary: 'The buyer’s statutory right to walk away from a signed contract, and what it actually costs them to do so.',
+    body: `
+<p>Queensland gives residential property buyers a statutory cooling-off period after signing a Contract of Sale — a safety net that exists regardless of whether the seller used a traditional agent or sold privately.</p>
+
+<h2>What the cooling-off period actually is</h2>
+<p>Once a buyer signs the formal Contract of Sale, they typically have a short window — commonly around five business days — during which they can terminate the contract without having to prove any reason. This protects buyers who may have signed under time pressure (for example, in a competitive multi-offer situation) from being locked into a purchase they haven't had time to fully consider.</p>
+
+<h2>It isn't free to exercise</h2>
+<p>Terminating during the cooling-off period isn't cost-free for the buyer — they typically forfeit a small percentage of the purchase price (commonly a quarter of one percent) to the seller as a termination penalty. This is deliberately set low enough to make the right meaningful, but high enough to discourage buyers from using it casually.</p>
+
+<h2>When cooling-off doesn't apply</h2>
+<p>The cooling-off period generally doesn't apply to properties bought at auction, or where the buyer has waived the right (commonly via a solicitor's certificate confirming they've received independent legal advice on the waiver). It's also distinct from any negotiated conditions in the contract itself, like finance or building &amp; pest — those operate on their own separate timeframes and don't require any penalty to invoke if the condition genuinely isn't met.</p>
+
+<h2>What this means for sellers</h2>
+<p>As a seller, the cooling-off period means a signed contract isn't fully secure until the window closes. It's rarely used in practice — most buyers who've made it to a signed contract intend to proceed — but it's worth understanding rather than being caught off guard if a buyer does exercise it. It's also a reason not to make firm commitments (like booking removalists or giving notice on your own next purchase) until the cooling-off window has passed.</p>
+
+<h2>How it interacts with the Heads of Agreement stage</h2>
+<p>The cooling-off period applies to the formal, executed Contract of Sale — not to a Heads of Agreement or offer acceptance, which are earlier, less formal stages of the process. Don't assume cooling-off protections apply before the actual contract is signed; the legal position at those earlier stages is different.</p>
+
+<div class="callout">If a buyer does invoke cooling-off, the termination penalty is typically handled by the conveyancers on both sides as part of settling accounts — it isn't something either party needs to chase manually.</div>
+`,
+  },
+  {
+    slug: 'how-open-offer-boards-work',
+    title: 'How Open Offer Boards Work: Selling With Full Price Transparency',
+    desc: 'How a transparent, open offer board compares to traditional private negotiation when selling a property, and what it means for both buyers and sellers.',
+    published: '2026-07-01',
+    summary: 'Why an open offer board removes gazumping and blind bidding from the sale process.',
+    body: `
+<p>Most traditional property sales run on private negotiation — a buyer submits an offer to the agent, the agent negotiates on the seller's behalf, and other interested buyers have no visibility into what's actually been offered. An open offer board works differently, and it's worth understanding both models before you sell or buy.</p>
+
+<h2>How private negotiation typically works</h2>
+<p>In a traditional sale, offers are submitted privately to the seller's agent. Other buyers generally can't see competing offers, which means they're negotiating somewhat blind — they don't know if their offer is genuinely competitive or being used as leverage against another buyer. This can lead to "gazumping," where a seller accepts a verbal offer and then takes a better one before contracts are signed, or to buyers overpaying because they assume (correctly or not) that they're up against stronger competition than actually exists.</p>
+
+<h2>What an open offer board changes</h2>
+<p>On an open offer board, every verified offer is visible to every verified buyer in real time — amount, settlement terms, and key conditions. Instead of negotiating through an intermediary who represents only the seller, buyers can see exactly where they stand against genuine competing interest, and adjust their own offer accordingly.</p>
+
+<h2>Why transparency tends to produce genuine best offers</h2>
+<p>When buyers can see real competing offers rather than being told a property has "strong interest" without evidence, they're negotiating against verified information instead of a sales narrative. This tends to produce offers that reflect what buyers actually believe the property is worth, rather than offers inflated or deflated by uncertainty about the competition.</p>
+
+<h2>What "verified" actually means</h2>
+<p>An offer being visible on an open board only works if it's genuinely from a real, identity-verified buyer — otherwise the transparency is meaningless. That's why buyer identity verification (typically a driver's licence or passport check) happens before a buyer can submit an offer, protecting sellers from fake or unserious offers cluttering the board.</p>
+
+<h2>Does the seller have to accept the highest offer?</h2>
+<p>No — an open offer board shows the terms, but the seller still chooses which offer to accept based on the full picture: price, deposit, settlement timeframe, and conditions like finance or building &amp; pest. A slightly lower offer with no finance condition and a fast, clean settlement can be a better outcome than a higher offer that's shakier.</p>
+
+<div class="callout">Offers submitted through an open board are expressions of interest, not binding contracts — the legally binding step is still the formal Contract of Sale, prepared once an offer is accepted.</div>
+`,
+  },
+  {
+    slug: 'do-you-need-a-real-estate-licence-to-sell-your-own-home-queensland',
+    title: 'Do You Need a Real Estate Licence to Sell Your Own Home in Queensland?',
+    desc: 'A clear answer to whether Queensland homeowners need a real estate licence to sell their own property privately, and where the law actually applies.',
+    published: '2026-07-03',
+    summary: 'The straightforward answer to a question every first-time private seller asks.',
+    body: `
+<p>This is one of the first questions anyone considering a private sale in Queensland asks — and the honest answer is more nuanced than a flat yes or no.</p>
+
+<h2>The short answer</h2>
+<p>You do not need a real estate licence to sell your own home. Queensland's Property Occupations Act 2014 regulates people and businesses who sell property <em>on behalf of someone else</em> for a fee — it doesn't require an owner to be licensed to sell something they own themselves.</p>
+
+<h2>So why do "sell without an agent" platforms mention a licence at all?</h2>
+<p>Because most flat-fee "FSBO" platforms in Queensland — including this one — aren't actually a loophole around the licensing requirement. They operate <em>as</em> a licensed real estate agency, charging a flat fee instead of a percentage commission for the services they provide: listing publication on major portals, marketing, and coordination through to contract. The licence belongs to the platform/agency facilitating the sale, not to the individual homeowner.</p>
+
+<h2>What genuinely unlicensed private selling looks like</h2>
+<p>A homeowner can, in theory, market their own property entirely independently — a sign on the lawn, word of mouth, a listing on a general classifieds site — without any licensing requirement at all, provided no one is being paid a fee to act as their agent. In practice this severely limits reach, since the major property portals (which is where the large majority of serious buyers actually search) generally only accept listings from licensed agencies, not individual private sellers directly.</p>
+
+<h2>Where the contract and settlement process still needs licensed professionals</h2>
+<p>Regardless of how a property is marketed, the formal Contract of Sale must be prepared by a licensed conveyancer or solicitor, and settlement is handled through licensed conveyancing — this part of the process is identical whether you sold with a full-commission agent, a flat-fee agency, or entirely independently.</p>
+
+<h2>The practical takeaway</h2>
+<p>If your goal is a genuinely private sale with no fee to anyone, you can do that — but you'll be marketing outside the major portals, which most sellers find limits buyer reach too much to be worthwhile. If your goal is to avoid commission while still reaching serious buyers on Domain.com.au or realestate.com.au, that requires a licensed agency operating on a different fee model — which is what a flat-fee platform actually is.</p>
+
+<div class="callout">Always check that a "no agent" platform discloses its real estate licence number — a legitimate flat-fee agency will display this prominently, since it's a legal requirement, not an optional trust signal.</div>
+`,
+  },
+  {
+    slug: 'settlement-day-what-happens-property-sale',
+    title: 'Settlement Day: What Actually Happens When Your Property Sale Settles',
+    desc: 'A plain-English walkthrough of what happens on settlement day for a Queensland property sale, from a seller’s perspective.',
+    published: '2026-07-04',
+    summary: 'What actually happens behind the scenes between an unconditional contract and handing over the keys.',
+    body: `
+<p>Settlement is the final step of a property sale — the day ownership and money actually change hands — but a lot happens in the lead-up that sellers don't always see directly, since most of it is handled by conveyancers.</p>
+
+<h2>What "settlement" actually means</h2>
+<p>Settlement is the point at which the buyer pays the remaining purchase price, the seller transfers legal title, and the buyer takes possession of the property. Everything before this — signing the contract, satisfying conditions like finance and building &amp; pest — is preparation for this single event.</p>
+
+<h2>The lead-up: your conveyancer's role</h2>
+<p>In the weeks before settlement, your conveyancer handles the mechanics most sellers never see directly: preparing the settlement statement (adjusting rates, water, and other outgoings between buyer and seller), liaising with the buyer's conveyancer, and coordinating with any mortgage lenders involved on either side.</p>
+
+<h2>What happens on the day itself</h2>
+<p>On settlement day, the respective conveyancers (and, if applicable, banks releasing or receiving mortgage funds) exchange the settlement funds and title documents — this typically happens electronically now via PEXA (Property Exchange Australia) rather than an in-person meeting. Once your conveyancer confirms funds have been received, you're cleared to hand over keys.</p>
+
+<h2>When do you actually get paid?</h2>
+<p>Sale proceeds are typically available shortly after settlement is confirmed on the day — your conveyancer will tell you once funds have actually cleared, since keys and possession shouldn't be handed over before that confirmation.</p>
+
+<h2>What sellers need to have ready</h2>
+<p>Before settlement, make sure all keys, remotes, security codes, and any items included in the sale (fixtures agreed to stay) are ready to hand over. If the property is tenanted, any handover of tenancy documentation to the buyer needs to be arranged in line with the contract terms and the buyer's own plans for the tenancy.</p>
+
+<h2>What if something isn't ready on the day?</h2>
+<p>Delays do happen — a lender's funds aren't released on time, or a document issue surfaces late. Your conveyancer manages this; it's rarely something a seller needs to resolve directly, though it can push settlement back by hours or occasionally days.</p>
+
+<div class="callout">Don't book removalists, hand in notice at a new job, or make other firm commitments tied to your exact settlement date until your conveyancer confirms it's genuinely locked in — dates can shift even late in the process.</div>
+`,
+  },
+  {
+    slug: 'how-to-price-your-property-selling-without-an-agent',
+    title: 'How to Price Your Property When Selling Without an Agent',
+    desc: 'A practical approach to setting an asking price for your Queensland property when you’re selling privately, without an agent’s appraisal.',
+    published: '2026-07-05',
+    summary: 'How to arrive at a realistic price guide using the same data sources agents actually rely on.',
+    body: `
+<p>One of the genuine challenges of selling without an agent is pricing — a traditional agent brings a professional appraisal based on comparable sales they've personally handled. Here's how to arrive at a realistic price without that.</p>
+
+<h2>Start with recent comparable sales, not listing prices</h2>
+<p>Other properties' <em>asking</em> prices tell you what sellers hoped for, not what buyers actually paid. Recent <em>sold</em> prices for genuinely comparable properties (similar size, condition, and location) are a far more reliable guide. Domain and realestate.com.au both publish sold-price data and price estimate tools that give a reasonable starting range.</p>
+
+<h2>Adjust for what the data can't see</h2>
+<p>Automated price estimates work from data like land size, floor area, and recent nearby sales, but they can't see condition, renovations, or specific features. A recently renovated kitchen or a north-facing outlook can move a property meaningfully above a generic estimate — and a property needing significant work should be priced below one.</p>
+
+<h2>Understand the difference between price guide and reserve</h2>
+<p>Your advertised price guide is a marketing figure meant to attract genuine enquiry — it doesn't have to be a rigid number if you're running an open offer process, since the actual sale price gets tested by real offers rather than fixed at listing. Pricing too high suppresses enquiry volume; pricing too low can undersell the property if you're not running a genuinely competitive process to capture upside.</p>
+
+<h2>Watch for the trap of overpricing</h2>
+<p>Overpricing is the single most common private-seller pricing mistake. An overpriced listing gets less enquiry, sits longer on the market, and can develop a reputation among buyers watching the portals as "stale" — which then makes it harder to achieve a good price even after a later reduction. A realistic price from day one generally outperforms starting high and hoping.</p>
+
+<h2>Use the transparency of an open offer board to your advantage</h2>
+<p>If your platform runs an open offer board, you don't need to get the price guide perfect — genuine competing offers will reveal the market's actual view of value, often more accurately than any single appraisal could. This is one of the practical advantages of transparent bidding over a fixed asking price you're locked into.</p>
+
+<div class="callout">If in doubt, price slightly conservatively and let competition do the work — a listing that attracts five genuine offers at your price guide almost always outperforms one that attracts none above an optimistic one.</div>
+`,
+  },
+  {
+    slug: 'selling-a-tenanted-property-queensland',
+    title: 'Tenanted Property Sales: Selling a Rental Property in Queensland',
+    desc: 'What Queensland landlords need to know about selling a property with tenants in place, including entry notice requirements and buyer considerations.',
+    published: '2026-07-06',
+    summary: 'What changes about the sale process when your property has tenants living in it.',
+    body: `
+<p>Selling a rental property with tenants still living in it involves a few extra considerations beyond a standard owner-occupied sale — mostly around access and the tenants' existing rights.</p>
+
+<h2>Tenants' rights don't disappear because you're selling</h2>
+<p>A valid residential tenancy agreement continues regardless of a change in ownership — a new owner buying a tenanted property generally takes on the tenancy as-is, for the remainder of its term. This is an important fact for both you and prospective buyers to understand upfront.</p>
+
+<h2>Entry notice requirements for inspections</h2>
+<p>Tenants are entitled to proper notice before their home is entered for marketing photography, inspections, or open homes — you can't simply let buyers through with no warning. The specific notice period is set by Queensland tenancy law, and getting this wrong can create real friction with tenants during a sale, which is the opposite of what you want during a marketing campaign.</p>
+
+<h2>Keeping tenants informed and cooperative</h2>
+<p>A tenant who feels ambushed by a sale process is far less likely to keep the property presentable for inspections or to be flexible about timing. Informing tenants early, being reasonable about scheduling, and — where appropriate — offering a small goodwill gesture for cooperation during the campaign tends to produce a smoother process and a better-presented property for buyers.</p>
+
+<h2>Selling to an owner-occupier vs. another investor</h2>
+<p>If your buyer intends to move in themselves rather than continue renting the property out, the existing tenancy and its notice-to-vacate timeline becomes a genuine negotiating point — buyers with a firm move-in timeline will want clarity on when they can actually take possession, which may not align neatly with your settlement date if a fixed-term tenancy is still running.</p>
+
+<h2>What information buyers will want</h2>
+<p>Prospective buyers of a tenanted property will typically want to see the current lease terms, rent amount, bond details, and the tenant's payment history — this is standard due diligence for anyone buying an investment property, and having it ready to share speeds up the process considerably.</p>
+
+<h2>Coordinating access without an agent managing it day-to-day</h2>
+<p>If you're managing the sale yourself rather than through a property manager, you're responsible for coordinating entry notices and inspection access directly with the tenant — or via a licensed agent attending on your behalf, if you'd rather not manage that relationship personally during the sale.</p>
+
+<div class="callout">Start the tenant conversation before your listing goes live, not after the first inspection request comes in — it gives everyone more room to work with scheduling.</div>
+`,
+  },
 ];
 
 function guidePage(g) {
