@@ -8,8 +8,9 @@
 // Required env vars: KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY (optional)
 
 import { notifyConveyancer, effectiveConveyancer, getDefaultConveyancer } from './conveyancing-handoff.js';
-import { notifyMortgageBroker } from './mortgage-broker.js';
+import { notifyMortgageBroker, logMortgageReferral } from './mortgage-broker.js';
 import { notifySeller } from './notify-seller.js';
+import { notifyAdmin } from './notify-admin.js';
 
 const { KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY } = process.env;
 
@@ -171,15 +172,34 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, alreadyRequested: true });
     }
 
+    const address = `${listing.address}, ${listing.suburb || ''}`.trim();
     const sent = await notifyMortgageBroker({
       buyerName: listing.contract.buyerName,
       buyerEmail: listing.contract.buyerEmail,
       buyerPhone: listing.contract.buyerPhone,
-      address: `${listing.address}, ${listing.suburb || ''}`.trim(),
+      address,
     });
 
     listing.contract.mortgageBrokerRequested = true;
     await kvSet(`listing:${listingId}`, listing);
+
+    await logMortgageReferral({
+      listingId,
+      address,
+      buyerName: listing.contract.buyerName,
+      buyerEmail: listing.contract.buyerEmail,
+      buyerPhone: listing.contract.buyerPhone,
+      sent,
+    });
+
+    await notifyAdmin({
+      subject: `Mortgage broker referral — ${listing.contract.buyerName || 'a buyer'} (${address})`,
+      html: `<p>${listing.contract.buyerName || 'A buyer'} requested a mortgage broker introduction for <strong>${address}</strong>.</p>
+<p><strong>Buyer:</strong> ${listing.contract.buyerName || '—'} · ${listing.contract.buyerEmail || '—'} · ${listing.contract.buyerPhone || '—'}</p>
+<p>${sent ? '✅ Broker notified automatically.' : '⚠️ Broker email failed to send — follow up manually.'}</p>`,
+      isError: !sent,
+    });
+
     return res.status(200).json({ ok: true, sent });
   }
 
