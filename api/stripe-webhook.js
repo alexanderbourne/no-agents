@@ -6,6 +6,7 @@ import Stripe from 'stripe';
 import { parseAddress, generateListingId } from './listing-utils.js';
 import { notifyAdmin } from './notify-admin.js';
 import { notifySeller } from './notify-seller.js';
+import { getReferral, creditReferral } from './referrals.js';
 
 export const config = {
   api: { bodyParser: false },
@@ -132,6 +133,25 @@ export default async function handler(req, res) {
       console.log('KV store result:', JSON.stringify(storeResult));
     } else {
       console.warn('LISTING_API_SECRET not set — skipping KV store');
+    }
+
+    // Referral credit — $100 owed to whoever referred this seller, unless
+    // they're referring themselves. No automated payout; this just records
+    // what's owed so admin can pay manually (see api/referrals.js).
+    let referralCredited = false;
+    if (meta.referralCode) {
+      const referral = await getReferral(meta.referralCode);
+      if (referral && referral.email !== (listing.sellerEmail || '').trim().toLowerCase()) {
+        const credit = await creditReferral({ code: meta.referralCode, listingId: listing.uniqueId, address: listing.address });
+        referralCredited = Boolean(credit);
+        if (credit) {
+          await notifyAdmin({
+            subject: `$100 referral credit owed — ${referral.name}`,
+            html: `<p><strong>${referral.name}</strong> (${referral.email}, ${referral.phone}) referred <strong>${listing.sellerName || listing.address}</strong>, who just paid for a listing at <strong>${listing.address}</strong>.</p>
+<p>$100 is now owed to them — pay manually (bank transfer) and mark the credit paid in the admin Referrals tab.</p>`,
+          });
+        }
+      }
     }
 
     // Do NOT publish yet — the listing sits in "pending" (off the public

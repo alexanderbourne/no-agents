@@ -118,6 +118,7 @@ select.status-sel{padding:6px 12px;border:1px solid #ddd;border-radius:8px;font-
   <div class="tabs" id="tabs">
     <div class="tab active" data-tab="agents">Agents <span class="count" id="cnt-agents">0</span></div>
     <div class="tab" data-tab="inspections">Inspections <span class="count" id="cnt-inspections">0</span></div>
+    <div class="tab" data-tab="referrals">Referrals <span class="count" id="cnt-referrals">0</span></div>
     <div class="tab" data-tab="leads">Leads <span class="count" id="cnt-leads">0</span></div>
     <div class="tab" data-tab="listings">Listings <span class="count" id="cnt-listings">0</span></div>
   </div>
@@ -130,7 +131,7 @@ select.status-sel{padding:6px 12px;border:1px solid #ddd;border-radius:8px;font-
 <script>
 const token = () => localStorage.getItem('na_token') || '';
 let currentTab = 'agents';
-let data = { agents: [], inspections: [], leads: [], listings: [] };
+let data = { agents: [], inspections: [], referrals: [], credits: [], leads: [], listings: [] };
 
 if (token()) init();
 
@@ -161,13 +162,17 @@ async function apiFetch(url, opts = {}) {
 }
 
 async function loadAll() {
-  const [agents, inspections, leads] = await Promise.all([
+  const [agents, inspections, referrals, credits, leads] = await Promise.all([
     apiFetch('/api/agents'),
     apiFetch('/api/inspections'),
+    apiFetch('/api/referrals'),
+    apiFetch('/api/referrals?credits=1'),
     apiFetch('/api/leads?token=' + token()),
   ]);
   data.agents = Array.isArray(agents) ? agents : [];
   data.inspections = Array.isArray(inspections) ? inspections : [];
+  data.referrals = Array.isArray(referrals) ? referrals : [];
+  data.credits = Array.isArray(credits) ? credits : [];
   data.leads = (leads && leads.leads) ? leads.leads : [];
   try {
     const ld = await apiFetch('/api/listing-store');
@@ -176,6 +181,7 @@ async function loadAll() {
 
   document.getElementById('cnt-agents').textContent = data.agents.length;
   document.getElementById('cnt-inspections').textContent = data.inspections.length;
+  document.getElementById('cnt-referrals').textContent = data.credits.filter(c => c.status === 'pending').length;
   document.getElementById('cnt-leads').textContent = data.leads.length;
   document.getElementById('cnt-listings').textContent = data.listings.length;
 
@@ -193,7 +199,7 @@ document.getElementById('tabs').addEventListener('click', e => {
 });
 
 function renderTab() {
-  const fns = { agents: renderAgents, inspections: renderInspections, leads: renderLeads, listings: renderListings };
+  const fns = { agents: renderAgents, inspections: renderInspections, referrals: renderReferrals, leads: renderLeads, listings: renderListings };
   fns[currentTab]();
 }
 
@@ -273,6 +279,52 @@ async function updateAgent(id, status) {
   if (ag) { ag.status = status; if (status === 'approved') ag.approvedAt = new Date().toISOString(); }
   document.getElementById('cnt-agents').textContent = data.agents.length;
   showAgent(id);
+}
+
+// ── Referrals ──
+
+function renderReferrals() {
+  const c = data.credits;
+  const pending = c.filter(x => x.status === 'pending');
+  const paid = c.filter(x => x.status === 'paid');
+  const owed = pending.reduce((s, x) => s + (x.amount || 100), 0);
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="n">${data.referrals.length}</div><div class="l">Referrers</div></div>
+      <div class="stat"><div class="n" style="color:#e65100">${pending.length}</div><div class="l">Pending</div></div>
+      <div class="stat"><div class="n" style="color:#2e7d32">${paid.length}</div><div class="l">Paid</div></div>
+      <div class="stat"><div class="n">$${owed.toLocaleString()}</div><div class="l">Owed now</div></div>
+    </div>`;
+
+  if (!c.length) { document.getElementById('content').innerHTML = '<div class="empty">No referral credits yet.</div>'; return; }
+
+  document.getElementById('content').innerHTML = c.map(cr => `
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="card-name">${esc(cr.referrerName)} <span style="font-weight:400;color:#888">→ $${cr.amount}</span></div>
+          <div class="card-sub">Referred: ${esc(cr.address || cr.listingId)}</div>
+        </div>
+        <span class="badge badge-${cr.status === 'paid' ? 'approved' : 'pending'}">${cr.status}</span>
+      </div>
+      <div class="card-meta">
+        <span>${esc(cr.referrerEmail)}</span>
+        <span>${esc(cr.referrerPhone)}</span>
+        <span>${timeAgo(cr.createdAt)}</span>
+      </div>
+      ${cr.status === 'pending' ? `<div class="actions"><button class="btn btn-approve" onclick="markCreditPaid('${cr.id}')">Mark paid</button></div>` : ''}
+    </div>
+  `).join('');
+}
+
+async function markCreditPaid(id) {
+  if (!confirm('Confirm you have paid this $100 referral credit (bank transfer) before marking it paid?')) return;
+  await apiFetch(`/api/referrals?creditId=${id}`, { method: 'PATCH', body: JSON.stringify({}) });
+  const cr = data.credits.find(x => x.id === id);
+  if (cr) { cr.status = 'paid'; cr.paidAt = new Date().toISOString(); }
+  document.getElementById('cnt-referrals').textContent = data.credits.filter(x => x.status === 'pending').length;
+  renderReferrals();
 }
 
 // ── Inspections ──

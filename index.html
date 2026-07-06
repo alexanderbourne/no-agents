@@ -341,7 +341,7 @@ function Bdg({st=''}){return html`<div style="display:flex;gap:8px;align-items:c
 
 function Nav({v,go,gl}){
   const[open,setOpen]=useState(false);
-  const nav=[['home','Home'],['sell','Sell'],['buy','Buy'],['fractional','Fractional'],['dash','My listing'],['agents','For agents']];
+  const nav=[['home','Home'],['sell','Sell'],['buy','Buy'],['fractional','Fractional'],['dash','My listing'],['agents','For agents'],['refer','Refer & earn $100']];
   return html`<nav style="position:sticky;top:0;z-index:100;background:rgba(250,249,246,.96);backdrop-filter:blur(12px);border-bottom:1px solid ${T.bd}">
     <div style="max-width:1100px;margin:0 auto;padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between">
       <div onclick=${()=>go('home')} style="cursor:pointer;display:flex;align-items:center;gap:10px"><${Logo}/><span class="sf" style="font-size:17px;font-weight:600;color:${T.t};letter-spacing:-.3px">no-agents</span></div>
@@ -826,7 +826,7 @@ function Home({go}){
 function Sell(){
   const[step,setStep]=useState(1);
   const[paying,setPaying]=useState(false);
-  const[form,setForm]=useState({address:'',addrState:'',type:'Apartment',beds:2,baths:1,cars:1,floor:'',description:'',price:'',deadline:'',tenanted:'no',inspection:'agent',tenantName:'',tenantEmail:'',tenantPhone:'',tenantAddress:'',availableDays:[],availableTimes:[],sellerName:'',sellerEmail:'',sellerPhone:'',listingStartDate:'',tier:'flat',cardSaveConsent:false});
+  const[form,setForm]=useState({address:'',addrState:'',type:'Apartment',beds:2,baths:1,cars:1,floor:'',description:'',price:'',deadline:'',tenanted:'no',inspection:'agent',tenantName:'',tenantEmail:'',tenantPhone:'',tenantAddress:'',availableDays:[],availableTimes:[],sellerName:'',sellerEmail:'',sellerPhone:'',listingStartDate:'',tier:'flat',cardSaveConsent:false,referralCode:localStorage.getItem('na_referral_code')||''});
   const up=(k,v)=>setForm(f=>({...f,[k]:v}));
   const[errors,setErrors]=useState({});
   const[eoiSent,setEoiSent]=useState(false);
@@ -1927,6 +1927,62 @@ function Agents({go}){
     </section>
   </div>`;}
 
+function Refer(){
+  const[form,setForm]=useState({name:'',email:'',phone:''});
+  const[result,setResult]=useState(null);
+  const[submitting,setSubmitting]=useState(false);
+  const[submitErr,setSubmitErr]=useState('');
+  const[copied,setCopied]=useState(false);
+  const up=(k,v)=>setForm(f=>({...f,[k]:v}));
+
+  const submit=async()=>{
+    if(!form.name||!form.email||!form.phone)return;
+    setSubmitting(true);setSubmitErr('');
+    try{
+      const r=await fetch('/api/referrals',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(form)});
+      const d=await r.json();
+      if(r.ok)setResult(d);else setSubmitErr(d.error||'Something went wrong. Try again or email office@no-agents.com.au');
+    }catch(e){setSubmitErr('Connection error. Try again.');}
+    setSubmitting(false);
+  };
+
+  const copyLink=()=>{
+    navigator.clipboard?.writeText(result.link);
+    setCopied(true);setTimeout(()=>setCopied(false),2000);
+  };
+
+  return html`<div>
+    <section style="background:${T.k};padding:80px 32px 72px;text-align:center" class="mp">
+      <div style="max-width:640px;margin:0 auto">
+        <div style="${P('w')};margin-bottom:20px;display:inline-flex;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600">Refer & earn</div>
+        <h1 class="sf mh1" style="font-size:50px;font-weight:600;color:#fff;letter-spacing:-1px;line-height:1.15;margin-bottom:16px">Know someone selling? Get $100.</h1>
+        <p style="font-size:17px;color:rgba(255,255,255,.6);line-height:1.75;margin-bottom:8px;max-width:480px;margin-left:auto;margin-right:auto">Get your link, share it anywhere — Facebook, text, email. When someone you referred pays to list their property, you get <strong style="color:#fff">$100</strong>. No limit on how many people you refer.</p>
+      </div>
+    </section>
+
+    <section style="padding:64px 32px" class="mp">
+      <div style="max-width:480px;margin:0 auto">
+        ${!result?html`<div style="${CD}">
+          <h3 class="sf" style="font-size:22px;font-weight:600;margin-bottom:8px">Get your referral link</h3>
+          <p style="font-size:14px;color:${T.tm};line-height:1.6;margin-bottom:20px">Takes 30 seconds. We'll pay you directly once your referral's listing is paid for.</p>
+          ${[['Full name','name','text','Jane Smith'],['Email','email','email','jane@example.com'],['Mobile','phone','tel','04XX XXX XXX (for payment)']].map(([l,k,t,ph])=>html`<div style="margin-bottom:14px"><label style="${LB}">${l}</label><input style="${IS}" type=${t} value=${form[k]} onInput=${e=>up(k,e.target.value)} placeholder=${ph}/></div>`)}
+          ${submitErr&&html`<div style="font-size:12px;color:${T.r};margin-bottom:10px">${submitErr}</div>`}
+          <button style="${B('p','l')};width:100%;opacity:${form.name&&form.email&&form.phone&&!submitting?1:.5}" onclick=${submit} disabled=${submitting||!(form.name&&form.email&&form.phone)}>${submitting?'Creating your link…':'Get my link →'}</button>
+        </div>`:html`<div style="${CD};text-align:center">
+          <div style="font-size:40px;margin-bottom:12px">🎉</div>
+          <h3 class="sf" style="font-size:22px;font-weight:600;margin-bottom:8px">You're set, ${form.name.split(' ')[0]}</h3>
+          <p style="font-size:14px;color:${T.tm};line-height:1.6;margin-bottom:20px">Share this link. You'll get $100 for every person who pays to list using it.</p>
+          <div style="background:${T.bg};border:1px solid ${T.bd};border-radius:10px;padding:14px 16px;font-size:14px;font-weight:500;word-break:break-all;margin-bottom:14px">${result.link}</div>
+          <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+            <button style="${B('p','m')}" onclick=${copyLink}>${copied?'✓ Copied':'Copy link'}</button>
+            <a href=${`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(result.link)}`} target="_blank" rel="noopener" style="${B('o','m')};text-decoration:none">Share on Facebook</a>
+          </div>
+          <div style="font-size:12px;color:${T.tu};margin-top:20px">Your code: <strong style="color:${T.t}">${result.code}</strong> — we'll pay you at ${form.email} once a referral pays.</div>
+        </div>`}
+      </div>
+    </section>
+  </div>`;}
+
 function Admin(){
   const[authed,setAuthed]=useState(false);
   const[pw,setPw]=useState('');
@@ -2559,7 +2615,7 @@ function ContractSign(){
 }
 
 // ── SEO routes: real URLs per view ─────────────────────────────
-const ROUTES={home:'/',sell:'/sell',buy:'/buy',fractional:'/fractional',dash:'/my-listing',agents:'/for-agents',legal:'/legal'};
+const ROUTES={home:'/',sell:'/sell',buy:'/buy',fractional:'/fractional',dash:'/my-listing',agents:'/for-agents',refer:'/refer',legal:'/legal'};
 const ROUTE_META={
   home:{t:'no-agents — Sell your property. Keep the commission.',d:'Sell your home in Brisbane for a $798 flat fee — Domain.com.au listing, photography and 3D tour included. No commission, ever.'},
   sell:{t:'List your property for $798 flat — no commission | no-agents',d:'List your Brisbane property in about 10 minutes. $798 covers Domain.com.au publication, professional photography and a 3D virtual tour. No commission.'},
@@ -2567,6 +2623,7 @@ const ROUTE_META={
   fractional:{t:'Fractional property ownership — own a Slice | no-agents',d:'Register interest in No Agents Fractional: buy Slices in residential property, earn monthly income and capital growth. Expression of interest now open.'},
   dash:{t:'My listing — seller dashboard | no-agents',d:'Manage your no-agents listing: enquiries, inspection bookings and live offers in one dashboard.'},
   agents:{t:'Earn $70 per inspection — for licensed QLD agents | no-agents',d:'Licensed Queensland agents: pick up buyer inspections around Brisbane at $70 per confirmed inspection, paid weekly. Join the panel in 2 minutes.'},
+  refer:{t:'Refer a friend, earn $100 | no-agents',d:'Know someone selling their property? Share your referral link and earn $100 once they pay to list with no-agents.'},
   legal:{t:'Legal | no-agents',d:'Privacy policy, terms of service and complaints handling for No Agents Pty Ltd.'}
 };
 const pathToView=p=>{const clean=(p||'/').replace(/\/+$/,'')||'/';for(const[v,r]of Object.entries(ROUTES))if(r===clean)return v;return null;};
@@ -2605,6 +2662,14 @@ function App(){
     return()=>window.removeEventListener('popstate',onPop);
   },[]);
 
+  // Referral attribution: capture ?ref=CODE from any page (not just /sell —
+  // people share the homepage or suburb pages too), persist so it survives
+  // browsing before the seller actually pays. Last click wins.
+  useEffect(()=>{
+    const ref=new URLSearchParams(window.location.search).get('ref');
+    if(ref)localStorage.setItem('na_referral_code',ref.trim().toUpperCase());
+  },[]);
+
   useEffect(()=>{
     if(view!=='checkout-redirect')return;
     let cancelled=false;
@@ -2636,6 +2701,7 @@ function App(){
       ${view==='fractional'&&html`<${Fractional} go=${go}/>`}
       ${view==='dash'&&html`<${Dash} go=${go}/>`}
       ${view==='agents'&&html`<${Agents} go=${go}/>`}
+      ${view==='refer'&&html`<${Refer}/>`}
       ${view==='legal'&&html`<${Legal} page=${legalPage}/>`}
       ${view==='admin'&&html`<${Admin}/>`}
       ${view==='checkout-redirect'&&html`<div style="max-width:480px;margin:0 auto;padding:140px 32px;text-align:center" class="mp"><div style="font-size:14px;color:${T.tm}">Setting up your seller dashboard…</div></div>`}
