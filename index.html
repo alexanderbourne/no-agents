@@ -1919,6 +1919,8 @@ function Agents({go}){
   </div>`;}
 
 function Vendors({go}){
+  const[sellerToken]=useState(()=>localStorage.getItem('na_seller_token')||'');
+  const[sellerListing]=useState(()=>localStorage.getItem('na_seller_listing')||'');
   const[cat,setCat]=useState('inspection');
   const[dir,setDir]=useState([]);
   const[loadingDir,setLoadingDir]=useState(true);
@@ -1929,8 +1931,9 @@ function Vendors({go}){
   const up=(k,v)=>setForm(f=>({...f,[k]:v}));
 
   useEffect(()=>{
-    fetch('/api/vendors').then(r=>r.ok?r.json():[]).then(d=>setDir(Array.isArray(d)?d:[])).catch(()=>{}).finally(()=>setLoadingDir(false));
-  },[]);
+    if(!sellerToken||!sellerListing){setLoadingDir(false);return;}
+    fetch(`/api/vendors?listingId=${encodeURIComponent(sellerListing)}&token=${encodeURIComponent(sellerToken)}`).then(r=>r.ok?r.json():[]).then(d=>setDir(Array.isArray(d)?d:[])).catch(()=>{}).finally(()=>setLoadingDir(false));
+  },[sellerToken,sellerListing]);
 
   const submitApp=async()=>{
     if(!form.businessName||!form.contactName||!form.email||!form.phone)return;
@@ -1957,22 +1960,29 @@ function Vendors({go}){
 
     <section style="padding:64px 32px" class="mp">
       <div style="max-width:900px;margin:0 auto">
-        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:32px">
-          ${Object.entries(catLabel).map(([k,l])=>html`<button onclick=${()=>setCat(k)} style="padding:10px 20px;border-radius:8px;border:1px solid ${T.bd};cursor:pointer;font-size:14px;font-weight:500;background:${cat===k?T.k:'#fff'};color:${cat===k?'#fff':T.tm};font-family:Inter,sans-serif">${l}</button>`)}
-        </div>
-        ${loadingDir?html`<div style="text-align:center;color:${T.tu};font-size:14px">Loading…</div>`:
-          !listed.length?html`<div style="${CD};text-align:center;padding:40px;color:${T.tm}">No ${catLabel[cat].toLowerCase()} vendors listed yet. Check back soon, or be the first to apply below.</div>`:
-          html`<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px" class="g1">
-            ${listed.map(v=>html`<div style="${CD}">
-              <div class="card-name sf" style="font-size:17px;font-weight:600;margin-bottom:4px">${v.businessName}</div>
-              ${v.serviceArea&&html`<div style="font-size:13px;color:${T.tu};margin-bottom:10px">${v.serviceArea}</div>`}
-              <div style="font-size:14px;color:${T.tm};margin-bottom:2px">${v.contactName}</div>
-              <div style="font-size:14px;color:${T.tm};margin-bottom:2px"><a href="mailto:${v.email}" style="color:inherit">${v.email}</a></div>
-              <div style="font-size:14px;color:${T.tm}">${v.phone}</div>
-              ${v.portfolioUrl&&html`<a href=${v.portfolioUrl} target="_blank" rel="noopener" style="font-size:13px;color:${T.a};display:inline-block;margin-top:8px">View portfolio →</a>`}
-              ${v.message&&html`<div style="font-size:13px;color:${T.tm};margin-top:10px;font-style:italic">"${v.message}"</div>`}
-            </div>`)}
-          </div>`}
+        ${!sellerToken||!sellerListing?html`<div style="${CD};text-align:center;padding:48px 32px">
+          <div style="font-size:32px;margin-bottom:12px">🔒</div>
+          <h3 class="sf" style="font-size:20px;font-weight:600;margin-bottom:8px">Sign in to browse the directory</h3>
+          <p style="font-size:14px;color:${T.tm};line-height:1.6;margin-bottom:20px;max-width:420px;margin-left:auto;margin-right:auto">Vendor contact details are visible to signed-in sellers. Sign in to your seller dashboard to browse building & pest inspectors and stylists.</p>
+          <button style="${B('p','m')}" onclick=${()=>go('dash')}>Sign in to my listing →</button>
+        </div>`:html`<div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-bottom:32px">
+            ${Object.entries(catLabel).map(([k,l])=>html`<button onclick=${()=>setCat(k)} style="padding:10px 20px;border-radius:8px;border:1px solid ${T.bd};cursor:pointer;font-size:14px;font-weight:500;background:${cat===k?T.k:'#fff'};color:${cat===k?'#fff':T.tm};font-family:Inter,sans-serif">${l}</button>`)}
+          </div>
+          ${loadingDir?html`<div style="text-align:center;color:${T.tu};font-size:14px">Loading…</div>`:
+            !listed.length?html`<div style="${CD};text-align:center;padding:40px;color:${T.tm}">No ${catLabel[cat].toLowerCase()} vendors listed yet. Check back soon, or be the first to apply below.</div>`:
+            html`<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px" class="g1">
+              ${listed.map(v=>html`<div style="${CD}">
+                <div class="card-name sf" style="font-size:17px;font-weight:600;margin-bottom:4px">${v.businessName}</div>
+                ${v.serviceArea&&html`<div style="font-size:13px;color:${T.tu};margin-bottom:10px">${v.serviceArea}</div>`}
+                <div style="font-size:14px;color:${T.tm};margin-bottom:2px">${v.contactName}</div>
+                <div style="font-size:14px;color:${T.tm};margin-bottom:2px"><a href="mailto:${v.email}" style="color:inherit">${v.email}</a></div>
+                <div style="font-size:14px;color:${T.tm}">${v.phone}</div>
+                ${v.portfolioUrl&&html`<a href=${v.portfolioUrl} target="_blank" rel="noopener" style="font-size:13px;color:${T.a};display:inline-block;margin-top:8px">View portfolio →</a>`}
+                ${v.message&&html`<div style="font-size:13px;color:${T.tm};margin-top:10px;font-style:italic">"${v.message}"</div>`}
+              </div>`)}
+            </div>`}
+        </div>`}
       </div>
     </section>
 

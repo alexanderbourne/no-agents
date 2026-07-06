@@ -9,6 +9,10 @@
 //
 // Public:
 //   POST /api/vendors                — self-serve signup (status starts 'pending')
+//
+// Signed-in sellers only (?listingId=xxx&token=<seller token>, or
+// x-seller-token header) — kept behind seller auth so an unauthenticated
+// visitor (or a bare curl) can't see whether the directory is empty:
 //   GET  /api/vendors                — directory: approved vendors only
 //
 // Admin (requires x-admin-token header):
@@ -21,8 +25,24 @@
 //   ADMIN_PASSWORD                       — verified via admin-auth.js
 
 import { verifyAdminToken } from './admin-auth.js';
+import { verifySellerToken } from './seller-auth.js';
 
 const CATEGORIES = ['inspection', 'styling'];
+
+// Tolerant parse: handles an already-deserialized value (object/array), a
+// JSON-encoded string, or a legacy double-wrapped `{ value: "<json>" }` shape
+// from a since-fixed write-path bug (see api/seller-portal.js).
+function safeParseListing(raw) {
+  if (raw === null || raw === undefined) return null;
+  let v = raw;
+  for (let i = 0; i < 2 && typeof v === 'string'; i++) {
+    try { v = JSON.parse(v); } catch { return null; }
+  }
+  if (v && typeof v === 'object' && !Array.isArray(v) && typeof v.value === 'string') {
+    try { v = JSON.parse(v.value); } catch {}
+  }
+  return v;
+}
 
 // ── KV helpers ───────────────────────────────────────────────────────────────
 
@@ -153,6 +173,19 @@ export default async function handler(req, res) {
       if (!verifyAdminToken(adminToken)) return res.status(401).json({ error: 'Unauthorized' });
       const vendors = await getAllVendors();
       return res.status(200).json(vendors);
+    }
+
+    // Directory browsing requires a signed-in seller — same token+listingId
+    // check as api/seller-portal.js — so an unauthenticated request (or a
+    // bare curl) can't see whether the directory is empty.
+    const { listingId } = req.query;
+    const sellerToken = req.headers['x-seller-token'] || req.query.token;
+    if (!listingId || !sellerToken) {
+      return res.status(401).json({ error: 'Sign in to view the vendor directory' });
+    }
+    const listing = safeParseListing(await kvGet(`listing:${listingId}`));
+    if (!listing || !listing.sellerPhone || !verifySellerToken(sellerToken, listing.sellerPhone)) {
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
     const vendors = (await getAllVendors()).filter(v => v.status === 'approved');
