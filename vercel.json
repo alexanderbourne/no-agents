@@ -20,7 +20,6 @@
     { "source": "/portal", "destination": "/portal.html" },
     { "source": "/my-listing", "destination": "/" },
     { "source": "/legal", "destination": "/" },
-    { "source": "/vendors", "destination": "/" },
     { "source": "/qld-suburbs", "destination": "/api/suburb-page" },
     { "source": "/sell-your-house/:slug", "destination": "/api/suburb-page?slug=:slug" },
     { "source": "/offer/:path*", "destination": "/" },

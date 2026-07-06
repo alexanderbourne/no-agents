@@ -188,11 +188,18 @@ export default async function handler(req, res) {
       await kvSet(`offers:${listingId}`, offers);
 
       listing.status = 'agreed';
+      // A seller who nominated their own conveyancer means the buyer still
+      // needs one of their own — the two parties can't share a conveyancer —
+      // so we offer our default partner to the buyer instead. See
+      // api/contract.js (action=request-conveyancer) and api/conveyancing-handoff.js.
+      const offerConveyancerToBuyer = Boolean(listing.conveyancer?.email);
       listing.contract = {
         offerId: offer.id,
         buyerName: offer.buyer,
         buyerEmail: offer.buyerEmail || '',
         buyerPhone: offer.buyerPhone || '',
+        offerConveyancerToBuyer,
+        buyerConveyancerRequested: false,
         amount: offer.amount,
         settlement: offer.settlement,
         finance: offer.finance,

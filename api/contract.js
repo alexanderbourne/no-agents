@@ -7,7 +7,7 @@
 //
 // Required env vars: KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY (optional)
 
-import { notifyConveyancer, effectiveConveyancer } from './conveyancing-handoff.js';
+import { notifyConveyancer, effectiveConveyancer, getDefaultConveyancer } from './conveyancing-handoff.js';
 import { notifySeller } from './notify-seller.js';
 
 const { KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY } = process.env;
@@ -110,9 +110,53 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     return res.status(200).json({
       address: listing.address,
+      suburb: listing.suburb,
       sellerName: listing.sellerName,
       contract: listing.contract,
     });
+  }
+
+  // Buyer opts in to an introduction to our default conveyancing partner —
+  // only offered when the seller nominated their own (see api/seller-portal.js,
+  // action=accept-offer), since the two parties can't share a conveyancer.
+  if (req.method === 'POST' && req.query.action === 'request-conveyancer') {
+    if (!listing.contract.offerConveyancerToBuyer) {
+      return res.status(400).json({ error: 'No introduction is available for this contract.' });
+    }
+    if (listing.contract.buyerConveyancerRequested) {
+      return res.status(200).json({ ok: true, alreadyRequested: true });
+    }
+
+    const partner = getDefaultConveyancer();
+    if (!partner?.email) {
+      return res.status(503).json({ error: 'No conveyancing partner is configured right now — please arrange your own.' });
+    }
+
+    let sent = false;
+    if (RESEND_API_KEY) {
+      try {
+        const res2 = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: 'No Agents <office@no-agents.com.au>',
+            to: [partner.email],
+            subject: `Buyer introduction requested — ${listing.address}`,
+            html: `<div style="font-family:sans-serif;max-width:500px;">
+              <h2>Buyer introduction requested</h2>
+              <p>The buyer on <strong>${listing.address}, ${listing.suburb || ''}</strong> does not have a conveyancer yet (the seller is using their own) and has requested an introduction to you via no-agents.com.au.</p>
+              <p><strong>Buyer:</strong> ${listing.contract.buyerName || '—'} · ${listing.contract.buyerEmail || '—'} · ${listing.contract.buyerPhone || '—'}</p>
+              <p style="font-size:12px;color:#999;">Reply directly to the buyer to proceed.</p>
+            </div>`,
+          }),
+        });
+        sent = res2.ok;
+      } catch (e) { console.error('request-conveyancer notify error:', e.message); }
+    }
+
+    listing.contract.buyerConveyancerRequested = true;
+    await kvSet(`listing:${listingId}`, listing);
+    return res.status(200).json({ ok: true, sent });
   }
 
   if (req.method === 'POST' && req.query.action === 'sign') {

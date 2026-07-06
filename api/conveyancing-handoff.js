@@ -17,6 +17,20 @@
 
 const { RESEND_API_KEY, DEFAULT_CONVEYANCER_EMAIL, DEFAULT_CONVEYANCER_NAME, DEFAULT_CONVEYANCER_PHONE } = process.env;
 
+// The default partner, regardless of what the seller nominated — used when
+// offering the default to the BUYER (see api/contract.js, action=request-conveyancer)
+// because a seller who nominated their own conveyancer means the buyer still
+// needs one of their own; the two parties can't share a conveyancer.
+export function getDefaultConveyancer() {
+  if (!DEFAULT_CONVEYANCER_EMAIL) return null;
+  return {
+    name: DEFAULT_CONVEYANCER_NAME || null,
+    email: DEFAULT_CONVEYANCER_EMAIL,
+    phone: DEFAULT_CONVEYANCER_PHONE || null,
+    isDefault: true,
+  };
+}
+
 // Resolves which conveyancer actually handles this case: the seller's own
 // nomination takes priority; otherwise falls back to the default partner
 // (isDefault:true) if one is configured via env vars; otherwise null.
@@ -24,15 +38,7 @@ export function effectiveConveyancer(listing) {
   if (listing.conveyancer?.email) {
     return { ...listing.conveyancer, isDefault: false };
   }
-  if (DEFAULT_CONVEYANCER_EMAIL) {
-    return {
-      name: DEFAULT_CONVEYANCER_NAME || null,
-      email: DEFAULT_CONVEYANCER_EMAIL,
-      phone: DEFAULT_CONVEYANCER_PHONE || null,
-      isDefault: true,
-    };
-  }
-  return null;
+  return getDefaultConveyancer();
 }
 
 export async function notifyConveyancer(listing) {
