@@ -19,7 +19,8 @@
       "mcp__c57879c6-285d-4739-b6f7-bcfbf0004314__get_project",
       "mcp__c57879c6-285d-4739-b6f7-bcfbf0004314__list_teams",
       "Bash(node -e ' *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(npm install *)"
     ]
   }
 }

@@ -143,7 +143,7 @@ ${NAV}
 <section class="alt"><div class="wrap">
 <h2 class="sf">Common questions — selling in ${esc(s.name)}</h2>
 <div class="faq"><h3>How much does it cost?</h3><p>$798 flat, including the Domain.com.au portal fee, photography, floor plans and 3D tour. Optional $99 licensed-agent visits. No commission at any sale price.</p></div>
-<div class="faq"><h3>How much would an agent charge?</h3><p>Around ${PCT}% — roughly ${aud(commission)} on a typical ${esc(s.regionLabel)} home, plus marketing. That money stays with you instead.</p></div>
+<div class="faq"><h3>How much would an agent charge?</h3><p>Around ${PCT}% — roughly ${aud(commission)} on a typical home in ${esc(s.regionLabel)}, plus marketing. That money stays with you instead.</p></div>
 <div class="faq"><h3>Is it legal to sell this way?</h3><p>Yes. No Agents Pty Ltd is a licensed Queensland agency (licence 4542501). Contracts go through your conveyancer, exactly as with any agent.</p></div>
 <div class="faq"><h3>Who shows buyers through?</h3><p>Your choice: meet buyers yourself for free, or hand over a spare key and a licensed agent opens up, shows through and locks up for $99 a visit.</p></div>
 </div></section>

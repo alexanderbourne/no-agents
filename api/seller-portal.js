@@ -18,6 +18,8 @@ import { randomBytes } from 'crypto';
 import { notifyAdmin } from './notify-admin.js';
 import { notifyConveyancer } from './conveyancing-handoff.js';
 import { notifySeller } from './notify-seller.js';
+import { put } from '@vercel/blob';
+import { renderForm6Pdf } from './form6-pdf.js';
 
 const { KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY } = process.env;
 
@@ -143,21 +145,35 @@ export default async function handler(req, res) {
       const name = (signedByName || listing.sellerName || '').trim();
       if (!name) return res.status(400).json({ error: 'signedByName required' });
       if (!signatureImage) return res.status(400).json({ error: 'signatureImage required' });
+      const signedAt = new Date().toISOString();
       listing.documents = listing.documents || {
         contractOfSale: { status: 'pending', fileUrl: null, providedAt: null },
         form6: { status: 'pending', fileUrl: null, signedAt: null, signedByName: null },
       };
-      listing.documents.form6 = {
-        status: 'signed',
-        fileUrl: listing.documents.form6?.fileUrl || null,
-        signedAt: new Date().toISOString(),
-        signedByName: name,
-        signatureImage,
-      };
+
+      // Generate a durable, downloadable PDF of the signed agreement — the
+      // DB row alone (status/name/timestamp) isn't sufficient for a legal
+      // record. Storage failure must not block the signature itself; the
+      // signed metadata is always saved even if the PDF can't be produced.
+      let fileUrl = listing.documents.form6?.fileUrl || null;
+      try {
+        const pdfBytes = await renderForm6Pdf({ listing, signedByName: name, signedAt, signatureImage });
+        const blob = await put(`form6/${listingId}-${Date.now()}.pdf`, Buffer.from(pdfBytes), {
+          access: 'public',
+          contentType: 'application/pdf',
+          addRandomSuffix: true,
+        });
+        fileUrl = blob.url;
+      } catch (e) {
+        console.error('[seller-portal] Form 6 PDF generation/upload failed:', e.message);
+      }
+
+      listing.documents.form6 = { status: 'signed', fileUrl, signedAt, signedByName: name, signatureImage };
       await kvSet(`listing:${listingId}`, listing);
       await notifyAdmin({
         subject: `Form 6 signed — ${listing.address}`,
-        html: `<p>${name} signed the Form 6 (agency agreement) for <strong>${listing.address}, ${listing.suburb}</strong>.</p>`,
+        html: `<p>${name} signed the Form 6 (agency agreement) for <strong>${listing.address}, ${listing.suburb}</strong>.</p>${fileUrl ? `<p><a href="${fileUrl}">Download signed Form 6</a></p>` : '<p style="color:#b00">PDF generation/storage failed — only the signature metadata was saved. Check function logs.</p>'}`,
+        isError: !fileUrl,
       });
       return res.status(200).json({ ok: true, form6: listing.documents.form6 });
     }
