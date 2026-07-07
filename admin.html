@@ -120,6 +120,7 @@ select.status-sel{padding:6px 12px;border:1px solid #ddd;border-radius:8px;font-
     <div class="tab" data-tab="inspections">Inspections <span class="count" id="cnt-inspections">0</span></div>
     <div class="tab" data-tab="referrals">Referrals <span class="count" id="cnt-referrals">0</span></div>
     <div class="tab" data-tab="mortgage">Mortgage <span class="count" id="cnt-mortgage">0</span></div>
+    <div class="tab" data-tab="seo">SEO</div>
     <div class="tab" data-tab="leads">Leads <span class="count" id="cnt-leads">0</span></div>
     <div class="tab" data-tab="listings">Listings <span class="count" id="cnt-listings">0</span></div>
   </div>
@@ -132,7 +133,7 @@ select.status-sel{padding:6px 12px;border:1px solid #ddd;border-radius:8px;font-
 <script>
 const token = () => localStorage.getItem('na_token') || '';
 let currentTab = 'agents';
-let data = { agents: [], inspections: [], referrals: [], credits: [], mortgageReferrals: [], leads: [], listings: [] };
+let data = { agents: [], inspections: [], referrals: [], credits: [], mortgageReferrals: [], leads: [], listings: [], seoReport: null };
 
 if (token()) init();
 
@@ -203,7 +204,7 @@ document.getElementById('tabs').addEventListener('click', e => {
 });
 
 function renderTab() {
-  const fns = { agents: renderAgents, inspections: renderInspections, referrals: renderReferrals, mortgage: renderMortgage, leads: renderLeads, listings: renderListings };
+  const fns = { agents: renderAgents, inspections: renderInspections, referrals: renderReferrals, mortgage: renderMortgage, seo: renderSeo, leads: renderLeads, listings: renderListings };
   fns[currentTab]();
 }
 
@@ -364,6 +365,64 @@ function renderMortgage() {
       </div>
     </div>
   `).join('');
+}
+
+// ── SEO (Search Console + GA4) ──
+// Lazy-loaded on first view — hits real Google APIs via a dedicated service
+// account (see api/seo-report.js), not fetched on every admin page load.
+
+async function renderSeo() {
+  document.getElementById('stats-bar').innerHTML = '';
+  if (!data.seoReport) {
+    document.getElementById('content').innerHTML = '<div class="empty">Loading Search Console + GA4 data…</div>';
+    try {
+      data.seoReport = await apiFetch('/api/seo-report');
+    } catch (e) {
+      document.getElementById('content').innerHTML = `<div class="empty">Failed to load: ${esc(e.message || 'unknown error')}</div>`;
+      return;
+    }
+  }
+  renderSeoContent();
+}
+
+function renderSeoContent() {
+  const r = data.seoReport;
+  if (!r) { document.getElementById('content').innerHTML = '<div class="empty">No data.</div>'; return; }
+
+  const gsc = r.searchConsole || {};
+  const ga4 = r.ga4 || {};
+  const gscError = gsc.error;
+  const ga4Error = ga4.error;
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="n">${gsc.totals?.clicks ?? '—'}</div><div class="l">GSC clicks (28d)</div></div>
+      <div class="stat"><div class="n">${gsc.totals?.impressions ?? '—'}</div><div class="l">Impressions (28d)</div></div>
+      <div class="stat"><div class="n">${ga4.totals?.sessions ?? '—'}</div><div class="l">GA4 sessions (28d)</div></div>
+      <div class="stat"><div class="n">${ga4.totals?.activeUsers ?? '—'}</div><div class="l">GA4 users (28d)</div></div>
+    </div>`;
+
+  const queriesHtml = (gsc.topQueries || []).length
+    ? `<h3 style="margin:16px 0 8px">Top queries</h3>` + gsc.topQueries.map(q => `
+        <div class="card" style="margin-bottom:6px;padding:12px 16px">
+          <div class="card-top"><div class="card-name" style="font-size:14px">${esc(q.query)}</div><div style="font-size:13px;color:#666">${q.clicks} clicks · ${q.impressions} impr. · pos ${Number(q.position).toFixed(1)}</div></div>
+        </div>`).join('')
+    : '';
+
+  const sitemapsHtml = (gsc.sitemaps || []).length
+    ? `<h3 style="margin:16px 0 8px">Sitemaps</h3>` + gsc.sitemaps.map(s => `
+        <div class="card" style="margin-bottom:6px;padding:12px 16px">
+          <div class="card-top"><div class="card-name" style="font-size:14px">${esc(s.path)}</div><span class="badge badge-${s.errors ? 'suspended' : 'approved'}">${s.errors ? s.errors + ' errors' : 'ok'}</span></div>
+        </div>`).join('')
+    : '';
+
+  document.getElementById('content').innerHTML = `
+    ${gscError ? `<div class="empty">Search Console error: ${esc(gscError)}</div>` : ''}
+    ${ga4Error ? `<div class="empty">GA4 error: ${esc(ga4Error)}</div>` : ''}
+    ${queriesHtml}
+    ${sitemapsHtml}
+    ${!queriesHtml && !sitemapsHtml && !gscError ? '<div class="empty">No query data yet — site is likely still too new for Search Console to report on.</div>' : ''}
+  `;
 }
 
 // ── Inspections ──
