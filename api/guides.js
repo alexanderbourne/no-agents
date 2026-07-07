@@ -334,6 +334,270 @@ const GUIDES = [
 <div class="callout">Start the tenant conversation before your listing goes live, not after the first inspection request comes in — it gives everyone more room to work with scheduling.</div>
 `,
   },
+  {
+    slug: 'conveyancing-costs-queensland',
+    title: 'Conveyancing Costs in Queensland: What You Pay and What You Get',
+    desc: 'What conveyancing actually costs in Queensland, what the fee covers, and why every property sale — with or without an agent — runs through a conveyancer.',
+    published: '2026-07-07',
+    summary: 'The one professional every QLD sale needs, what they do, and the realistic cost ranges.',
+    body: `
+<p>Whether you sell through a traditional agent or a flat-fee platform, one professional is non-negotiable in a Queensland property sale: the conveyancer (or property solicitor). They handle the legal transfer of ownership — and their fee is one of the few genuinely unavoidable costs of a sale.</p>
+
+<h2>What a conveyancer actually does</h2>
+<p>For a seller, the conveyancer prepares the Contract of Sale, manages the disclosure documents the law requires, coordinates with the buyer's side through the conditional period (finance, building and pest), handles the discharge of your mortgage with your lender, and attends settlement — the moment ownership and money legally change hands. For a buyer, they review the contract, order title and property searches, and make sure what you're buying is what's actually on the title.</p>
+
+<h2>What it typically costs</h2>
+<p>Queensland conveyancing is usually quoted as a fixed professional fee plus disbursements — the third-party search and registration costs paid on your behalf. Professional fees commonly sit in the several-hundred-to-low-four-figure range, and disbursements add a few hundred dollars more depending on how many searches your transaction needs. Always ask for a fixed-fee quote that itemises disbursements separately, so there are no surprises at settlement.</p>
+
+<h2>Solicitor vs conveyancer in Queensland</h2>
+<p>In Queensland, conveyancing work is carried out by law firms — so your "conveyancer" is typically a solicitor or a conveyancing clerk working under one. This differs from some other states where standalone licensed conveyancers operate independently. Practically, it means QLD sellers get legal oversight built into the process by default.</p>
+
+<h2>Why selling without an agent doesn't change any of this</h2>
+<p>An agent never does the conveyancing — even in a full-commission sale, the contract and settlement always run through your conveyancer. Selling with a flat-fee platform uses exactly the same legal machinery: you save the commission, not the conveyancing. Budget for it in every scenario.</p>
+
+<div class="callout">Engage your conveyancer before you list, not after you accept an offer — having the contract framework ready means an accepted offer can move to a signed contract in days rather than weeks.</div>
+`,
+  },
+  {
+    slug: 'stamp-duty-transfer-duty-queensland-explained',
+    title: 'Stamp Duty (Transfer Duty) in Queensland Explained',
+    desc: 'How Queensland transfer duty works when buying property, who pays it, when it is paid, and where concessions for home buyers and first home buyers fit in.',
+    published: '2026-07-07',
+    summary: 'Who pays it, how it scales with price, and the concessions that can dramatically reduce it.',
+    body: `
+<p>Transfer duty — still universally called stamp duty — is usually the single biggest transaction cost in a Queensland property purchase, often dwarfing every other fee combined. Here's how it works in plain English.</p>
+
+<h2>Who pays, and when</h2>
+<p>The buyer pays transfer duty, not the seller. It's assessed on the contract and must be paid before the transfer can be registered — in practice your conveyancer arranges payment as part of the settlement process, and you'll need the funds available on top of your deposit and purchase price.</p>
+
+<h2>How the amount is calculated</h2>
+<p>Duty is calculated on a sliding scale: the higher the purchase price, the higher the rate applied to each band of value. On a typical Brisbane house it commonly runs to tens of thousands of dollars at the standard rate — which is why the concessions matter so much.</p>
+
+<h2>The home concession</h2>
+<p>If you're buying a home you'll actually live in (rather than an investment), Queensland applies a concessional rate that can cut the bill substantially compared with the investor rate. There are occupancy requirements — move in within a set period and live there for a minimum time — and breaching them can claw the concession back.</p>
+
+<h2>First home buyer concessions</h2>
+<p>First home buyers get further relief again, potentially paying no duty at all below certain price thresholds, with the concession phasing out above them. The thresholds and rules have changed several times in recent years — check the Queensland Revenue Office's current figures before you budget, because outdated numbers circulate constantly online.</p>
+
+<h2>What sellers should know</h2>
+<p>Even though sellers don't pay duty, it shapes your buyer pool: price points just under a concession threshold attract noticeably more first-home-buyer demand. If your property sits near one, that's worth knowing when you set your price guide.</p>
+
+<div class="callout">This is general information, not financial or legal advice — duty rates, thresholds and concessions change. Confirm current figures with the Queensland Revenue Office or your conveyancer before committing.</div>
+`,
+  },
+  {
+    slug: 'what-does-a-buyers-agent-do',
+    title: "What Does a Buyer's Agent Do — and Do You Actually Need One?",
+    desc: "What buyer's agents charge, what they actually deliver in a Queensland purchase, and when paying one makes sense versus doing it yourself.",
+    published: '2026-07-07',
+    summary: "The buyer-side equivalent of a selling agent: what they cost, and when they're worth it.",
+    body: `
+<p>A buyer's agent is the mirror image of a selling agent: a licensed professional who works exclusively for the purchaser — searching, appraising, negotiating and bidding on their behalf. They've grown rapidly in Australia as buyers look for an edge in competitive markets.</p>
+
+<h2>What they actually do</h2>
+<p>A full-service buyer's agent takes your brief, shortlists properties (including some sold off-market), inspects on your behalf, prepares price appraisals so you don't overpay, negotiates directly with the selling agent or seller, and bids for you at auction. A cheaper "negotiation only" engagement skips the search and just handles the deal on a property you've already found.</p>
+
+<h2>What they cost</h2>
+<p>Fees are typically either a fixed amount or a percentage of the purchase price — commonly in the one-to-three per cent range for full service. On a million-dollar purchase that's a five-figure fee, which is why the value question matters: they need to save you more than they cost, in price or in avoided mistakes.</p>
+
+<h2>When one makes sense</h2>
+<p>Buyer's agents earn their fee most clearly for interstate or overseas buyers who can't inspect personally, time-poor professionals, and buyers targeting tightly-held areas where off-market access matters. For a local buyer with time to research, much of what they provide — sales data, inspection legwork, pricing discipline — is achievable yourself.</p>
+
+<h2>How transparent offer processes change the equation</h2>
+<p>Part of a buyer's agent's traditional value is piercing the information fog of private negotiations — knowing what other offers really exist. On an open offer board, every verified offer is already visible to every buyer, which removes the blind-bidding problem the agent was partly hired to solve. You still might value their appraisal and negotiation experience; you just aren't paying to see through a wall that no longer exists.</p>
+
+<div class="callout">If you do engage one, confirm they hold a real estate licence, work exclusively for buyers (no selling-side kickbacks), and put their fee structure in writing before you sign.</div>
+`,
+  },
+  {
+    slug: 'first-home-buyer-queensland-what-help-exists',
+    title: 'First Home Buyers in Queensland: What Help Actually Exists',
+    desc: 'A plain-English overview of the concessions, grants and guarantee schemes available to Queensland first home buyers, and where to verify the current rules.',
+    published: '2026-07-07',
+    summary: 'Duty concessions, grants and guarantee schemes — what each one does and where they apply.',
+    body: `
+<p>First home buyers in Queensland have several distinct forms of help available, and they're often confused with each other. Here's what each one actually is.</p>
+
+<h2>Transfer duty concessions</h2>
+<p>The biggest saving for most first home buyers is the transfer duty concession — reduced or zero stamp duty below certain price thresholds, phasing out above them. Because this scales with your purchase price, it can be worth tens of thousands of dollars, and it applies to established homes as well as new ones within the rules.</p>
+
+<h2>The First Home Owner Grant</h2>
+<p>The grant is a cash payment for first home buyers building or buying a brand-new home — it has never applied to established properties. The amount and eligibility criteria are set by the Queensland Government and have changed over time, so verify the current figure before you count on it.</p>
+
+<h2>Home guarantee schemes</h2>
+<p>Separately from the state measures, Commonwealth guarantee schemes allow eligible first home buyers to purchase with a small deposit without paying lenders mortgage insurance — the government guarantees part of the loan instead. Places, price caps and eligibility rules are set federally and administered through participating lenders.</p>
+
+<h2>How the pieces stack</h2>
+<p>These measures can often be combined: a duty concession plus a guarantee scheme place, for example. The practical effect is that a first home buyer's real budget can be meaningfully higher than their savings alone suggest — which is also worth understanding as a <em>seller</em>, because entry-level properties priced within concession thresholds see deeper buyer pools.</p>
+
+<h2>Where to verify the current rules</h2>
+<p>Every figure in this space — thresholds, grant amounts, scheme places — changes with budgets and policy cycles. Treat any specific number you read online (including here) as a prompt to check the Queensland Revenue Office and Housing Australia's current published rules, or ask your conveyancer or broker to confirm what applies to you.</p>
+
+<div class="callout">General information only — eligibility rules change and depend on your circumstances. Confirm current thresholds with the QRO and your lender before making offers.</div>
+`,
+  },
+  {
+    slug: 'valuation-vs-appraisal-vs-avm-whats-the-difference',
+    title: "Valuation vs Appraisal vs AVM: What's the Difference?",
+    desc: 'Bank valuations, agent appraisals and automated valuation models all put a number on your property — but they mean very different things. Here is how each works.',
+    published: '2026-07-07',
+    summary: 'Three very different numbers get called "the value of your house" — here is what each one really is.',
+    body: `
+<p>Three different processes all produce "what your property is worth", and confusing them causes real problems — like planning a sale around a number no bank will lend against. Here's the distinction.</p>
+
+<h2>A bank valuation is a formal, liability-backed opinion</h2>
+<p>When a lender orders a valuation, a certified valuer inspects the property and produces a formal report the bank relies on to size its loan. Valuers carry professional liability for the number, which makes bank valuations conservative by design — they're protecting the lender's downside, not cheering your upside. This is the number that decides how much a buyer can actually borrow against your property.</p>
+
+<h2>An agent appraisal is a marketing opinion</h2>
+<p>A real estate agent's appraisal is an informed estimate based on comparable sales — but it's produced by someone hoping to win your listing. Overquoting to flatter a seller into signing an agency agreement, then "conditioning" them down during the campaign, is one of the industry's oldest patterns. Treat any appraisal that lands well above the data as a sales pitch, not a price.</p>
+
+<h2>An AVM is a statistical estimate</h2>
+<p>Automated valuation models — the instant estimates on portals and bank apps — crunch sales data, land size and property attributes to produce a value range in seconds. They're excellent for orientation and trend-tracking, weaker on properties with unusual features the model can't see (a renovation, a view, a flood overlay). Their confidence range matters as much as the midpoint.</p>
+
+<h2>Using all three when you sell</h2>
+<p>The practical approach: start with AVMs from a couple of sources for an unbiased baseline, sanity-check against actual recent sales you can verify, and treat any single much-higher opinion with suspicion. Then let real buyer competition — genuine offers — settle the question. The market's collective bid is the only "valuation" that ends in money.</p>
+
+<div class="callout">If a buyer's bank valuation comes in under your agreed price, their finance clause is usually what saves them — and what puts the deal back on your table. Price realistically and this rarely happens.</div>
+`,
+  },
+  {
+    slug: 'making-an-offer-on-a-house-queensland-conditions-explained',
+    title: 'Making an Offer on a House in Queensland: Conditions Explained',
+    desc: 'What actually goes into a Queensland property offer — price, deposit, settlement period, finance and building & pest conditions — and how conditions change your bargaining position.',
+    published: '2026-07-07',
+    summary: 'Price is only one part of an offer — conditions decide how strong it really is.',
+    body: `
+<p>An offer on a Queensland property is more than a number. Sellers weigh the whole package — price, deposit, settlement timing and conditions — and a slightly lower unconditional offer regularly beats a higher, heavily-conditional one. Here's what each component does.</p>
+
+<h2>Price, deposit and settlement period</h2>
+<p>The deposit signals commitment — larger and earlier is stronger. The settlement period is the time between signed contract and the day money and title change hands; sellers often value a settlement date that matches their plans more than an extra few thousand dollars in price. If you can be flexible on timing, say so in the offer.</p>
+
+<h2>The finance condition</h2>
+<p>"Subject to finance" gives the buyer a set number of days to obtain formal loan approval, with the right to walk away if it falls through. It's the most common condition and a sensible protection — but every extra day of finance condition is uncertainty the seller carries. Buyers with strong pre-approval can shorten it; cash buyers who waive it entirely make their offer dramatically more attractive.</p>
+
+<h2>The building and pest condition</h2>
+<p>This lets the buyer commission a professional inspection and withdraw (or renegotiate) if significant defects surface. Sensible buyers include it; smart sellers pre-empt it by fixing known issues or disclosing upfront, because a mid-contract renegotiation almost always costs more than the repair would have.</p>
+
+<h2>Subject to sale — the weakest common condition</h2>
+<p>An offer conditional on the buyer selling their own property first pushes all the timing risk onto the seller, and is usually the first offer culled from a competitive field. If you must offer subject to sale, expect to pay a premium or accept being treated as a fallback.</p>
+
+<h2>How this plays on an open offer board</h2>
+<p>On a transparent offer board, conditions are visible alongside price — a $820,000 offer with no conditions sits honestly against an $835,000 offer with 21-day finance and B&P, and the seller weighs them openly. Buyers quickly learn that tightening conditions is often cheaper than raising price.</p>
+
+<div class="callout">Never waive building and pest on a property you haven't had inspected just to win — the discount you're chasing can be a fraction of the defect you're buying.</div>
+`,
+  },
+  {
+    slug: 'auction-vs-private-treaty-vs-open-offers-queensland',
+    title: 'Auction vs Private Treaty vs Open Offers: How QLD Sale Methods Compare',
+    desc: 'The three ways Queensland properties get sold — auction, private treaty and transparent offer processes — and what each means for price, cooling-off rights and stress.',
+    published: '2026-07-07',
+    summary: 'Each sale method distributes information and pressure differently — here is the honest comparison.',
+    body: `
+<p>Every Queensland property sells by some process for surfacing what buyers will pay. The three main methods differ mostly in one thing: who can see what, and when.</p>
+
+<h2>Private treaty: the default, with a blind spot</h2>
+<p>Most Queensland homes sell by private treaty — an asking price, private negotiations, offers invisible to competing buyers. Its weakness cuts both ways: buyers can't see rival offers (so they bid against ghosts, or lowball), and sellers can't easily prove competition exists. The information sits with whoever manages the negotiation — traditionally, the agent.</p>
+
+<h2>Auction: transparent, but on one afternoon</h2>
+<p>Auctions solve the transparency problem — every bid is public — but compress it into a single high-pressure event. In Queensland, a buyer at auction generally has no cooling-off period and must bid unconditionally: no finance clause, no building and pest condition, deposit payable on the fall of the hammer. That excludes plenty of genuine buyers who simply can't bid unconditionally, which can thin your field.</p>
+
+<h2>Cooling-off: a key difference buyers should know</h2>
+<p>Private treaty contracts for residential property in Queensland typically carry a statutory cooling-off period for the buyer; auction purchases generally don't. The details and any penalties for exercising it are set by legislation — your conveyancer will walk you through what applies to your contract.</p>
+
+<h2>Open offer boards: auction transparency, private-treaty flexibility</h2>
+<p>A transparent offer process aims to combine the two: every verified offer is visible to every buyer (like an auction's open bidding), but offers can carry conditions and buyers act on their own timeline (like private treaty). Competition happens in the open across days or weeks rather than minutes, no one is gazumped by an invisible rival, and sellers see exactly what the market genuinely offers.</p>
+
+<div class="callout">Whatever the method, the mechanism that raises price is the same: multiple genuine buyers who can see they're in competition. Choose the process that gets the most real buyers competing for your specific property.</div>
+`,
+  },
+  {
+    slug: 'costs-of-selling-a-house-queensland-full-list',
+    title: 'The Full Cost of Selling a House in Queensland: Every Line Item',
+    desc: 'Every cost a Queensland seller actually faces — commission or flat fee, marketing, conveyancing, mortgage discharge, presentation and moving — with realistic ranges.',
+    published: '2026-07-07',
+    summary: 'From commission to the removalist: the complete, honest list of what selling costs.',
+    body: `
+<p>Most sellers budget for the agent and forget the rest. Here's the complete list of what a Queensland sale actually costs, so nothing surprises you at settlement.</p>
+
+<h2>1. The selling fee — the item you control most</h2>
+<p>A traditional agent's commission in Queensland commonly runs in the twos-to-threes per cent range — tens of thousands of dollars on a typical Brisbane home — plus marketing charged on top. A flat-fee platform replaces that with a fixed amount in the hundreds. This single choice moves more money than every other line item combined.</p>
+
+<h2>2. Marketing and advertising</h2>
+<p>In a traditional campaign, vendor-paid advertising — portal listings, photography, signboards, sometimes print — is typically billed to you separately from commission, often running to several thousand dollars. Check whether any quoted fee includes the portal listing and photography or treats them as extras.</p>
+
+<h2>3. Conveyancing and legal</h2>
+<p>Unavoidable in every sale: professional fees plus search disbursements. Get a fixed-fee quote upfront.</p>
+
+<h2>4. Mortgage discharge costs</h2>
+<p>If the property is mortgaged, your lender charges a discharge/settlement fee, and there's a government registration fee to remove the mortgage from the title. If you're on a fixed rate, ask your lender about break costs before you commit to a sale date — on recent fixed loans these can be genuinely large.</p>
+
+<h2>5. Presentation: the discretionary spend that pays for itself (sometimes)</h2>
+<p>Cleaning, minor repairs, gardening and possibly staging. Small presentation spends usually return their cost; large renovations right before sale usually don't. Fix what's broken, refresh what's cheap, and stop.</p>
+
+<h2>6. Compliance items</h2>
+<p>Queensland sellers need compliant smoke alarms at contract and settlement, and a pool safety certificate where there's a pool — budget for an electrician or pool inspector if you're not certain you comply.</p>
+
+<h2>7. Moving and the gap between homes</h2>
+<p>Removalists, cleaning the old place, connection fees at the new one — and if your settlement dates don't line up, short-term storage or accommodation. Sellers consistently underestimate this cluster.</p>
+
+<div class="callout">Build the list before you set your price expectations: your true walk-away number is sale price minus all of the above, and knowing it changes how you negotiate.</div>
+`,
+  },
+  {
+    slug: 'how-long-does-it-take-to-sell-a-house-brisbane',
+    title: 'How Long Does It Take to Sell a House in Brisbane?',
+    desc: 'The realistic timeline of a Brisbane property sale, stage by stage — preparation, marketing campaign, contract period and settlement — and what speeds each one up.',
+    published: '2026-07-07',
+    summary: 'Stage-by-stage: what actually determines whether your sale takes six weeks or six months.',
+    body: `
+<p>"How long will it take?" has a structural answer: a sale is four sequential stages, each with its own clock. Here's what each stage involves and what actually moves it.</p>
+
+<h2>Stage 1: Preparation (one to three weeks)</h2>
+<p>Getting the property photo-ready, professional photography and floor plans, the listing written, and your conveyancer engaged. Sellers control this stage entirely — decisive sellers compress it to days; drifting sellers lose a month before the market ever sees the property.</p>
+
+<h2>Stage 2: The marketing campaign (two to six weeks, typically)</h2>
+<p>From listing live to accepted offer. This is the stage everyone means by "how long to sell", and it's driven by three things: price realism (the dominant factor), presentation, and how easy you make it for buyers to inspect. Well-priced Brisbane properties in normal conditions commonly attract their real buyers within the first few weeks — a listing that's had heavy traffic but no offers after that is usually sending a price message, not a patience message.</p>
+
+<h2>Stage 3: Contract period (roughly 30 to 60 days)</h2>
+<p>From signed contract to unconditional: the buyer's finance approval and building and pest inspection run during this window, per the conditions in the contract. Sellers speed this up mainly by having a clean, complete contract ready and by fixing obvious B&P items before listing.</p>
+
+<h2>Stage 4: Settlement (per the contract — often 30 days after unconditional)</h2>
+<p>The administrative run-in: banks and conveyancers coordinate the money and title transfer. The date was set in the contract, so this stage holds few surprises if the paperwork is in order.</p>
+
+<h2>The honest total</h2>
+<p>A prepared, realistically-priced Brisbane sale commonly runs two to four months door to door. The variance is mostly in stages 1 and 2 — the parts the seller controls. Overpricing is the single biggest cause of six-month sales.</p>
+
+<div class="callout">If you have a hard deadline (job move, purchase settlement), work backwards from it and price to sell in the campaign window you actually have — not the one you wish you had.</div>
+`,
+  },
+  {
+    slug: 'property-deposits-queensland-explained',
+    title: 'Property Deposits in Queensland: Holding Deposits, the 10%, and Deposit Bonds',
+    desc: 'How deposits work in a Queensland property sale — who holds the money, when it is paid, what happens if a contract falls over, and how deposit bonds fit in.',
+    published: '2026-07-07',
+    summary: 'Where the deposit actually sits, when it changes hands, and what happens when contracts fall over.',
+    body: `
+<p>The deposit is the most misunderstood pile of money in a property sale. Here's how it actually works in Queensland.</p>
+
+<h2>How much is a deposit?</h2>
+<p>Convention says ten per cent, but it's negotiable — five per cent is common, and contracts often split it into an initial deposit on signing and a balance when the contract goes unconditional. A bigger, earlier deposit signals a committed buyer, which is worth real negotiating weight to a seller.</p>
+
+<h2>Who actually holds the money</h2>
+<p>The deposit doesn't go to the seller. It's held in trust — typically in the trust account of the agency handling the sale or the seller's law firm — until settlement. Trust accounts are regulated and audited; neither party can touch the money while the contract is on foot.</p>
+
+<h2>What happens if the contract falls over</h2>
+<p>It depends on why. If the buyer validly terminates under a condition — finance declined, a failed building and pest — the deposit comes back to them. If a buyer simply walks away from an unconditional contract, the seller is generally entitled to the deposit (and potentially further damages). If termination is under the statutory cooling-off period, legislation sets what it costs the buyer. Your conveyancer will confirm what applies to your specific contract.</p>
+
+<h2>Deposit bonds: a deposit without the cash</h2>
+<p>A deposit bond is an insurer's guarantee that stands in place of a cash deposit until settlement, when the buyer pays the full price. They suit buyers whose money is tied up — in a property yet to settle, or a term deposit. Sellers can accept or refuse them; a bond is only as good as the issuer behind it, so they warrant a closer look than cash.</p>
+
+<h2>At settlement</h2>
+<p>The deposit is released and counts toward the purchase price, with the balance paid by the buyer's lender and their own funds. The trust holding simply ends — the money was always part of the price, just parked safely along the way.</p>
+
+<div class="callout">Sellers: confirm in writing whose trust account holds your deposit and check the balance clears before treating a contract as solid — a deposit promised is not a deposit paid.</div>
+`,
+  },
 ];
 
 function guidePage(g) {

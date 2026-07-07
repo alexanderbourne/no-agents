@@ -20,7 +20,10 @@
       "mcp__c57879c6-285d-4739-b6f7-bcfbf0004314__list_teams",
       "Bash(node -e ' *)",
       "Bash(git stash *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(node --check script0.mjs)",
+      "Bash(node --check api/form6-pdf.js)",
+      "Bash(node --check api/seller-portal.js)"
     ]
   }
 }
