@@ -51,6 +51,10 @@
 //     sellerName:     string
 //     sellerEmail:    string
 //     sellerPhone:    string
+//     tenant:         { tenanted: boolean, name: string, email: string, phone: string, address: string }
+//                     // Used by api/entry-notice.js to serve the tenant a QLD RTA-
+//                     // compliant (48hr minimum) entry notice when an inspection is
+//                     // confirmed — see api/inspections.js and api/agent-portal.js.
 //     stripeSessionId: string   // traceability
 //     views:          number    // listing page views, used by seller dashboard stats
 //     photoShoot:     { status: "not_booked"|"requested"|"booked"|"completed", date: string|null, notes: string }
@@ -67,6 +71,9 @@
 //                        // until buyerSigned is set.
 //                        buyerSigned:  null | { signedAt, signedByName, signatureImage },
 //                        sellerSigned: null | { signedAt, signedByName, signatureImage },
+//                        // Set once both signatures are in — see api/contract-pdf.js — to a
+//                        // durable Vercel Blob URL of the fully-executed Heads of Agreement PDF.
+//                        fileUrl: string|null,
 //                        populatedAt
 //                      }
 //   }
@@ -131,6 +138,7 @@ async function handleCreate(req, res) {
       contractOfSale: { status: 'pending', fileUrl: null, providedAt: null },
       form6: { status: 'pending', fileUrl: null, signedAt: null, signedByName: null },
     },
+    tenant: data.tenant || { tenanted: false, name: '', email: '', phone: '', address: '' },
   };
 
   // Save listing

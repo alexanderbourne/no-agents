@@ -10,6 +10,7 @@
 //   POST /api/seller-portal?listingId=xxx&action=sign-contract  { signedByName }
 //   POST /api/seller-portal?listingId=xxx&action=update-details { deadline, priceView, conveyancer }
 //   POST /api/seller-portal?listingId=xxx&action=withdraw       { } — withdraws the listing
+//   POST /api/seller-portal?listingId=xxx&action=send-entry-notice { inspectionId } — (re)send the tenant's entry notice
 //
 // Required env vars: KV_REST_API_URL, KV_REST_API_TOKEN, ADMIN_PASSWORD, RESEND_API_KEY (optional)
 
@@ -18,8 +19,10 @@ import { randomBytes } from 'crypto';
 import { notifyAdmin } from './notify-admin.js';
 import { notifyConveyancer, effectiveConveyancer } from './conveyancing-handoff.js';
 import { notifySeller } from './notify-seller.js';
+import { sendEntryNotice } from './entry-notice.js';
 import { put } from '@vercel/blob';
 import { renderForm6Pdf } from './form6-pdf.js';
+import { storeContractPdf } from './contract-pdf.js';
 
 const { KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY } = process.env;
 
@@ -267,6 +270,13 @@ export default async function handler(req, res) {
       if (!signatureImage) return res.status(400).json({ error: 'signatureImage required' });
       listing.contract.sellerSigned = { signedAt: new Date().toISOString(), signedByName: name, signatureImage };
 
+      // Both signatures are now in — generate the durable, downloadable PDF
+      // of the fully-executed Heads of Agreement (see api/contract-pdf.js).
+      // Storage failure must not block the signature itself; it's flagged
+      // to admin below instead.
+      const fileUrl = await storeContractPdf(listing);
+      if (fileUrl) listing.contract.fileUrl = fileUrl;
+
       const conveyancer = effectiveConveyancer(listing);
       const handoffLine = conveyancer?.email
         ? (conveyancer.isDefault
@@ -275,6 +285,8 @@ export default async function handler(req, res) {
         : null;
 
       if (listing.contract.buyerEmail && RESEND_API_KEY) {
+        const base = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://no-agents.com.au';
+        const statusUrl = `${base}/contract/${listingId}?token=${listing.contract.buyerAccessToken}`;
         try {
           await fetch('https://api.resend.com/emails', {
             method: 'POST',
@@ -287,6 +299,7 @@ export default async function handler(req, res) {
                 <h2>Heads of Agreement signed by both parties</h2>
                 <p>The agreed terms for <strong>${listing.address}</strong> at $${(listing.contract.amount || 0).toLocaleString()} have now been signed by both you and the seller.</p>
                 <p>${handoffLine || "The seller's conveyancer or solicitor will be in touch to prepare the formal Contract of Sale."}</p>
+                <p><a href="${statusUrl}">Track the transaction — conditions, deposit and settlement →</a></p>
               </div>`,
             }),
           });
@@ -314,7 +327,8 @@ export default async function handler(req, res) {
       await kvSet(`listing:${listingId}`, listing);
       await notifyAdmin({
         subject: `Contract fully signed — ${listing.address}`,
-        html: `<p>Both parties have signed the Heads of Agreement for <strong>${listing.address}, ${listing.suburb}</strong> at $${(listing.contract.amount || 0).toLocaleString()}. ${conveyancerNotified ? `Conveyancer (${conveyancer?.name || conveyancer?.email}${conveyancer?.isDefault ? ' — default partner' : ' — seller-nominated'}) notified automatically.` : 'No conveyancer nominated yet — follow up with the seller to get one entered in Settings, or hand off manually.'}</p>`,
+        html: `<p>Both parties have signed the Heads of Agreement for <strong>${listing.address}, ${listing.suburb}</strong> at $${(listing.contract.amount || 0).toLocaleString()}. ${conveyancerNotified ? `Conveyancer (${conveyancer?.name || conveyancer?.email}${conveyancer?.isDefault ? ' — default partner' : ' — seller-nominated'}) notified automatically.` : 'No conveyancer nominated yet — follow up with the seller to get one entered in Settings, or hand off manually.'}</p>${fileUrl ? `<p><a href="${fileUrl}">Download signed Heads of Agreement</a></p>` : '<p style="color:#b00">PDF generation/storage failed — only the signature metadata was saved. Check function logs.</p>'}`,
+        isError: !fileUrl,
       });
       return res.status(200).json({ ok: true, contract: listing.contract });
     }
@@ -342,6 +356,25 @@ export default async function handler(req, res) {
         html: `<p>${listing.sellerName || 'Seller'} marked "${labels[key]}" as ${done ? 'complete' : 'incomplete'} for <strong>${listing.address}, ${listing.suburb}</strong>.</p>`,
       });
       return res.status(200).json({ ok: true, milestones: listing.milestones });
+    }
+
+    if (action === 'send-entry-notice') {
+      const { inspectionId } = req.body || {};
+      if (!inspectionId) return res.status(400).json({ error: 'inspectionId required' });
+      const inspection = safeParse(await kvGet(`inspection:${inspectionId}`));
+      if (!inspection) return res.status(404).json({ error: 'Inspection not found' });
+      // Ownership check — a seller may only (re)send a notice for an inspection
+      // on their own listing.
+      if (inspection.listingId !== listing.id && inspection.listingAddress !== listing.address) {
+        return res.status(403).json({ error: 'This inspection does not belong to this listing' });
+      }
+      if (!listing.tenant?.tenanted) {
+        return res.status(400).json({ error: 'This listing is not marked as tenanted' });
+      }
+      const entryNotice = await sendEntryNotice({ listing, inspection: { date: inspection.date, time: inspection.time, agentName: inspection.agentName || '', buyerName: inspection.buyerName || '' } });
+      inspection.entryNotice = entryNotice;
+      await kvSet(`inspection:${inspectionId}`, inspection);
+      return res.status(200).json({ ok: true, entryNotice });
     }
 
     if (action === 'update-details') {

@@ -346,12 +346,10 @@ function Nav({v,go,gl}){
     <div style="max-width:1100px;margin:0 auto;padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between">
       <div onclick=${()=>go('home')} style="cursor:pointer;display:flex;align-items:center;gap:10px"><${Logo}/><span class="sf" style="font-size:17px;font-weight:600;color:${T.t};letter-spacing:-.3px">no-agents</span></div>
       <div class="hm" style="display:flex;gap:4px">${nav.map(([id,l])=>html`<button onclick=${()=>go(id)} style="padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:${v===id?T.k:'transparent'};color:${v===id?'#fff':T.tm};transition:all .15s;font-family:Inter,sans-serif">${l}</button>`)}</div>
-      <a href="tel:+61485043210" class="hm" style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:${T.t};text-decoration:none;padding:8px 10px">📞 0485 043 210</a>
       <button class="hm" style="${B('p','s')}" onclick=${()=>go('sell')}>List your property</button>
       <button onclick=${()=>setOpen(!open)} style="display:none;background:none;border:none;cursor:pointer;padding:8px;color:${T.t};font-size:22px" class="sm">${open?'✕':'☰'}</button>
     </div>
     ${open&&html`<div style="border-top:1px solid ${T.bd};background:${T.bg}">
-      <a href="tel:+61485043210" style="display:block;padding:16px 32px;font-size:15px;color:${T.t};font-weight:600;text-decoration:none;border-bottom:1px solid ${T.bd}">📞 Call 0485 043 210</a>
       ${nav.map(([id,l])=>html`<button onclick=${()=>{go(id);setOpen(false)}} style="display:block;width:100%;text-align:left;padding:16px 32px;background:${v===id?T.bw:'transparent'};border:none;border-bottom:1px solid ${T.bd};cursor:pointer;font-size:15px;color:${T.t};font-weight:500;font-family:Inter,sans-serif">${l}</button>`)}
       <div style="padding:20px"><button style="${B('p')};width:100%" onclick=${()=>{go('sell');setOpen(false)}}>List your property</button></div>
     </div>`}
@@ -927,7 +925,7 @@ function Sell(){
         </div>
         ${form.tenanted==='yes'&&html`<div style="background:${T.bw};border-radius:12px;padding:20px;border:1px solid ${T.bdd}">
           <div style="font-weight:600;font-size:13px;margin-bottom:4px">Tenant details — for automatic entry notices</div>
-          <div style="font-size:12px;color:${T.tm};line-height:1.5;margin-bottom:12px">We automatically generate and serve QLD-compliant entry notices when inspections are booked.</div>
+          <div style="font-size:12px;color:${T.tm};line-height:1.5;margin-bottom:12px">We automatically generate and serve the official RTA Entry Notice (Form 9) when inspections are booked.</div>
           <input style="${IS};margin-bottom:8px" value=${form.tenantName} onInput=${e=>up('tenantName',e.target.value)} placeholder="Tenant full name"/>
           <input style="${IS};margin-bottom:8px" type="email" value=${form.tenantEmail} onInput=${e=>up('tenantEmail',e.target.value)} placeholder="Tenant email"/>
           <input style="${IS};margin-bottom:8px" type="tel" value=${form.tenantPhone} onInput=${e=>up('tenantPhone',e.target.value)} placeholder="Tenant phone"/>
@@ -954,7 +952,7 @@ function Sell(){
             ${[{val:'agent',t:'Human agent — $99 per visit',s:'Pay as you go — only when you need one. Licensed agent opens up, shows through, locks up.'},{val:'self',t:'Self-facilitate — $0',s:'You meet buyers yourself. Flexible and free.'}].map(o=>html`<div onclick=${()=>up('inspection',o.val)} style="border-radius:12px;border:1.5px solid ${form.inspection===o.val?T.k:T.bd};padding:16px;cursor:pointer;background:${form.inspection===o.val?T.k:T.bg};transition:all .15s"><div style="font-weight:600;font-size:13px;color:${form.inspection===o.val?'#fff':T.t};margin-bottom:4px">${o.t}</div><div style="font-size:12px;color:${form.inspection===o.val?'rgba(255,255,255,.6)':T.tu}">${o.s}</div></div>`)}
           </div>
         </div>
-        ${form.tenanted==='yes'&&html`<div style="background:${T.bw};border-radius:12px;padding:14px;font-size:13px;color:${T.tm};border:1px solid ${T.bdd};line-height:1.6">When a buyer books, we automatically send an entry notice to ${form.tenantEmail||'your tenant'} with the required QLD notice period.</div>`}
+        ${form.tenanted==='yes'&&html`<div style="background:${T.bw};border-radius:12px;padding:14px;font-size:13px;color:${T.tm};border:1px solid ${T.bdd};line-height:1.6">When a buyer books, we automatically send an official RTA Entry Notice (Form 9) to ${form.tenantEmail||'your tenant'}, with the required 48 hours' notice.</div>`}
       </div>`}
 
       ${step===3&&html`<div>
@@ -1012,7 +1010,7 @@ function Sell(){
       ${Object.keys(errors).length>0&&html`<div style="background:#fde8e6;border-radius:10px;padding:12px 16px;font-size:13px;color:${T.r};border:1px solid #f5c6c3;margin-top:16px">${Object.values(errors).join(' · ')}</div>`}
       <div style="display:flex;justify-content:space-between;margin-top:24px;padding-top:20px;border-top:1px solid ${T.bd}">
         ${step>1?html`<button style="${B('g','s')}" onclick=${()=>{setErrors({});setStep(s=>s-1);}}>← Back</button>`:html`<div></div>`}
-        ${step<4?html`<button style="${B('p','m')}" onclick=${()=>{if(validate(step))setStep(s=>s+1);}}>Continue →</button>`:html`<div></div>`}
+        ${step<4?html`<button style="${B('p','m')}" onclick=${()=>{if(validate(step)){if(step===1&&typeof gtag==='function'){gtag('event','conversion',{'send_to':'AW-862620860/LSdCJDv88ocELyZqpsD'});}setStep(s=>s+1);}}}>Continue →</button>`:html`<div></div>`}
       </div>
     </div>
   </div>`;}
@@ -1369,7 +1367,7 @@ function SellerDash({go,token,listingId,onLogout}){
   const[loadErr,setLoadErr]=useState('');
   const[data,setData]=useState(null);
   const[insp,setInsp]=useState([]);
-  const[notices,setNotices]=useState({});
+  const[noticeBusy,setNoticeBusy]=useState({});
   const[acceptM,setAcceptM]=useState(false);
   const[counterM,setCounterM]=useState(false);
   const[counterAmt,setCounterAmt]=useState('');
@@ -1443,6 +1441,15 @@ function SellerDash({go,token,listingId,onLogout}){
       if(r.ok){const d=await r.json();setData(prev=>({...prev,listing:d.listing}));}
     }catch{}
     setWithdrawing(false);
+  };
+  const sendEntryNoticeFor=async(inspectionId)=>{
+    setNoticeBusy(b=>({...b,[inspectionId]:true}));
+    try{
+      const r=await fetch(`/api/seller-portal?listingId=${encodeURIComponent(listingId)}&action=send-entry-notice`,{method:'POST',headers:{'Content-Type':'application/json','x-seller-token':token},body:JSON.stringify({inspectionId})});
+      const d=await r.json();
+      if(r.ok)setInsp(prev=>prev.map(x=>x.id===inspectionId?{...x,entryNotice:d.entryNotice}:x));
+    }catch{}
+    setNoticeBusy(b=>({...b,[inspectionId]:false}));
   };
   const replyToEnquiry=(e)=>{
     const subject=encodeURIComponent(`Re: your enquiry about ${data.listing.address}`);
@@ -1659,12 +1666,16 @@ function SellerDash({go,token,listingId,onLogout}){
           <span style="${P('u')};font-size:11px">${i.agentName?i.agentName+' · $99':'Self'}</span>
           <span style="${P('g')};font-size:11px">${i.status||'confirmed'}</span>
         </div>
-        ${i.status==='confirmed'&&i.agentName&&html`<div style="margin-top:12px;padding-top:12px;border-top:1px solid ${T.bd};display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-          <span style="font-size:12px;color:${notices[i.id]?T.g:T.tu}">${notices[i.id]?'✓ Entry notice sent':'Entry notice not yet sent'}</span>
-          ${!notices[i.id]&&html`<button style="${B('o','s')}" onclick=${()=>setNotices(n=>({...n,[i.id]:true}))}>Send entry notice →</button>`}
+        ${i.status==='confirmed'&&i.agentName&&p.tenant?.tenanted&&html`<div style="margin-top:12px;padding-top:12px;border-top:1px solid ${T.bd}">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+            <span style="font-size:12px;color:${i.entryNotice?.sent?T.g:T.tu}">${i.entryNotice?.sent?'✓ Entry notice sent':'Entry notice not sent'}</span>
+            <button style="${B('o','s')}" disabled=${noticeBusy[i.id]} onclick=${()=>sendEntryNoticeFor(i.id)}>${noticeBusy[i.id]?'Sending…':i.entryNotice?.sent?'Resend →':'Send entry notice →'}</button>
+          </div>
+          ${i.entryNotice?.compliant===false&&html`<div style="font-size:11px;color:#e65100;margin-top:6px">⚠ Under 48 hours' notice — QLD RTA requires a minimum of 48 hours before entry.</div>`}
+          ${i.entryNotice?.compliant===null&&i.entryNotice?.sent&&html`<div style="font-size:11px;color:${T.tu};margin-top:6px">Couldn't auto-verify this clears the 48-hour minimum — double check the timing.</div>`}
         </div>`}
       </div>`)}
-      <div style="background:${T.bw};border-radius:10px;padding:12px 16px;font-size:12px;color:${T.tm}">Entry notices are auto-served to tenants when a tenanted property inspection is confirmed.</div>
+      <div style="background:${T.bw};border-radius:10px;padding:12px 16px;font-size:12px;color:${T.tm}">The official RTA Entry Notice (Form 9) is auto-served to tenants (min. 48 hours' notice) when a tenanted property inspection is confirmed.</div>
     </div>`}
 
     ${tab==='enquiries'&&html`<div>
@@ -1744,7 +1755,7 @@ function SellerDash({go,token,listingId,onLogout}){
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
-            ${d.kind==='contract'?(d.status==='executed'?(p.conveyancingHandoff?.notified?html`<span style="${P('g')};font-size:11px">✓ Conveyancer notified</span>`:html`<span style="${P('w')};font-size:11px">No conveyancer set</span>`):d.status==='awaiting_buyer'?html`<span style="${P('u')};font-size:11px">Awaiting buyer</span>`:html`<button style="${B('p','s')}" onclick=${()=>{setCsignName(p.sellerName||'');setCsignAgree(false);setCsignImg(null);setContractM(true);}}>Review & sign →</button>`):
+            ${d.kind==='contract'?(d.status==='executed'?html`<span style="display:flex;align-items:center;gap:8px">${p.conveyancingHandoff?.notified?html`<span style="${P('g')};font-size:11px">✓ Conveyancer notified</span>`:html`<span style="${P('w')};font-size:11px">No conveyancer set</span>`}${d.contract.fileUrl&&html`<a href=${d.contract.fileUrl} target="_blank" rel="noopener" style="${B('o','s')}">Download PDF</a>`}</span>`:d.status==='awaiting_buyer'?html`<span style="${P('u')};font-size:11px">Awaiting buyer</span>`:html`<button style="${B('p','s')}" onclick=${()=>{setCsignName(p.sellerName||'');setCsignAgree(false);setCsignImg(null);setContractM(true);}}>Review & sign →</button>`):
               d.kind==='agent'?(d.status==='provided'?html`<span style="${P('g')};font-size:11px">✓ Provided</span>`:html`<span style="${P('w')};font-size:11px">Awaiting</span>`):
               d.kind==='sign'?(d.status==='signed'?html`<span style="display:flex;align-items:center;gap:8px"><span style="${P('g')};font-size:11px">✓ Signed</span>${d.fileUrl&&html`<a href=${d.fileUrl} target="_blank" rel="noopener" style="${B('o','s')}">Download PDF</a>`}</span>`:html`<button style="${B('p','s')}" onclick=${()=>{setSignName(p.sellerName||'');setSignAgree(false);setSignImg(null);setForm6M(true);}}>Review & sign →</button>`):
               docFiles[d.id]?html`<span style="${P('g')};font-size:11px">✓ Uploaded</span>`:d.kind==='seller'?html`<label style="${B('o','s')};cursor:pointer"><input type="file" accept=".pdf,.doc,.docx,image/*" style="display:none" onChange=${e=>{if(e.target.files[0])setDocFiles(f=>({...f,[d.id]:e.target.files[0]}))}}/>Upload →</label>`:html`<span style="${P('w')};font-size:11px">Awaiting</span>`}
@@ -2592,6 +2603,22 @@ function ContractSign(){
   if(err)return html`<div style="max-width:480px;margin:0 auto;padding:120px 32px;text-align:center" class="mp"><div style="font-size:14px;color:${T.r}">${err}</div></div>`;
 
   const c=data.contract,signed=Boolean(c.buyerSigned);
+  const milestones=data.milestones||{};
+  const bothSigned=Boolean(c.buyerSigned&&c.sellerSigned);
+  const executedAt=bothSigned?(new Date(c.sellerSigned.signedAt)>new Date(c.buyerSigned.signedAt)?c.sellerSigned.signedAt:c.buyerSigned.signedAt):null;
+  const addDays=(iso,days)=>{const d=new Date(iso);d.setDate(d.getDate()+Number(days||0));return d;};
+  const fmtDue=(iso,days)=>iso&&days?addDays(iso,days).toLocaleDateString('en-AU',{day:'numeric',month:'short'}):null;
+  const bpNeeded=bothSigned&&c.building;
+  const financeNeeded=bothSigned&&c.finance;
+  const bpDone=!bpNeeded||milestones.bp?.done;
+  const financeDone=!financeNeeded||milestones.finance?.done;
+  const conditionsDone=bothSigned&&bpDone&&financeDone;
+  const depositDone=bothSigned&&Boolean(milestones.deposit?.done);
+  const settlementDone=data.status==='sold';
+  const possessionDone=settlementDone&&Boolean(milestones.possession?.done);
+  const BSTAGES=['Signed','Both signed','Conditions','Deposit','Settlement','Possession'];
+  const stepDone=[signed,bothSigned,conditionsDone,depositDone,settlementDone,possessionDone];
+  const activeIdx=stepDone.findIndex(d=>!d);
 
   return html`<div style="max-width:560px;margin:0 auto;padding:64px 32px" class="mp">
     <div style="${CD}">
@@ -2610,9 +2637,54 @@ function ContractSign(){
         ${c.mortgageBrokerRequested?html`<span style="${P('g')};font-size:11px">✓ Introduction requested — they'll be in touch</span>`:html`<button style="${B('o','s')}" disabled=${mtgBusy} onclick=${requestMortgageBroker}>${mtgBusy?'Sending…':'Request an introduction →'}</button>`}
         ${mtgErr&&html`<div style="font-size:12px;color:${T.r};margin-top:8px">${mtgErr}</div>`}
       </div>`}
-      ${signed?html`<div style="border-radius:12px;background:#d4ede1;border:1px solid ${T.g};padding:16px;text-align:center">
+      ${signed?html`<div>
+      <div style="border-radius:12px;background:#d4ede1;border:1px solid ${T.g};padding:16px;text-align:center">
         <div style="font-size:14px;font-weight:600;color:${T.g};margin-bottom:4px">✓ You signed on ${new Date(c.buyerSigned.signedAt).toLocaleDateString('en-AU')}</div>
         <div style="font-size:13px;color:${T.tm}">${c.sellerSigned?'Both parties have signed — your conveyancer will be in touch to prepare the formal Contract of Sale.':'Waiting on the seller to countersign.'}</div>
+        ${c.fileUrl&&html`<a href=${c.fileUrl} target="_blank" rel="noopener" style="font-size:12px;color:${T.g};font-weight:600;display:inline-block;margin-top:10px">Download signed Heads of Agreement →</a>`}
+      </div>
+
+      <div style="${CD};margin-top:16px;overflow-x:auto">
+        <div style="font-size:12px;font-weight:600;color:${T.tu};text-transform:uppercase;letter-spacing:.05em;margin-bottom:16px">Transaction progress</div>
+        <div style="display:flex;align-items:center;min-width:480px">
+          ${BSTAGES.map((stage,i)=>{const done=stepDone[i],active=i===activeIdx;return html`<div style="display:flex;align-items:center;flex:0 0 auto">
+            <div style="display:flex;flex-direction:column;align-items:center;width:72px">
+              <div style="width:32px;height:32px;border-radius:50%;border:2px solid ${done||active?T.k:T.bd};background:${done?T.k:active?T.bw:'transparent'};display:flex;align-items:center;justify-content:center;margin-bottom:6px">
+                ${done?html`<span style="color:#fff;font-size:12px">✓</span>`:html`<div style="width:8px;height:8px;border-radius:50%;background:${active?T.k:T.bd}"></div>`}
+              </div>
+              <div style="font-size:10px;color:${done||active?T.t:T.tu};text-align:center;font-weight:${done||active?600:400};line-height:1.3">${stage}</div>
+            </div>
+            ${i<BSTAGES.length-1&&html`<div style="width:16px;height:2px;background:${done?T.k:T.bd};flex-shrink:0;margin-bottom:18px"></div>`}
+          </div>`;})}
+        </div>
+
+        ${activeIdx===2&&html`<div style="margin-top:20px;padding-top:16px;border-top:1px solid ${T.bd}">
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px">Subject-to conditions</div>
+          <div style="display:grid;gap:8px">
+            ${c.building&&html`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:10px;background:${T.bg}">
+              <div><div style="font-size:13px;font-weight:500">Building &amp; pest</div><div style="font-size:11px;color:${T.tu}">${c.buildingDays}-day condition${fmtDue(executedAt,c.buildingDays)?` — due ~${fmtDue(executedAt,c.buildingDays)}`:''}</div></div>
+              <span style="${P(bpDone?'g':'o')}">${bpDone?'✓ Cleared':'Pending'}</span>
+            </div>`}
+            ${c.finance&&html`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:10px;background:${T.bg}">
+              <div><div style="font-size:13px;font-weight:500">Finance</div><div style="font-size:11px;color:${T.tu}">${c.financeDays}-day condition${fmtDue(executedAt,c.financeDays)?` — due ~${fmtDue(executedAt,c.financeDays)}`:''}</div></div>
+              <span style="${P(financeDone?'g':'o')}">${financeDone?'✓ Approved':'Pending'}</span>
+            </div>`}
+            ${!c.building&&!c.finance&&html`<div style="font-size:12px;color:${T.tu}">No B&amp;P or finance conditions on this contract.</div>`}
+          </div>
+        </div>`}
+
+        ${activeIdx===3&&html`<div style="margin-top:20px;padding-top:16px;border-top:1px solid ${T.bd}">
+          <div style="font-size:12px;color:${T.tu}">Conditions cleared. Your deposit is due next — your conveyancer will confirm once it's received into trust.</div>
+        </div>`}
+
+        ${activeIdx===4&&html`<div style="margin-top:20px;padding-top:16px;border-top:1px solid ${T.bd}">
+          <div style="font-size:12px;color:${T.tu}">Estimated settlement: ${fmtDue(executedAt,c.settlement)||`${c.settlement} days from signing`}. Your conveyancer will confirm once settlement funds have cleared.</div>
+        </div>`}
+
+        ${activeIdx===-1&&html`<div style="margin-top:20px;padding-top:16px;border-top:1px solid ${T.bd}">
+          <div style="font-size:12px;color:${T.g};font-weight:500">✓ Settled — keys and possession handed over.</div>
+        </div>`}
+      </div>
       </div>`:html`<div>
         <div style="font-size:13px;color:${T.tm};line-height:1.6;margin-bottom:16px">This is a summary of the agreed terms, not the formal Contract of Sale. Once both parties sign, it's passed to the seller's conveyancer to prepare the official contract.</div>
         <div style="background:${T.bw};border-radius:10px;padding:16px;font-size:13px;color:${T.tm};margin-bottom:16px;line-height:1.9">

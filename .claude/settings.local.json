@@ -23,7 +23,14 @@
       "Bash(npm install *)",
       "Bash(node --check script0.mjs)",
       "Bash(node --check api/form6-pdf.js)",
-      "Bash(node --check api/seller-portal.js)"
+      "Bash(node --check api/seller-portal.js)",
+      "mcp__e2c75400-198a-4e88-9bcf-2459fca5f7a0__list_deployments",
+      "mcp__e2c75400-198a-4e88-9bcf-2459fca5f7a0__get_runtime_errors",
+      "Bash(node --check api/pdf-writer.js)",
+      "Bash(node --check api/contract-pdf.js)",
+      "Bash(node --check api/contract.js)",
+      "mcp__claude-in-chrome__browser_batch",
+      "mcp__claude-in-chrome__list_connected_browsers"
     ]
   }
 }

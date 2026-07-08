@@ -16,6 +16,7 @@ import { verifyAdminToken } from './admin-auth.js';
 import { chargeInspectionVisit, findListingByAddress } from './inspection-billing.js';
 import { notifyAdmin } from './notify-admin.js';
 import { notifySeller } from './notify-seller.js';
+import { sendEntryNotice } from './entry-notice.js';
 
 // ── KV helpers ───────────────────────────────────────────────────────────────
 
@@ -74,6 +75,14 @@ export default async function handler(req, res) {
       const listing = await findListingByAddress(address);
       if (!listing || listing.inspectionMode !== 'agent') {
         let notified = { emailed: false, texted: false };
+        // Self-facilitate has no separate "confirmed" step — the seller
+        // arranges access directly with the buyer — so this request IS the
+        // only signal the system gets. For a tenanted property, the tenant
+        // still needs the statutory notice regardless of who shows the
+        // buyer through, so it's sent now against the requested time.
+        const entryNotice = listing?.tenant?.tenanted
+          ? await sendEntryNotice({ listing, inspection: { date, time, buyerName: (buyerName || '').trim() } })
+          : null;
         if (listing) {
           notified = await notifySeller({
             listing,
@@ -86,14 +95,17 @@ export default async function handler(req, res) {
                 ${buyerName ? `<tr><td style="padding:8px 12px;color:#666">Buyer</td><td style="padding:8px 12px">${buyerName}</td></tr>` : ''}
               </table>
               <p style="margin-top:20px">You've chosen to self-facilitate inspections for this listing, so reach out directly to arrange access.</p>
+              ${entryNotice?.sent ? `<p>Your tenant has already been sent the required entry notice for this requested time — if you change the time when confirming with the buyer, let us know so we can notify them again.</p>` : ''}
+              ${listing?.tenant?.tenanted && !entryNotice?.sent ? `<p style="color:#b00">This property is tenanted and we could not confirm the entry notice was sent to your tenant — please notify them directly, in writing, at least 48 hours before entry (QLD RTA requirement).</p>` : ''}
             </div>`,
-            sms: `No Agents: A buyer wants to inspect ${address} on ${date}${time ? ` at ${time}` : ''}. You self-facilitate this listing — please arrange access directly.`,
+            sms: `No Agents: A buyer wants to inspect ${address} on ${date}${time ? ` at ${time}` : ''}. You self-facilitate this listing — please arrange access directly.${listing?.tenant?.tenanted && !entryNotice?.sent ? ' Tenanted property — you must give 48hrs written entry notice yourself.' : ''}`,
           });
         }
         await notifyAdmin({
           subject: `Inspection request (self-facilitate) — ${address}`,
           html: `<p><strong>${(buyerName || 'A buyer').trim()}</strong> requested an inspection at <strong>${address}</strong> on ${date}${time ? ` at ${time}` : ''}.</p>
-<p>This listing is self-facilitate${listing ? '' : ' (listing not found)'}, so no agent-claimable request was created. ${notified.emailed ? 'Seller was emailed directly.' : notified.texted ? 'Seller was texted directly (no email on file or email failed).' : 'Could not reach the seller by email or SMS — follow up manually.'}</p>`,
+<p>This listing is self-facilitate${listing ? '' : ' (listing not found)'}, so no agent-claimable request was created. ${notified.emailed ? 'Seller was emailed directly.' : notified.texted ? 'Seller was texted directly (no email on file or email failed).' : 'Could not reach the seller by email or SMS — follow up manually.'}</p>
+${listing?.tenant?.tenanted ? `<p>Tenanted property — entry notice ${entryNotice?.sent ? 'sent to tenant' : 'FAILED to send to tenant, follow up manually'}.</p>` : ''}`,
         });
         return res.status(200).json({ ok: true, mode: 'self' });
       }
@@ -179,6 +191,7 @@ export default async function handler(req, res) {
       sellerFeeChargeId: billing.chargeId || null,
       sellerFeeSkipReason: billing.charged ? null : billing.reason,
       recordedAt:      new Date().toISOString(),
+      entryNotice:     billing.listing?.tenant?.tenanted ? await sendEntryNotice({ listing: billing.listing, inspection: { date, time, agentName: agentName.trim(), buyerName: (buyerName || '').trim() } }) : null,
     };
 
     await kvSet(`inspection:${id}`, inspection);

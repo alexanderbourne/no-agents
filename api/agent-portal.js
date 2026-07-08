@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { chargeInspectionVisit } from './inspection-billing.js';
 import { notifySeller } from './notify-seller.js';
+import { sendEntryNotice } from './entry-notice.js';
 
 const { KV_REST_API_URL: KV_URL, KV_REST_API_TOKEN: KV_TOKEN } = process.env;
 
@@ -157,6 +158,9 @@ export default async function handler(req, res) {
       sellerFeeChargeId: billing.chargeId || null,
       sellerFeeSkipReason: billing.charged ? null : billing.reason,
       recordedAt: new Date().toISOString(),
+      entryNotice: billing.listing?.tenant?.tenanted
+        ? await sendEntryNotice({ listing: billing.listing, inspection: { date: request.date, time: request.time, agentName: agent.name, buyerName: request.buyerName || '' } })
+        : null,
     };
     await kvSet(`inspection:${inspId}`, inspection);
 

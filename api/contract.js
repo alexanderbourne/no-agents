@@ -11,6 +11,7 @@ import { notifyConveyancer, effectiveConveyancer, getDefaultConveyancer } from '
 import { notifyMortgageBroker, logMortgageReferral } from './mortgage-broker.js';
 import { notifySeller } from './notify-seller.js';
 import { notifyAdmin } from './notify-admin.js';
+import { storeContractPdf } from './contract-pdf.js';
 
 const { KV_REST_API_URL, KV_REST_API_TOKEN, RESEND_API_KEY } = process.env;
 
@@ -66,6 +67,8 @@ async function notifyBothExecuted(listing) {
     : null;
 
   if (listing.contract.buyerEmail && RESEND_API_KEY) {
+    const base = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://no-agents.com.au';
+    const statusUrl = `${base}/contract/${listing.id}?token=${listing.contract.buyerAccessToken}`;
     try {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -78,6 +81,7 @@ async function notifyBothExecuted(listing) {
             <h2>Heads of Agreement signed by both parties</h2>
             <p>The agreed terms for <strong>${listing.address}</strong> have now been signed by both the seller and the buyer.</p>
             <p>${handoffLine || "The seller's conveyancer or solicitor will be in touch to prepare the formal Contract of Sale."}</p>
+            <p><a href="${statusUrl}">Track the transaction — conditions, deposit and settlement →</a></p>
           </div>`,
         }),
       });
@@ -115,6 +119,8 @@ export default async function handler(req, res) {
       suburb: listing.suburb,
       sellerName: listing.sellerName,
       contract: listing.contract,
+      status: listing.status,
+      milestones: listing.milestones || {},
     });
   }
 
@@ -212,6 +218,13 @@ export default async function handler(req, res) {
     listing.contract.buyerSigned = { signedAt: new Date().toISOString(), signedByName: name, signatureImage };
 
     if (listing.contract.sellerSigned) {
+      // Both signatures are now in — generate the durable, downloadable PDF
+      // of the fully-executed Heads of Agreement (see api/contract-pdf.js).
+      // Storage failure must not block the signature itself; it's flagged
+      // to admin below instead.
+      const fileUrl = await storeContractPdf(listing);
+      if (fileUrl) listing.contract.fileUrl = fileUrl;
+
       const { conveyancerNotified } = await notifyBothExecuted(listing);
       listing.conveyancingHandoff = {
         notified: conveyancerNotified,
@@ -219,6 +232,11 @@ export default async function handler(req, res) {
         sentTo: conveyancerNotified ? (effectiveConveyancer(listing)?.email || null) : null,
       };
       await kvSet(`listing:${listingId}`, listing);
+      await notifyAdmin({
+        subject: `Contract fully signed — ${listing.address}`,
+        html: `<p>Both parties have signed the Heads of Agreement for <strong>${listing.address}</strong>.</p>${fileUrl ? `<p><a href="${fileUrl}">Download signed Heads of Agreement</a></p>` : '<p style="color:#b00">PDF generation/storage failed — only the signature metadata was saved. Check function logs.</p>'}`,
+        isError: !fileUrl,
+      });
     } else {
       await kvSet(`listing:${listingId}`, listing);
       await notifySellerTurn(listing);

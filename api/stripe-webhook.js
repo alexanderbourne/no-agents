@@ -91,6 +91,13 @@ export default async function handler(req, res) {
     sellerEmail:  meta.sellerEmail || session.customer_details?.email || '',
     sellerName:   meta.sellerName || '',
     sellerPhone:  meta.sellerPhone || '',
+    tenant: meta.tenanted === 'yes' ? {
+      tenanted: true,
+      name:    meta.tenantName || '',
+      email:   meta.tenantEmail || '',
+      phone:   meta.tenantPhone || '',
+      address: meta.tenantAddress || meta.address || '',
+    } : { tenanted: false, name: '', email: '', phone: '', address: '' },
     // Publish gating — see api/mark-photos-ready.js and api/cron-publish.js
     status:             'pending',
     requestedStartDate: meta.listingStartDate || null,
