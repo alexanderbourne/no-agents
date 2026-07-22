@@ -600,6 +600,7 @@ function Home({go}){
   const agent=Math.round(price*.03);
   const ours=798+insp*99;
   const saved=agent-ours;
+  const doorPrice=800000,doorAgent=Math.round(doorPrice*.03),doorOpens=4,perOpen=Math.round(doorAgent/doorOpens);
 
   const faqs=[
     ["What does an agent actually do?","Prospect buyers (the internet does this), conduct inspections (any licensed agent can), present offers (our platform does this transparently) and negotiate. Our open offer board gives every buyer full visibility of every bid."],
@@ -720,6 +721,19 @@ function Home({go}){
       </div>
     </section>
 
+    <section style="background:${T.k};color:#fff;padding:80px 32px;text-align:center">
+      <div style="max-width:680px;margin:0 auto">
+        <div style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:16px">The uncomfortable math</div>
+        <h2 class="sf" style="font-size:40px;font-weight:600;line-height:1.15;letter-spacing:-1px;margin-bottom:20px">Wanna get paid $${perOpen.toLocaleString()} to open a front door?</h2>
+        <p style="font-size:16px;color:rgba(255,255,255,.75);line-height:1.75;margin-bottom:20px;max-width:540px;margin-left:auto;margin-right:auto">Across a typical campaign, a licensed agent opens your front door somewhere between four and six times — a couple of buyer inspections, an open home, maybe a building &amp; pest walkthrough. That's the job. On an $${doorPrice.toLocaleString()} sale at 3% commission ($${doorAgent.toLocaleString()}), four door-openings works out to <strong>$${perOpen.toLocaleString()} each</strong>.</p>
+        <p style="font-size:16px;color:rgba(255,255,255,.75);line-height:1.75;margin-bottom:36px;max-width:540px;margin-left:auto;margin-right:auto">And once a buyer signs, the agent's job effectively stops. From contract to settlement, it's your conveyancer doing the real work — disclosure, searches, adjustments, the paperwork that actually gets you to close. You're paying $${doorAgent.toLocaleString()} for a handful of unlocked doors, not for what gets your sale over the line.</p>
+        <div style="display:inline-flex;align-items:center;gap:8px;padding:14px 24px;font-size:14px;font-weight:500;background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.2);border-radius:12px;margin-bottom:28px">We charge $99 a visit. Not $${perOpen.toLocaleString()}.</div>
+        <div>
+          <button style="${B('w','l')}" onclick=${()=>go('sell')}>List for $798 →</button>
+        </div>
+      </div>
+    </section>
+
     <section style="padding:64px 32px" class="mp">
       <div style="max-width:1100px;margin:0 auto">
         <div style="text-align:center;margin-bottom:48px"><h2 class="sf" style="font-size:36px;font-weight:600;letter-spacing:-.8px;margin-bottom:12px">Pricing</h2><p style="font-size:16px;color:${T.tm};max-width:500px;margin:0 auto;line-height:1.7">One flat fee. Everything included. No commission.</p></div>
@@ -825,7 +839,7 @@ function Home({go}){
 function Sell(){
   const[step,setStep]=useState(1);
   const[paying,setPaying]=useState(false);
-  const[form,setForm]=useState({address:'',addrState:'',type:'Apartment',beds:2,baths:1,cars:1,floor:'',description:'',price:'',deadline:'',tenanted:'no',inspection:'agent',tenantName:'',tenantEmail:'',tenantPhone:'',tenantAddress:'',availableDays:[],availableTimes:[],sellerName:'',sellerEmail:'',sellerPhone:'',listingStartDate:'',tier:'flat',cardSaveConsent:false,referralCode:localStorage.getItem('na_referral_code')||''});
+  const[form,setForm]=useState({address:'',addrState:'',type:'Apartment',beds:'',baths:'',cars:'',floor:'',description:'',price:'',deadline:'',tenanted:'no',inspection:'agent',tenantName:'',tenantEmail:'',tenantPhone:'',tenantAddress:'',availableDays:[],availableTimes:[],sellerName:'',sellerEmail:'',sellerPhone:'',listingStartDate:'',tier:'flat',cardSaveConsent:false,referralCode:localStorage.getItem('na_referral_code')||''});
   const up=(k,v)=>setForm(f=>({...f,[k]:v}));
   const[errors,setErrors]=useState({});
   const[eoiSent,setEoiSent]=useState(false);
