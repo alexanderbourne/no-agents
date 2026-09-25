@@ -4,9 +4,29 @@
 // instead of the homepage's generic markup. The SPA script is untouched —
 // Preact still hydrates over this and takes on client-side routing as normal.
 
-export const config = { matcher: ['/sell', '/buy', '/fractional', '/for-agents'] };
+// Also matches the plain-SPA entry paths (no route-specific SEO block) so the
+// entity fix below applies wherever the app's single index.html gets served:
+// '/' itself, and every path vercel.json rewrites straight to '/'.
+export const config = { matcher: ['/', '/sell', '/buy', '/fractional', '/for-agents', '/my-listing', '/legal', '/refer', '/offer/:path*', '/contract/:path*'] };
 
 const BASE = 'https://www.no-agents.com.au';
+
+// The app's `html` tagged template (preact-standalone.module.js) does not
+// decode HTML entities in text/attributes the way a browser parsing real
+// HTML does — it inserts them literally. A few strings in index.html used
+// `&amp;` (correct for real server-parsed HTML, wrong here), which rendered
+// on screen as the literal text "&amp;" instead of "&". This corrects those
+// spots in the response body without touching the underlying (large,
+// fragile) index.html source file. Safe/idempotent: only replaces these
+// exact known-bad substrings, nothing else.
+function fixEntities(html) {
+  return html
+    .replace('maybe a building &amp; pest walkthrough.', 'maybe a building & pest walkthrough.')
+    .replace('font-size:13px;font-weight:500">Building &amp; pest cleared</div>', 'font-size:13px;font-weight:500">Building & pest cleared</div>')
+    .replace('font-size:13px;font-weight:500">Building &amp; pest</div>', 'font-size:13px;font-weight:500">Building & pest</div>')
+    .replace('No B&amp;P or finance conditions on this contract.', 'No B&P or finance conditions on this contract.')
+    .replace('placeholder="https://.../photo1.jpg&#10;https://.../photo2.jpg"', 'placeholder="https://.../photo1.jpg\nhttps://.../photo2.jpg"');
+}
 
 const ROUTES = {
   '/sell': {
@@ -91,13 +111,18 @@ const ROUTES = {
 export default async function middleware(request) {
   const url = new URL(request.url);
   const route = ROUTES[url.pathname];
-  if (!route) return fetch(request);
 
-  const originRes = await fetch(new URL('/', url));
+  // IMPORTANT: never fetch(new URL('/', url)) here — '/' is now itself in
+  // this middleware's matcher, and self-fetching the path currently being
+  // handled risks re-entering this same middleware (recursion/hang) on
+  // Vercel's edge runtime. `fetch(request)` with the *original* request is
+  // the documented pass-through and does not re-invoke middleware.
+  const originRes = await fetch(request);
   let html = await originRes.text();
 
-  const canonical = `${BASE}${url.pathname}`;
-  const metaBlock = `<!--SEO_META_START-->
+  if (route) {
+    const canonical = `${BASE}${url.pathname}`;
+    const metaBlock = `<!--SEO_META_START-->
 <title>${route.title}</title>
 <meta name="description" content="${route.description}">
 <link rel="canonical" href="${canonical}">
@@ -114,14 +139,17 @@ export default async function middleware(request) {
 <meta name="twitter:image" content="${BASE}/no-agents-hero.jpg">
 <!--SEO_META_END-->`;
 
-  html = html.replace(/<!--SEO_META_START-->[\s\S]*?<!--SEO_META_END-->/, metaBlock);
-  html = html.replace(
-    /<!--STATIC_CONTENT_START-->[\s\S]*?<!--STATIC_CONTENT_END-->/,
-    `<!--STATIC_CONTENT_START-->${route.static}<!--STATIC_CONTENT_END-->`
-  );
+    html = html.replace(/<!--SEO_META_START-->[\s\S]*?<!--SEO_META_END-->/, metaBlock);
+    html = html.replace(
+      /<!--STATIC_CONTENT_START-->[\s\S]*?<!--STATIC_CONTENT_END-->/,
+      `<!--STATIC_CONTENT_START-->${route.static}<!--STATIC_CONTENT_END-->`
+    );
+  }
+
+  html = fixEntities(html);
 
   return new Response(html, {
     status: 200,
-    headers: { 'content-type': 'text/html; charset=utf-8' },
+    headers: { 'content-type': originRes.headers.get('content-type') || 'text/html; charset=utf-8' },
   });
 }
